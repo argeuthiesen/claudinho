@@ -2,6 +2,8 @@
 
 O mascote do Claude Code, vivo, na sua mesa.
 
+A caixa para imprimir em 3D está no MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
+
 Claudinho é um plugin do Claude Code que dá corpo ao Clawd: um ESP32 com um
 display Nextion que reage ao que o Claude está fazendo (pensando, usando uma
 ferramenta, esperando você, terminou, deu erro) e mostra quanto do seu plano
@@ -208,6 +210,7 @@ alternativas de baixo custo e alto risco.
 | 4 fios | 5V, GND, TX, RX |
 | Cabo USB **de dados** | só para a primeira gravação |
 | Fonte USB de 5 V, **pelo menos 1 A** | veja abaixo |
+| Caixa impressa em 3D | [no MakerWorld](https://makerworld.com/models/3365275-claudinho) (PLA, sem suportes) |
 
 ### Alimentação
 
@@ -423,7 +426,10 @@ desde que ligou.
 
 ## Autoria
 
-De mim saíram os conceitos. O trabalho braçal (firmware, scripts, skill,
+A modelagem 3D da caixa não foi feita por IA: é 100% minha, desenhada à
+mão no SketchUp (e está no [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
+
+No software, de mim saíram os conceitos. O trabalho braçal (firmware, scripts, skill,
 testes e boa parte deste texto) foi do Claude, trabalhando comigo no próprio
 Claude Code. Então a autoria é compartilhada. Vai que a Skynet realmente
 acontece: não quero ninguém ressentido por eu ter tomado para mim a autoria
