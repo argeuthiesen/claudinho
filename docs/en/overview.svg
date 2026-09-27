@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" width="960" height="520" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+  <rect width="960" height="520" fill="#f7f4ee"/>
+  <text x="480" y="44" text-anchor="middle" font-size="24" font-weight="bold" fill="#2b2a29">How information reaches Claudinho</text>
+  <text x="480" y="72" text-anchor="middle" font-size="15" fill="#6b6560">No cloud, no OAuth, no tokens spent: it all happens on your desk.</text>
+
+  <!-- computador -->
+  <rect x="30" y="100" width="560" height="330" rx="14" fill="#fff" stroke="#d9d2c6" stroke-width="2"/>
+  <text x="50" y="130" font-size="15" font-weight="bold" fill="#6b6560">YOUR COMPUTER</text>
+
+  <rect x="55" y="150" width="200" height="250" rx="10" fill="#f3ece2" stroke="#e8743b" stroke-width="3"/>
+  <text x="155" y="182" text-anchor="middle" font-size="17" font-weight="bold" fill="#2b2a29">Claude Code</text>
+  <text x="155" y="202" text-anchor="middle" font-size="12" fill="#6b6560">(official features)</text>
+  <rect x="75" y="222" width="160" height="70" rx="8" fill="#fff" stroke="#c9bfb1"/>
+  <text x="155" y="250" text-anchor="middle" font-size="15" font-weight="bold" fill="#2b2a29">hooks</text>
+  <text x="155" y="272" text-anchor="middle" font-size="12" fill="#6b6560">"something happened"</text>
+  <rect x="75" y="308" width="160" height="70" rx="8" fill="#fff" stroke="#c9bfb1"/>
+  <text x="155" y="336" text-anchor="middle" font-size="15" font-weight="bold" fill="#2b2a29">status line</text>
+  <text x="155" y="358" text-anchor="middle" font-size="12" fill="#6b6560">plan numbers</text>
+
+  <rect x="335" y="222" width="220" height="70" rx="8" fill="#eef4fb" stroke="#8fb3de"/>
+  <text x="445" y="250" text-anchor="middle" font-size="15" font-weight="bold" fill="#2b2a29">evento.sh</text>
+  <text x="445" y="272" text-anchor="middle" font-size="12" fill="#6b6560">type + mood (text stays here)</text>
+  <rect x="335" y="308" width="220" height="70" rx="8" fill="#eef4fb" stroke="#8fb3de"/>
+  <text x="445" y="336" text-anchor="middle" font-size="15" font-weight="bold" fill="#2b2a29">statusline.py</text>
+  <text x="445" y="358" text-anchor="middle" font-size="12" fill="#6b6560">5 h, 7 days, context</text>
+  <text x="445" y="208" text-anchor="middle" font-size="12" fill="#6b6560">(plugin scripts)</text>
+
+  <g stroke="#6b6560" stroke-width="3">
+    <line x1="235" y1="257" x2="325" y2="257"/><line x1="235" y1="343" x2="325" y2="343"/>
+  </g>
+  <polygon points="318,250 332,257 318,264" fill="#6b6560"/>
+  <polygon points="318,336 332,343 318,350" fill="#6b6560"/>
+
+  <!-- rede -->
+  <g stroke="#2f7de1" stroke-width="4" stroke-dasharray="10 7">
+    <line x1="555" y1="257" x2="680" y2="290"/><line x1="555" y1="343" x2="680" y2="310"/>
+  </g>
+  <text x="640" y="250" text-anchor="middle" font-size="13" font-weight="bold" fill="#1f5fb0">Home Wi-Fi</text>
+  <text x="640" y="362" text-anchor="middle" font-size="12" fill="#1f5fb0">HTTP + own secret</text>
+
+  <!-- placa -->
+  <rect x="690" y="240" width="110" height="110" rx="10" fill="#27313d"/>
+  <text x="745" y="292" text-anchor="middle" font-size="14" font-weight="bold" fill="#e9edf2">ESP32</text>
+  <text x="745" y="312" text-anchor="middle" font-size="11" fill="#b8c2cc">firmware</text>
+  <line x1="800" y1="295" x2="830" y2="295" stroke="#6b6560" stroke-width="3"/>
+  <rect x="830" y="230" width="110" height="130" rx="8" fill="#3a3a3a"/>
+  <rect x="842" y="244" width="86" height="102" rx="3" fill="#f06a1e"/>
+  <rect x="862" y="272" width="12" height="32" fill="#1e1c1c"/>
+  <rect x="896" y="272" width="12" height="32" fill="#1e1c1c"/>
+  <text x="885" y="385" text-anchor="middle" font-size="13" font-weight="bold" fill="#2b2a29">the face</text>
+
+  <g font-size="14" fill="#2b2a29">
+    <text x="30" y="468">Hooks and the status line are Claude Code features and run on your computer, without going through the model.</text>
+    <text x="30" y="492">Close Claude Code and nothing else runs: Claudinho notices the silence and goes to sleep.</text>
+  </g>
+</svg>

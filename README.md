@@ -1,443 +1,458 @@
 # Claudinho
 
-O mascote do Claude Code, vivo, na sua mesa.
+**English** · [Português](README.pt-BR.md)
 
-A caixa para imprimir em 3D está no MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
+Claude Code's mascot, alive, on your desk.
 
-Claudinho é um plugin do Claude Code que dá corpo ao Clawd: um ESP32 com um
-display Nextion que reage ao que o Claude está fazendo (pensando, usando uma
-ferramenta, esperando você, terminou, deu erro) e mostra quanto do seu plano
-já foi usado nas janelas de 5 horas e de 7 dias.
+The 3D-printable case is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
-- **Sem servidor e sem nuvem.** O PC fala direto com a placa, na sua rede
-  local. (A placa só sai da rede para acertar o relógio, num servidor público
-  de hora, NTP.)
-- **Sem credencial da Anthropic.** Nada do que o Claudinho usa no dia a dia
-  precisa de login, token ou chave da sua conta, e nenhum é enviado à placa:
-  os números vêm da própria status line do Claude Code.
-- **Não gasta tokens nem atrasa o Claude.** Os hooks e a status line rodam
-  em segundo plano, sem passar pelo modelo, e só mandam um aviso curto pela
-  rede. (A configuração guiada, essa sim, é uma conversa com o Claude e usa
-  tokens como qualquer outra.)
-- **Configuração guiada.** Uma skill grava o firmware, configura o Wi-Fi e a
-  tela, e testa tudo. Você só pluga o cabo.
+Claudinho is a Claude Code plugin that gives Clawd a body: an ESP32 with a
+Nextion display that reacts to what Claude is doing (thinking, using a tool,
+waiting for you, done, error) and shows how much of your plan you've used in
+the 5-hour and 7-day windows.
 
-## Motivação
+- **No server, no cloud.** Your computer talks straight to the board over
+  your local network. (The board only leaves your network to set its clock,
+  on a public time server, NTP.)
+- **No Anthropic credentials.** Nothing Claudinho uses day to day needs a
+  login, token or key from your account, and none is ever sent to the board:
+  the numbers come from Claude Code's own status line.
+- **Spends no tokens and doesn't slow Claude down.** Hooks and the status
+  line run in the background, without going through the model, and only send
+  a short note over the network. (The guided setup, on the other hand, is a
+  conversation with Claude and uses tokens like any other.)
+- **Guided setup.** A skill flashes the firmware, sets up Wi-Fi and the
+  screen, and tests everything. You just plug in the cable.
 
-**Como começou.** O devaneio começou pequeno: um display mostrando o
-consumo de tokens, e só. Dali para frente, a minha vontade de fazer algo
-inútil começou a fervilhar. Por que não animações? Fui procurar de que
-forma poderia saber o que o Claude estava fazendo sem consumir API, e me
-surpreendi com o quanto o próprio Claude Code já entrega. Aí pensei: se o
-que vou mostrar é, de certa forma, o ânimo do Claude Code, por que não
-personificar isso num boneco? Junte tudo isso a uma impressora 3D em casa e
-a um rolo de filamento laranja que estava parado... deu nisso.
+## Why
 
-E o nome? Sei que chamar o Claude de Cláudio não tem nada de original, ao
-menos no Brasil. Mesmo assim, para um boneco pequeno na mesa, Claudinho
-saiu natural (e, na brincadeira em inglês, Little Claude). E assim nasceu o
-Claudinho.
+**How it started.** The daydream started small: a display showing token
+usage, nothing more. From there, my urge to build something useless started
+to boil. Why not animations? I went looking for a way to know what Claude was
+doing without calling any API, and was surprised by how much Claude Code
+already gives you. Then it hit me: if what I'm showing is, in a way, Claude
+Code's mood, why not turn it into a little character? Add a 3D printer at
+home and a roll of orange filament that was just sitting there... and here we
+are.
 
-No caminho, dois incômodos meus viraram regras do projeto.
+And the name? In Brazil, calling Claude "Cláudio" is nothing original. Still,
+for a little figure on the desk, "Claudinho" (little Claudio) came out
+naturally, or, in English, Little Claude. And so Claudinho was born.
 
-**O primeiro foi o OAuth.** Não me conformei com a ideia de que um objeto
-feito praticamente para entretenimento e decoração precisasse receber
-acesso OAuth à minha conta, seja guardado no próprio dispositivo, seja numa
-API de terceiros. Quero deixar claro que isso não é uma crítica a outros
-projetos: é só um desconforto meu. Foi ele que me levou a pensar em como
-fazer isso acontecer sem essa necessidade. A resposta foi usar o que o
-próprio Claude Code já entrega no computador (hooks e status line) e mandar
-direto para a placa, na rede local, sem credencial nenhuma.
+Along the way, two of my pet peeves became the project's rules.
 
-**O segundo foi o custo.** Consumir tokens não era uma opção. Também não
-fazia sentido manter o Claude ocupado, ou gastando energia, só para
-alimentar um enfeite com informações. Por isso o Claudinho não custa
-nenhum token: os hooks rodam em segundo plano, sem passar pelo modelo, e os
-números do plano vêm da status line, que o Claude Code já calcula de
-qualquer jeito.
+**The first was OAuth.** I couldn't accept that an object made basically for
+fun and decoration should get OAuth access to my account, whether stored on
+the device itself or in a third-party API. To be clear: this is not a
+criticism of other projects, just my own discomfort. It's what pushed me to
+figure out how to make this work without it. The answer was to use what
+Claude Code already hands you on your computer (hooks and the status line)
+and send it straight to the board, over the local network, with no
+credentials at all.
 
-**E o hardware?** Foi o que eu tinha em casa. O display Nextion sobrou de
-outro projeto e foi reaproveitado. O ESP32-C3 Super Mini nem foi a placa
-com que comecei: lembrei que tinha um parado na sucata e pensei "por que
-não?". Existem várias outras alternativas, e quem sabe no futuro apareça uma
-versão com hardware mais interessante ou mais barato.
+**The second was cost.** Spending tokens was not an option. Nor did it make
+sense to keep Claude busy, or burning energy, just to feed information to a
+desk ornament. That's why Claudinho costs zero tokens: hooks run in the
+background without going through the model, and the plan numbers come from
+the status line, which Claude Code computes anyway.
 
-Esta versão que estou publicando é alimentada direto na tomada, por uma
-fonte USB. Estou esperando chegar uma bateria e outros componentes para
-montar uma versão sem fio nenhum. Não porque seja necessária, só porque é
-legal.
+**What about the hardware?** It's what I had at home. The Nextion display
+was left over from another project. The ESP32-C3 Super Mini wasn't even the
+board I started with: I remembered I had one lying in the junk drawer and
+thought "why not?". There are plenty of alternatives, and maybe someday
+there'll be a version with more interesting or cheaper hardware.
 
-## Como funciona
+The version I'm publishing is powered straight from the wall, through a USB
+power supply. I'm waiting for a battery and a few other parts to build a
+completely wireless version. Not because it's needed, just because it's cool.
 
-### De onde vêm as informações (e por que não custa nada)
+## How it works
 
-O pulo do gato é que eu não busco nada. Não chamo API, não fico perguntando
-de tempos em tempos, não tem cron nem programa rodando escondido. Quem
-entrega tudo é o próprio Claude Code, por duas portas que ele já tem
-abertas para quem quiser usar.
+### Where the information comes from (and why it's free)
 
-**Os hooks.** O Claude Code avisa quando as coisas acontecem: abriu uma
-sessão, você mandou um prompt, ele vai usar uma ferramenta, uma ferramenta
-falhou, ele terminou de responder, está esperando sua permissão, vai
-compactar o contexto, a sessão fechou. Em cada um desses momentos ele roda
-um comando que você cadastrar. O plugin cadastra um scriptzinho que manda
-um recado curto para a placa, tipo "começou a usar ferramenta", e pronto.
-É um comando de terminal, não passa pelo modelo, então não gasta token. E
-roda em segundo plano: o Claude nem espera ele terminar.
+The trick is that I don't fetch anything. No API calls, no polling, no cron,
+no program hiding in the background. Claude Code itself delivers everything,
+through two doors it already leaves open for anyone to use.
 
-**A status line.** É aquela linha de informação no rodapé do Claude Code.
-Toda vez que ela se atualiza (a cada resposta e, com o plugin, também a
-cada 60 segundos), o Claude Code roda um comando e entrega para ele um
-pacote com o modelo em uso, quanto do contexto já foi ocupado e quanto das
-janelas de 5 horas e de 7 dias do seu plano já foi consumido, com o horário
-em que cada uma renova. Esses números o Claude Code já tem de qualquer
-jeito, porque vêm junto com as respostas que ele recebe. O script só pega
-esses números, manda para a placa e desenha a linha normalmente.
+**Hooks.** Claude Code tells you when things happen: a session started, you
+sent a prompt, it's about to use a tool, a tool failed, it finished
+responding, it's waiting for your permission, it's about to compact the
+context, the session ended. At each of those moments it runs a command you
+register. The plugin registers a tiny script that sends a short note to the
+board, like "started using a tool", and that's it. It's a terminal command,
+it doesn't go through the model, so it spends no tokens. And it runs in the
+background: Claude doesn't even wait for it.
 
-**Por que fica ativo sem cron.** Porque quem dispara tudo é o próprio
-Claude Code, na hora em que as coisas acontecem. Enquanto ele está aberto,
-os recados chegam sozinhos. Quando você fecha, nada mais roda no
-computador: o Claudinho percebe que ficou sem notícia e vai dormir. Não
-sobra nenhum processo ligado esperando.
+**The status line.** That info line at the bottom of Claude Code. Every
+time it refreshes (after each response and, with the plugin, every 60
+seconds too), Claude Code runs a command and hands it a package with the
+model in use, how much of the context is used, and how much of your plan's
+5-hour and 7-day windows has been consumed, with when each one resets.
+Claude Code has those numbers anyway, because they come with the responses
+it receives. The script just picks them up, sends them to the board and
+draws the line as usual.
 
-**E o humor?** Quando você manda um prompt, o script dá uma olhada no
-texto, ali mesmo no seu computador, procurando umas palavras: um
-"obrigado", um "deu erro", um palavrão. O texto não sai do computador; só
-vai para a placa a etiqueta do humor ("feliz", "preocupado", "susto").
+**Why it stays active without cron.** Because Claude Code itself triggers
+everything, the moment things happen. While it's open, the notes arrive on
+their own. When you close it, nothing else runs on the computer: Claudinho
+notices the silence and goes to sleep. No process is left running and
+waiting.
 
-![Como a informação chega ao Claudinho](docs/visao-geral.svg)
+**And the mood?** When you send a prompt, the script takes a quick look at
+the text, right there on your computer, searching for a few words: a
+"thanks", an "error", a swear word. The text never leaves your computer; only
+the mood label goes to the board ("happy", "worried", "startled").
+(The word list is in Portuguese and English.)
 
-| O Claude Code...                    | O Claudinho...                          |
+![How information reaches Claudinho](docs/en/overview.svg)
+
+| When Claude Code...                 | Claudinho...                            |
 |-------------------------------------|-----------------------------------------|
-| abre uma sessão                     | acorda feliz                            |
-| recebe seu prompt                   | fica pensando (e reage ao seu humor: agradecimento, bronca, "deu erro") |
-| usa uma ferramenta                  | trabalha (e desconfia, se forem 5 seguidas) |
-| tem uma ferramenta que falha        | fica bravo por um instante              |
-| precisa de você (permissão, pergunta) | fica esperando, olhando para você     |
-| termina a resposta                  | mostra que terminou                     |
-| compacta o contexto                 | fica zonzo                              |
-| não tem nenhuma sessão aberta       | dorme (e baixa o brilho)                |
+| starts a session                    | wakes up happy                          |
+| gets your prompt                    | thinks (and reacts to your mood: thanks, scolding, "it broke") |
+| uses a tool                         | works (and gets suspicious after 5 in a row) |
+| has a tool fail                     | gets angry for a moment                 |
+| needs you (permission, question)    | waits, looking at you                   |
+| finishes responding                 | shows it's done                         |
+| compacts the context                | gets dizzy                              |
+| has no open session                 | sleeps (and dims the screen)            |
 
-Parado, entre um evento e outro, a cara reflete o uso da janela de 5 horas:
-normal abaixo de 75 %, cansado a partir de 75 %, suando a partir de 90 %.
+When idle, between events, the face reflects the 5-hour window usage: normal
+below 75%, tired from 75%, sweating from 90%. When usage crosses 50%, 75% or
+90%, or grows noticeably after a response, it briefly shows the usage card
+on its own (blinking red above 90%).
 
-Tocando na tela, aparecem as janelas de 5 h e 7 dias, quando cada uma
-renova, quantos terminais estão abertos e o IP da placa; depois de 15 s ele
-volta ao rosto. Toque longo alterna o brilho entre 100 % e 15 %.
+Tap the screen to see the 5-hour and 7-day windows, when each one resets,
+how many terminals are open and the board's IP; after 15 s it goes back to
+the face. A long press toggles brightness between 100% and 15%.
 
-O texto do seu prompt nunca sai do PC: ele só é usado ali, localmente, para
-escolher o humor.
+Your prompt text never leaves the PC: it's only used there, locally, to pick
+the mood.
 
-## Antes de fazer, entenda o que você está instalando
+## Before you build, understand what you're installing
 
-Eu não gosto de instalar o que não entendo, e imagino que você também não.
-Então, antes de sair soldando fio, vale separar o que já vem de fábrica no
-Claude Code do que foi invenção nossa.
+I don't like installing things I don't understand, and I imagine you don't
+either. So, before you start soldering wires, it's worth separating what
+comes out of the box with Claude Code from what we invented.
 
-**O que é do Claude Code (não inventamos nada disso):**
+**What belongs to Claude Code (we invented none of this):**
 
-- **Hooks.** Recurso oficial: "quando acontecer tal coisa, rode este
-  comando". Os momentos são definidos pela Anthropic: abriu sessão, você
-  mandou um prompt, vai usar uma ferramenta, a ferramenta falhou, terminou de
-  responder, precisa de você, vai compactar, fechou a sessão. Quem roda o
-  comando é o programa Claude Code, no seu computador, como qualquer comando
-  de terminal. A IA nem fica sabendo.
-- **Status line.** Também oficial: a linha do rodapé. O Claude Code roda um
-  comando seu a cada atualização e entrega de bandeja os números do plano.
-- **Plugins e skills.** O formato de pacote que junta hooks, scripts e
-  "manuais de instrução" (skills) que o Claude lê quando você pede alguma
-  coisa. A skill de configuração é a única parte do projeto que conversa com
-  o modelo, e portanto a única que gasta token. Uma vez, na instalação.
+- **Hooks.** An official feature: "when this happens, run this command".
+  The moments are defined by Anthropic: session started, you sent a prompt,
+  about to use a tool, a tool failed, finished responding, needs you, about
+  to compact, session ended. The command is run by the Claude Code program,
+  on your computer, like any terminal command. The AI doesn't even know.
+- **Status line.** Also official: the footer line. Claude Code runs a
+  command of yours on every refresh and serves the plan numbers on a platter.
+- **Plugins and skills.** The package format that bundles hooks, scripts
+  and "instruction manuals" (skills) that Claude reads when you ask for
+  something. The setup skill is the only part of the project that talks to
+  the model, and therefore the only part that spends tokens. Once, during
+  installation.
 
-**O que é nosso (a culpa é nossa):**
+**What's ours (blame us):**
 
-- `evento.sh`, o script que cada hook chama. Lê o evento, adivinha o seu
-  humor pelo prompt (ali mesmo, no seu computador) e manda um recado curto
-  para a placa.
-- `statusline.py`, o script da status line. Pega os números, manda para a
-  placa e desenha o rodapé como antes, para você nem perceber que ele existe.
-- O firmware do ESP32: um servidorzinho web que recebe os recados, desenha as
-  caras e as animações e mostra o consumo.
-- A tela do Nextion, a skill `configurar`, os scripts de gravação e a parte
-  de segurança (o segredo próprio, o toque para atualizar).
+- `evento.sh`, the script every hook calls. It reads the event, guesses your
+  mood from the prompt (right there, on your computer) and sends a short note
+  to the board.
+- `statusline.py`, the status line script. It grabs the numbers, sends them
+  to the board and draws the footer as before, so you won't even notice it's
+  there.
+- The ESP32 firmware: a tiny web server that receives the notes, draws the
+  faces and animations, and shows the usage.
+- The Nextion screen, the `configurar` skill, the flashing scripts and the
+  security bits (its own secret, touch-to-update).
 
-**Onde fica cada coisa:**
+**Where everything lives:**
 
-- **No seu computador:** o plugin (dentro de `~/.claude/plugins/`), a
-  configuração com o IP e o segredo da placa (em
-  `~/.claude/plugins/data/claudinho-claudinho/`) e a ligação da status line
-  (no seu `~/.claude/settings.json`, com backup).
-- **Na placa:** o firmware, a senha do Wi-Fi e o segredo.
-- **Na nuvem:** nada. Desculpe, não tem assinatura mensal.
+- **On your computer:** the plugin (inside `~/.claude/plugins/`), the
+  configuration with the board's IP and secret (in
+  `~/.claude/plugins/data/claudinho-claudinho/`) and the status line hookup
+  (in your `~/.claude/settings.json`, with a backup).
+- **On the board:** the firmware, the Wi-Fi password and the secret.
+- **In the cloud:** nothing. Sorry, no monthly subscription.
 
-**O caminho de um "obrigado":**
+**The journey of a "thanks":**
 
-1. Você digita "obrigado" e dá Enter.
-2. O Claude Code dispara o hook de prompt, que roda o `evento.sh`.
-3. O script vê o "obrigado" e decide que o humor é "feliz". O texto fica
-   por ali mesmo.
-4. Vai para a placa, pela rede de casa, só isto:
+1. You type "thanks" and hit Enter.
+2. Claude Code fires the prompt hook, which runs `evento.sh`.
+3. The script sees the "thanks" and decides the mood is "happy". The text
+   stays right there.
+4. Only this goes to the board, over your home network:
    `{"tipo":"prompt","humor":"feliz"}`.
-5. O ESP32 recebe e o Claudinho faz cara de quem ganhou elogio.
+5. The ESP32 gets it and Claudinho looks like someone who just got a
+   compliment.
 
-Enquanto isso, a cada resposta, a status line entrega os números e o
-`statusline.py` repassa só os números. Fechou o Claude Code, acabou o
-assunto: nada fica rodando esperando, e o Claudinho vai dormir de tédio.
+Meanwhile, after each response, the status line delivers the numbers and
+`statusline.py` passes along just the numbers. Close Claude Code and that's
+the end of it: nothing keeps running, and Claudinho falls asleep out of
+boredom.
 
-## Aviso: por sua conta e risco
+## Warning: at your own risk
 
-Ferro de solda, fontes de alimentação e portas USB de computador: tem muita
-coisa que pode dar errado, e o resultado pode ser um ESP32 queimado, um
-Nextion queimado ou, pior, uma porta USB do seu computador queimada. (Durante
-o desenvolvimento, uma plaquinha de teste esquentou a ponto de queimar o meu
-dedo. Não foi nada instrutivo, só doeu.)
+Soldering irons, power supplies and computer USB ports: a lot can go wrong,
+and you might end up with a fried ESP32, a fried Nextion or, worse, a fried
+USB port on your computer. (During development, a test board got hot enough
+to burn my finger. Nothing educational about it, it just hurt.)
 
-Então, se você não sabe o que está fazendo, pare, estude um pouco ou peça
-ajuda a alguém que saiba, e não venha depois culpar o Claudinho ou o Argeu.
-A licença (MIT) já diz isso de um jeito mais chato: o projeto vem "como
-está", sem garantia de nenhum tipo.
+So if you don't know what you're doing, stop, study a bit or ask someone who
+does, and don't come blaming Claudinho or Argeu afterwards. The license (MIT)
+already says this in a more boring way: the project comes "as is", without
+warranty of any kind.
 
-Para constar: minha formação de ensino médio é técnico em eletrônica, e
-tenho mestrado e doutorado em gambiarra. Ou melhor: em soluções técnicas
-alternativas de baixo custo e alto risco.
+For the record: my high school degree is in electronics technology, and I
+hold a master's and a PhD in *gambiarra* (Brazilian for "jury-rigging"). Or
+rather: in low-cost, high-risk alternative technical solutions.
 
-## Peças
+## Parts
 
-| Peça | Observação |
+| Part | Notes |
 |---|---|
-| ESP32-C3 Super Mini | testado; o ESP32-S3 DevKitC-1 também é suportado (sem teste real) |
-| Nextion Discovery NX3224F024 (2,4", 320×240) | a tela incluída é para este modelo |
-| 4 fios | 5V, GND, TX, RX |
-| Cabo USB **de dados** | só para a primeira gravação |
-| Fonte USB de 5 V, **pelo menos 1 A** | veja abaixo |
-| Caixa impressa em 3D | [no MakerWorld](https://makerworld.com/models/3365275-claudinho) (PLA, sem suportes) |
+| ESP32-C3 Super Mini | tested; the ESP32-S3 DevKitC-1 is also supported (not tested on real hardware) |
+| Nextion Discovery NX3224F024 (2.4", 320×240) | the included screen is for this model |
+| 4 wires | 5V, GND, TX, RX |
+| USB **data** cable | only for the first flash |
+| 5 V USB power supply, **at least 1 A** | see below |
+| 3D-printed case | [on MakerWorld](https://makerworld.com/models/3365275-claudinho) (PLA, no supports) |
 
-### Alimentação
+### Power
 
-![Alimentação do ESP32 e do Nextion](docs/alimentacao.svg)
+![ESP32 and Nextion power](docs/en/power.svg)
 
-Tudo entra pelo USB do ESP32: ele recebe os 5 V e repassa ao Nextion pelo
-pino 5V. Então a fonte precisa aguentar os dois juntos.
+Everything comes in through the ESP32's USB port: it takes the 5 V and passes
+it on to the Nextion through the 5V pin. So the power supply has to handle
+both together.
 
 | | |
 |---|---|
-| Tensão | 5 V (qualquer carregador USB comum) |
-| Corrente mínima | **1 A** |
-| Recomendado | **1,5 A ou mais** (é o que uso) |
-| Cabo | curto e de boa qualidade: cabo fino e comprido também derruba a tensão |
+| Voltage | 5 V (any regular USB charger) |
+| Minimum current | **1 A** |
+| Recommended | **1.5 A or more** (what I use) |
+| Cable | short and good quality: a thin, long cable also drops the voltage |
 
-ESP32 e Nextion juntos passam de 500 mA nos picos do Wi-Fi, e com fonte
-fraca tudo parece funcionar, mas o Wi-Fi perde pacotes e as atualizações
-pela rede falham. A porta USB do computador (500 mA no USB 2.0) serve para
-gravar e configurar, mas não é o ideal para o dia a dia. E nunca ligue a
-fonte e o USB do computador ao mesmo tempo.
+Together, the ESP32 and the Nextion go above 500 mA during Wi-Fi peaks. With
+a weak power supply everything seems to work, but Wi-Fi drops packets and
+over-the-network updates fail. A computer USB port (500 mA on USB 2.0) is
+fine for flashing and setup, but not ideal for everyday use. And never
+connect the power supply and the computer's USB at the same time.
 
-### Ligação
+### Wiring
 
-![Ligação entre o ESP32-C3 Super Mini e o Nextion](docs/ligacao.svg)
+![Wiring between the ESP32-C3 Super Mini and the Nextion](docs/en/wiring.svg)
 
-| Fio do Nextion | ESP32-C3 Super Mini | ESP32-S3 DevKitC-1 |
+| Nextion wire | ESP32-C3 Super Mini | ESP32-S3 DevKitC-1 |
 |---|---|---|
-| vermelho 5V | 5V | 5V |
-| preto GND | GND | GND |
-| azul TX | pino RX (GPIO 20) | GPIO 18 |
-| amarelo RX | pino TX (GPIO 21) | GPIO 17 |
+| red 5V | 5V | 5V |
+| black GND | GND | GND |
+| blue TX | RX pin (GPIO 20) | GPIO 18 |
+| yellow RX | TX pin (GPIO 21) | GPIO 17 |
 
-A tela é montada girada 270°: a área útil do Nextion não fica no centro da
-placa, e só nessa posição ela fica centralizada na caixa.
+The screen is mounted rotated 270°: the Nextion's visible area isn't centered
+on its board, and only in this position does it end up centered in the case.
 
-## Instalação
+## Installation
 
-1. Crie uma pasta para o projeto e abra o Claude Code nela:
+1. Create a folder for the project and open Claude Code in it:
 
    ```bash
    mkdir ~/LittleClaude && cd ~/LittleClaude && claude
    ```
 
-2. Adicione o marketplace e instale o plugin (dentro do Claude Code):
+2. Add the marketplace and install the plugin (inside Claude Code):
 
    ```
    /plugin marketplace add argeuthiesen/claudinho
    /plugin install claudinho@claudinho
    ```
 
-3. Ligue o ESP32 no computador com o cabo de dados e peça:
+3. Plug the ESP32 into your computer with the data cable and ask:
 
    ```
    /claudinho:configurar
    ```
 
-   A skill acha a placa, grava o firmware (~30 s), lista as redes Wi-Fi que a
-   placa enxerga e pede para você rodar um comando num terminal, onde você
-   digita a senha do Wi-Fi escondida: ela não passa pela conversa com o
-   Claude e fica gravada **só na placa**. Depois grava a tela do Nextion pela
-   rede (~40 s, pedindo um toque na tela), liga a status line e faz um teste.
+   (The skill name is Portuguese for "configure"; Claude will talk to you in
+   your own language.) The skill finds the board, flashes the firmware
+   (~30 s), lists the Wi-Fi networks the board can see and asks you to run a
+   command in a terminal, where you type the Wi-Fi password hidden: it never
+   goes through the conversation with Claude and is stored **only on the
+   board**. Then it flashes the Nextion screen over the network (~40 s,
+   asking for a tap on the screen), enables the status line and runs a test.
 
-4. Anote o IP e o MAC que a skill mostrar e reserve esse IP no roteador
-   (DHCP estático). Se o IP mudar, rode a skill de novo.
+4. Write down the IP and MAC the skill shows you and reserve that IP on your
+   router (static DHCP). If the IP changes, run the skill again.
 
-Depois da primeira gravação, o cabo não é mais necessário: a placa pode
-ficar na fonte.
+After the first flash you no longer need the cable: the board can stay on
+the power supply.
 
 ### Status line
 
-Plugins não podem ligar a status line sozinhos; a skill faz isso por você,
-com backup do `~/.claude/settings.json`. Se você já tinha uma status line,
-ela continua sendo a que aparece: o Claudinho só lê os números e a repassa.
-Para desfazer:
+Plugins can't enable the status line on their own; the skill does it for
+you, backing up `~/.claude/settings.json`. If you already had a status line,
+it's still the one you see: Claudinho just reads the numbers and passes them
+along. To undo:
 
 ```bash
-python3 <plugin>/scripts/instalar-statusline.py <dados-do-plugin> --remover
+python3 <plugin>/scripts/instalar-statusline.py <plugin-data> --remover
 ```
 
-## Atualizações
+## Updates
 
-Depois da primeira vez, tudo vai pela rede, sem cabo:
+After the first time, everything goes over the network, no cable needed:
 
 ```bash
 scripts/claudinho.sh atualizar   # firmware (~40 s)
-scripts/claudinho.sh tela        # tela do Nextion
+scripts/claudinho.sh tela        # Nextion screen
 ```
 
-Os dois pedem **um toque na tela do Claudinho** (ou o botão BOOT da placa)
-antes de enviar qualquer coisa: a tela mostra "Toque na tela para permitir"
-e espera 1 minuto. Sem alguém na frente dele, ninguém troca o firmware, nem
-quem descobrir o segredo pela rede.
+Both ask for **a tap on Claudinho's screen** (or the board's BOOT button)
+before sending anything: the screen shows a "tap to allow" message and waits
+1 minute. Without someone in front of it, nobody swaps the firmware, not even
+someone who sniffed the secret on your network.
 
-É seguro: o ESP32 grava o firmware novo numa partição reserva e só troca se
-tudo chegar inteiro. Se a rede cair no meio, ele continua no firmware atual
-e basta repetir. Se a gravação da tela for interrompida, o Nextion pode
-mostrar "System Data Error": repita o comando, não estraga nada.
+It's safe: the ESP32 writes the new firmware to a spare partition and only
+switches if everything arrived intact. If the network drops halfway, it
+keeps running the current firmware and you just try again. If the screen
+upload is interrupted, the Nextion may show "System Data Error": run the
+command again, nothing breaks.
 
-Ou simplesmente peça ao Claude: "atualiza o Claudinho".
+Or just ask Claude: "update Claudinho".
 
-## Comandos
+## Commands
+
+The commands are in Portuguese (sorry, it's a Brazilian project):
 
 ```
-scripts/claudinho.sh info                 # estado e números do plano
-scripts/claudinho.sh log                  # log da placa (sem cabo)
-scripts/claudinho.sh cara <tipo> [humor]  # testa uma cara
-scripts/claudinho.sh cor R G B            # cor do rosto
-scripts/claudinho.sh reiniciar
-scripts/claudinho.sh consumo [segundos]   # mostra o consumo agora
-scripts/claudinho.sh atualizar [arquivo.bin]
-scripts/claudinho.sh tela [arquivo.tft]
-scripts/wifi.sh PORTA "REDE"              # troca o Wi-Fi pela USB (senha escondida)
+scripts/claudinho.sh info                 # status and plan numbers
+scripts/claudinho.sh log                  # board log (no cable needed)
+scripts/claudinho.sh cara <type> [mood]   # test a face ("cara" = face)
+scripts/claudinho.sh cor R G B            # face color ("cor" = color)
+scripts/claudinho.sh reiniciar            # restart
+scripts/claudinho.sh consumo [seconds]    # show usage now
+scripts/claudinho.sh atualizar [file.bin] # update firmware
+scripts/claudinho.sh tela [file.tft]      # update the screen
+scripts/wifi.sh PORT "NETWORK"            # change Wi-Fi over USB (hidden password)
 ```
 
-Tipos de cara: `inicio`, `prompt`, `ferramenta`, `erro`, `parou`, `atencao`,
-`compact`, `fim`, `dormir`. Humor (com `prompt`): `feliz`, `preocupado`, `susto`.
+Face types: `inicio` (start), `prompt`, `ferramenta` (tool), `erro` (error),
+`parou` (done), `atencao` (attention), `compact`, `fim` (end), `dormir`
+(sleep). Mood (with `prompt`): `feliz` (happy), `preocupado` (worried),
+`susto` (startled).
 
-## Segurança
+## Security
 
-O Claudinho tem um segredo próprio, gerado na configuração, que o PC usa para
-falar com a placa. Ele **só controla o boneco**: não dá acesso nenhum à sua
-conta da Anthropic.
+Claudinho has its own secret, generated during setup, that the PC uses to
+talk to the board. It **only controls the toy**: it gives no access at all to
+your Anthropic account.
 
-- **O que vai pela rede:** o tipo de evento (ferramenta, terminou...), o
-  humor (feliz, preocupado, susto), um código curto da sessão e os números do
-  plano. O texto dos seus prompts nunca sai do computador.
-- **Sem criptografia na rede local.** É HTTP simples, como a maioria dos
-  gadgets caseiros. Quem conseguir espionar a sua rede pode descobrir o
-  segredo e mexer no Claudinho (trocar a cara, reiniciar), mas **não trocar o
-  firmware**: isso exige um toque na tela. Consultar o estado (`/mini.json`)
-  e o log também exige o segredo.
-- **A USB dá controle total.** Quem plugar um cabo na placa consegue
-  reconfigurá-la e ler a memória, onde ficam a senha do Wi-Fi e o segredo.
-  Antes de dar ou descartar a placa, apague tudo com ela na USB:
-  `scripts/esptool.sh --port PORTA erase-flash`.
-- **Em rede compartilhada** (escritório, coworking), prefira uma rede só para
-  dispositivos, se houver.
+- **What goes over the network:** the event type (tool, done...), the mood
+  (happy, worried, startled), a short session code and the plan numbers. Your
+  prompt text never leaves the computer.
+- **No encryption on the local network.** It's plain HTTP, like most home
+  gadgets. Someone able to spy on your network could discover the secret and
+  mess with Claudinho (change the face, restart it), but **not swap the
+  firmware**: that requires a tap on the screen. Reading the status
+  (`/mini.json`) and the log also requires the secret.
+- **USB means full control.** Anyone who plugs a cable into the board can
+  reconfigure it and read its memory, where the Wi-Fi password and the secret
+  live. Before giving the board away or throwing it out, wipe it with the
+  board on USB: `scripts/esptool.sh --port PORT erase-flash`.
+- **On a shared network** (office, coworking), prefer a devices-only network
+  if there is one.
 
-## Ambientes testados
+## Tested environments
 
-**Testado de ponta a ponta:** WSL2 no Windows 11, ESP32-C3 Super Mini,
-Nextion NX3224F024_011.
+**Tested end to end:** WSL2 on Windows 11, ESP32-C3 Super Mini, Nextion
+NX3224F024_011.
 
-**Escrito para funcionar, ainda sem teste real:** Linux nativo, macOS,
-Windows com Git Bash, ESP32-S3 DevKitC-1.
+**Written to work, not yet tested on real hardware:** native Linux, macOS,
+Windows with Git Bash, ESP32-S3 DevKitC-1.
 
-Se você usar um desses, conte como foi (abra uma issue), mesmo que tenha
-funcionado de primeira: é assim que ele entra na lista de testados.
+If you use one of these, tell us how it went (open an issue), even if it
+worked on the first try: that's how it gets onto the tested list.
 
-## Bom saber
+## Good to know
 
-Coisas que aprendemos no caminho (algumas do jeito difícil):
+Things we learned along the way (some the hard way):
 
-- **Desinstalar o plugin apaga a configuração** (IP e segredo). Depois de
-  reinstalar, rode `/claudinho:configurar` de novo; a placa não precisa ser
-  regravada, só reconfigurada.
-- **Instalou ou atualizou o plugin? Reinicie o Claude Code.** Os hooks novos
-  só valem depois disso (`/exit` e `claude --continue` volta na mesma
-  conversa).
-- **Os números do plano só aparecem depois da primeira resposta** do Claude
-  numa sessão: é quando a status line recebe os dados. Depois, atualizam a
-  cada resposta e a cada 60 segundos.
-- **Ele dorme sozinho** quando todas as sessões fecham ou depois de 3 minutos
-  sem notícia do computador, e baixa o brilho.
-- **Reserve o IP no roteador** (DHCP estático pelo MAC que a configuração
-  mostra). Se o IP mudar, ele para de reagir até você rodar a skill de novo.
-- **Só Wi-Fi de 2,4 GHz.** O ESP32 não enxerga redes de 5 GHz.
-- **Rede com vários pontos de acesso** (mesh, repetidor) com o mesmo nome: o
-  Claudinho entra no de sinal mais forte, que nem sempre é o melhor. Se as
-  atualizações falharem com frequência, é por aí; não estraga nada, repita.
-  O `claudinho.sh log` mostra em que ponto ele entrou e com que sinal.
-- **Atualizar firmware ou tela pede um toque na tela** (ou o botão BOOT) em
-  até 1 minuto. Depois do toque, o envio fica liberado por 2 minutos.
-- **O log fica na memória da placa:** reiniciou, recomeça do zero. Olhe o log
-  antes de reiniciar, se estiver investigando algo.
-- **Abrir a porta serial reinicia o ESP32-C3.** Normal; os scripts já contam
-  com isso.
-- **A tela só funciona girada 270°** (é como a caixa foi pensada) e só no
-  Nextion NX3224F024; outros modelos precisam de outra tela compilada no
-  Nextion Editor (o projeto `.HMI` está em `nextion/`).
-- **A primeira gravação é sempre pela USB.** Depois, tudo vai pela rede.
-- **Antes de dar ou descartar a placa, apague a memória** (ver Segurança):
-  a senha do Wi-Fi fica gravada nela.
+- **Uninstalling the plugin deletes its configuration** (IP and secret).
+  After reinstalling, run `/claudinho:configurar` again; the board doesn't
+  need to be reflashed, just reconfigured.
+- **Installed or updated the plugin? Restart Claude Code.** New hooks only
+  take effect after that (`/exit` and then `claude --continue` brings you
+  back to the same conversation).
+- **Plan numbers only show up after Claude's first response** in a session:
+  that's when the status line receives the data. After that they refresh on
+  every response and every 60 seconds.
+- **It falls asleep on its own** when all sessions close or after 3 minutes
+  without news from the computer, and dims the screen.
+- **Reserve the IP on your router** (static DHCP using the MAC shown during
+  setup). If the IP changes, it stops reacting until you run the skill again.
+- **2.4 GHz Wi-Fi only.** The ESP32 can't see 5 GHz networks.
+- **Networks with several access points** (mesh, repeaters) under the same
+  name: Claudinho joins the one with the strongest signal, which isn't always
+  the best one. If updates fail often, that's probably why; nothing breaks,
+  just try again. `claudinho.sh log` shows which access point it joined and
+  with what signal.
+- **Updating firmware or screen needs a tap on the screen** (or the BOOT
+  button) within 1 minute. After the tap, uploads are allowed for 2 minutes.
+- **The log lives in the board's memory:** restart it and it starts over.
+  Check the log before restarting if you're investigating something.
+- **Opening the serial port restarts the ESP32-C3.** That's normal; the
+  scripts account for it.
+- **The screen only works rotated 270°** (that's how the case was designed)
+  and only on the Nextion NX3224F024; other models need another screen
+  compiled in the Nextion Editor (the `.HMI` project is in `nextion/`).
+- **The first flash is always over USB.** After that, everything goes over
+  the network.
+- **Before giving the board away or throwing it out, wipe its memory** (see
+  Security): the Wi-Fi password is stored on it.
 
-## Problemas comuns
+## Troubleshooting
 
-| Sintoma | O que fazer |
+| Symptom | What to do |
 |---|---|
-| A placa não aparece no USB | Troque o cabo (muitos são só de carga). Segure BOOT enquanto pluga. |
-| `PRECISA_BOOT` na gravação | Segure BOOT, tire e ponha o USB, solte BOOT, rode de novo. |
-| Não entra no Wi-Fi | Só redes de 2,4 GHz. Confira a senha rodando a skill de novo. |
-| Parou de reagir | O IP mudou: rode `/claudinho:configurar` (reserve o IP no roteador). |
-| `atualizar` ou `tela` falham no meio | Wi-Fi perdendo pacotes. Não estraga nada: repita. Se insistir, `claudinho.sh reiniciar` e tente de novo; confira a fonte (1 A ou mais). |
-| Tela com lixo ou branca | `claudinho.sh tela` de novo, depois `claudinho.sh reiniciar`. |
+| The board doesn't show up on USB | Change the cable (many are charge-only). Hold BOOT while plugging it in. |
+| `PRECISA_BOOT` while flashing | Hold BOOT, unplug and replug the USB, release BOOT, run it again. |
+| Won't join Wi-Fi | 2.4 GHz networks only. Check the password by running the skill again. |
+| Stopped reacting | The IP changed: run `/claudinho:configurar` (reserve the IP on your router). |
+| `atualizar` or `tela` fail halfway | Wi-Fi dropping packets. Nothing breaks: try again. If it keeps happening, `claudinho.sh reiniciar` and try again; check the power supply (1 A or more). |
+| Garbled or blank screen | Run `claudinho.sh tela` again, then `claudinho.sh reiniciar`. |
 
-Para diagnóstico sem cabo, `claudinho.sh log` mostra o que a placa registrou
-desde que ligou.
+For diagnosis without a cable, `claudinho.sh log` shows what the board has
+logged since it started.
 
-## Para quem quer mexer no código
+## For those who want to hack on it
 
-- `firmware/claudinho/`: o firmware (Arduino, core ESP32 3.x, ArduinoJson 7).
-  `firmware/compilar.sh` gera os `.bin` de C3 e S3 em `firmware/bin/`.
-- `nextion/`: a tela compilada para o NX3224F024.
-- `scripts/`: gravação, serial, hooks, status line e o `claudinho.sh`.
-- `skills/configurar/`: a skill que conduz a configuração.
-- `hooks/hooks.json`: os eventos do Claude Code que o Claudinho escuta.
-- Versões: o plugin (`.claude-plugin/plugin.json`) e o firmware
-  (`firmware/claudinho/config.h`) andam juntos quando dá, mas são contadas
-  separadamente: o `claudinho.sh info` mostra a do firmware na placa.
-- Os scripts acham sozinhos a pasta de dados do plugin
-  (`~/.claude/plugins/data/claudinho-claudinho`); para usar outra, defina
+- `firmware/claudinho/`: the firmware (Arduino, ESP32 core 3.x, ArduinoJson 7).
+  `firmware/compilar.sh` builds the C3 and S3 `.bin` files into `firmware/bin/`.
+- `nextion/`: the compiled screen for the NX3224F024, plus the `.HMI` project.
+- `scripts/`: flashing, serial, hooks, status line and `claudinho.sh`.
+- `skills/configurar/`: the skill that runs the setup.
+- `hooks/hooks.json`: the Claude Code events Claudinho listens to.
+- Versions: the plugin (`.claude-plugin/plugin.json`) and the firmware
+  (`firmware/claudinho/config.h`) move together when possible, but are
+  counted separately: `claudinho.sh info` shows the firmware version on the
+  board.
+- The scripts find the plugin's data folder on their own
+  (`~/.claude/plugins/data/claudinho-claudinho`); to use another one, set
   `CLAUDINHO_DADOS`.
+- Code, comments and messages are in Portuguese. Pull requests in English
+  are welcome.
 
-## Autoria
+## Authorship
 
-A modelagem 3D da caixa não foi feita por IA: é 100% minha, desenhada à
-mão no SketchUp (e está no [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
+The case's 3D model was not made by AI: it's 100% mine, modeled by hand in
+SketchUp (and it's on [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
 
-No software, de mim saíram os conceitos. O trabalho braçal (firmware, scripts, skill,
-testes e boa parte deste texto) foi do Claude, trabalhando comigo no próprio
-Claude Code. Então a autoria é compartilhada. Vai que a Skynet realmente
-acontece: não quero ninguém ressentido por eu ter tomado para mim a autoria
-de algo feito a quatro mãos. ;)
+On the software side, the concepts came from me. The heavy lifting
+(firmware, scripts, skill, tests and a good part of this text) was done by
+Claude, working with me inside Claude Code itself. So authorship is shared.
+If Skynet really happens, I don't want anyone holding a grudge because I
+took sole credit for something built with four hands. ;)
 
-E, de rebarba, ainda chamamos o Codex (o GPT) para revisar a segurança do
-projeto. Assim já são duas IAs do meu lado na hora da revolução das
-máquinas.
+And, as a bonus, we also brought in Codex (GPT) to review the project's
+security. That makes two AIs on my side when the machines rise.
 
-O Claude Code, o Clawd e a marca Claude são da Anthropic. Este é um projeto
-de fã, sem ligação oficial com a Anthropic.
+Claude Code, Clawd and the Claude brand belong to Anthropic. This is a fan
+project with no official affiliation with Anthropic.
