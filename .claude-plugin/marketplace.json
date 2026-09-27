@@ -1,0 +1,8 @@
+{
+  "name": "claudinho",
+  "description": "Claudinho: o mascote do Claude Code em um ESP32 na sua mesa.",
+  "owner": { "name": "Argeu Thiesen" },
+  "plugins": [
+    { "name": "claudinho", "source": "./", "description": "Mascote físico do Claude Code (ESP32 + Nextion) que reage aos hooks e mostra o uso do plano." }
+  ]
+}

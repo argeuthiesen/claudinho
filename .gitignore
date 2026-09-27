@@ -1,0 +1,8 @@
+# gerados na compilacao (firmware/compilar.sh copia o que importa para firmware/bin)
+firmware/claudinho/build/
+firmware/build/
+__pycache__/
+*.pyc
+# configuracao local e segredos nunca vao para o repositorio
+*.env
+.cfg.*
