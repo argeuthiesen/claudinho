@@ -103,12 +103,7 @@ texto, ali mesmo no seu computador, procurando umas palavras: um
 "obrigado", um "deu erro", um palavrão. O texto não sai do computador; só
 vai para a placa a etiqueta do humor ("feliz", "preocupado", "susto").
 
-```
-Claude Code ──hooks──────────► evento.sh  ──┐
-            ──status line───► statusline.py ─┤  HTTP na rede local
-                                             ▼  (com um segredo próprio)
-                                   ESP32 ──serial──► Nextion (rosto)
-```
+![Como a informação chega ao Claudinho](docs/visao-geral.svg)
 
 | O Claude Code...                    | O Claudinho...                          |
 |-------------------------------------|-----------------------------------------|
@@ -199,6 +194,8 @@ assunto: nada fica rodando esperando, e o Claudinho vai dormir de tédio.
 
 ### Alimentação
 
+![Alimentação do ESP32 e do Nextion](docs/alimentacao.svg)
+
 Tudo entra pelo USB do ESP32: ele recebe os 5 V e repassa ao Nextion pelo
 pino 5V. Então a fonte precisa aguentar os dois juntos.
 
@@ -216,6 +213,8 @@ gravar e configurar, mas não é o ideal para o dia a dia. E nunca ligue a
 fonte e o USB do computador ao mesmo tempo.
 
 ### Ligação
+
+![Ligação entre o ESP32-C3 Super Mini e o Nextion](docs/ligacao.svg)
 
 | Fio do Nextion | ESP32-C3 Super Mini | ESP32-S3 DevKitC-1 |
 |---|---|---|
@@ -340,6 +339,41 @@ Windows com Git Bash, ESP32-S3 DevKitC-1.
 
 Se você usar um desses, conte como foi (abra uma issue), mesmo que tenha
 funcionado de primeira: é assim que ele entra na lista de testados.
+
+## Bom saber
+
+Coisas que aprendemos no caminho (algumas do jeito difícil):
+
+- **Desinstalar o plugin apaga a configuração** (IP e segredo). Depois de
+  reinstalar, rode `/claudinho:configurar` de novo; a placa não precisa ser
+  regravada, só reconfigurada.
+- **Instalou ou atualizou o plugin? Reinicie o Claude Code.** Os hooks novos
+  só valem depois disso (`/exit` e `claude --continue` volta na mesma
+  conversa).
+- **Os números do plano só aparecem depois da primeira resposta** do Claude
+  numa sessão: é quando a status line recebe os dados. Depois, atualizam a
+  cada resposta e a cada 60 segundos.
+- **Ele dorme sozinho** quando todas as sessões fecham ou depois de 3 minutos
+  sem notícia do computador, e baixa o brilho.
+- **Reserve o IP no roteador** (DHCP estático pelo MAC que a configuração
+  mostra). Se o IP mudar, ele para de reagir até você rodar a skill de novo.
+- **Só Wi-Fi de 2,4 GHz.** O ESP32 não enxerga redes de 5 GHz.
+- **Rede com vários pontos de acesso** (mesh, repetidor) com o mesmo nome: o
+  Claudinho entra no de sinal mais forte, que nem sempre é o melhor. Se as
+  atualizações falharem com frequência, é por aí; não estraga nada, repita.
+  O `claudinho.sh log` mostra em que ponto ele entrou e com que sinal.
+- **Atualizar firmware ou tela pede um toque na tela** (ou o botão BOOT) em
+  até 1 minuto. Depois do toque, o envio fica liberado por 2 minutos.
+- **O log fica na memória da placa:** reiniciou, recomeça do zero. Olhe o log
+  antes de reiniciar, se estiver investigando algo.
+- **Abrir a porta serial reinicia o ESP32-C3.** Normal; os scripts já contam
+  com isso.
+- **A tela só funciona girada 270°** (é como a caixa foi pensada) e só no
+  Nextion NX3224F024; outros modelos precisam de outra tela compilada no
+  Nextion Editor (o projeto `.HMI` está em `nextion/`).
+- **A primeira gravação é sempre pela USB.** Depois, tudo vai pela rede.
+- **Antes de dar ou descartar a placa, apague a memória** (ver Segurança):
+  a senha do Wi-Fi fica gravada nela.
 
 ## Problemas comuns
 

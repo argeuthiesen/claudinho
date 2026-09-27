@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" width="960" height="520" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+  <rect width="960" height="520" fill="#f7f4ee"/>
+  <text x="480" y="44" text-anchor="middle" font-size="24" font-weight="bold" fill="#2b2a29">Ligação: ESP32-C3 Super Mini ↔ Nextion NX3224F024</text>
+  <text x="480" y="72" text-anchor="middle" font-size="15" fill="#6b6560">4 fios. O TX de um liga no RX do outro.</text>
+
+  <!-- ESP32-C3 Super Mini -->
+  <rect x="90" y="120" width="220" height="300" rx="12" fill="#27313d"/>
+  <rect x="160" y="104" width="80" height="30" rx="8" fill="#b8bec6" stroke="#8a9098"/>
+  <text x="200" y="124" text-anchor="middle" font-size="12" fill="#27313d">USB-C</text>
+  <rect x="130" y="190" width="100" height="100" rx="6" fill="#3b4756"/>
+  <text x="180" y="236" text-anchor="middle" font-size="14" font-weight="bold" fill="#e9edf2">ESP32-C3</text>
+  <text x="180" y="256" text-anchor="middle" font-size="12" fill="#b8c2cc">Super Mini</text>
+  <g font-size="15" font-weight="bold" fill="#e9edf2" text-anchor="end">
+    <text x="288" y="185">5V</text>
+    <text x="288" y="255">GND</text>
+    <text x="288" y="325">RX</text>
+    <text x="288" y="395">TX</text>
+  </g>
+  <g font-size="11" fill="#b8c2cc" text-anchor="end">
+    <text x="288" y="340">GPIO 20</text>
+    <text x="288" y="410">GPIO 21</text>
+  </g>
+  <g fill="#d9b44a" stroke="#8a6d1a" stroke-width="2">
+    <circle cx="310" cy="180" r="7"/><circle cx="310" cy="250" r="7"/>
+    <circle cx="310" cy="320" r="7"/><circle cx="310" cy="390" r="7"/>
+  </g>
+
+  <!-- Nextion -->
+  <rect x="620" y="120" width="260" height="300" rx="10" fill="#3a3a3a"/>
+  <rect x="648" y="150" width="204" height="240" rx="4" fill="#f06a1e"/>
+  <rect x="706" y="220" width="22" height="56" fill="#1e1c1c"/>
+  <rect x="772" y="220" width="22" height="56" fill="#1e1c1c"/>
+  <text x="750" y="335" text-anchor="middle" font-size="13" fill="#5a2a08">Nextion 2,4 pol.</text>
+  <g fill="#d9b44a" stroke="#8a6d1a" stroke-width="2">
+    <circle cx="620" cy="180" r="7"/><circle cx="620" cy="250" r="7"/>
+    <circle cx="620" cy="320" r="7"/><circle cx="620" cy="390" r="7"/>
+  </g>
+
+  <!-- fios -->
+  <g stroke-width="9" stroke-linecap="round" fill="none">
+    <path d="M317 180 H613" stroke="#7a1414"/><path d="M317 180 H613" stroke="#d62828" stroke-width="6"/>
+    <path d="M317 250 H613" stroke="#000"/><path d="M317 250 H613" stroke="#2a2a2a" stroke-width="6"/>
+    <path d="M317 320 H613" stroke="#0d3f80"/><path d="M317 320 H613" stroke="#2f7de1" stroke-width="6"/>
+    <path d="M317 390 H613" stroke="#806300"/><path d="M317 390 H613" stroke="#f2c200" stroke-width="6"/>
+  </g>
+  <!-- setas de direcao dos dados -->
+  <polygon points="398,309 380,320 398,331" fill="#0d3f80"/>
+  <polygon points="542,379 560,390 542,401" fill="#806300"/>
+  <g font-size="14" font-weight="bold" text-anchor="end">
+    <text x="455" y="168" fill="#b01e1e">vermelho</text>
+    <text x="455" y="238" fill="#2b2a29">preto</text>
+    <text x="455" y="308" fill="#1f5fb0">azul</text>
+    <text x="455" y="378" fill="#8a6d00">amarelo</text>
+  </g>
+  <g font-size="14" fill="#2b2a29" text-anchor="start">
+    <text x="463" y="168">5V → 5V</text>
+    <text x="463" y="238">GND → GND</text>
+    <text x="463" y="308">TX do Nextion → RX</text>
+    <text x="463" y="378">TX → RX do Nextion</text>
+  </g>
+  <g font-size="13" fill="#6b6560">
+    <text x="90" y="462">Os nomes (5V, G, RX, TX) vêm impressos na placa. O Nextion é alimentado pelo pino 5V do ESP32.</text>
+    <text x="90" y="484">ESP32-S3 DevKitC-1: mesmas cores, com RX = GPIO 18 e TX = GPIO 17.</text>
+  </g>
+</svg>
