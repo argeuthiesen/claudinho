@@ -182,6 +182,23 @@ Enquanto isso, a cada resposta, a status line entrega os números e o
 `statusline.py` repassa só os números. Fechou o Claude Code, acabou o
 assunto: nada fica rodando esperando, e o Claudinho vai dormir de tédio.
 
+## Aviso: por sua conta e risco
+
+Ferro de solda, fontes de alimentação e portas USB de computador: tem muita
+coisa que pode dar errado, e o resultado pode ser um ESP32 queimado, um
+Nextion queimado ou, pior, uma porta USB do seu computador queimada. (Durante
+o desenvolvimento, uma plaquinha de teste esquentou a ponto de queimar o meu
+dedo. Não foi nada instrutivo, só doeu.)
+
+Então, se você não sabe o que está fazendo, pare, estude um pouco ou peça
+ajuda a alguém que saiba, e não venha depois culpar o Claudinho ou o Argeu.
+A licença (MIT) já diz isso de um jeito mais chato: o projeto vem "como
+está", sem garantia de nenhum tipo.
+
+Para constar: minha formação de ensino médio é técnico em eletrônica, e
+tenho mestrado e doutorado em gambiarra. Ou melhor: em soluções técnicas
+alternativas de baixo custo e alto risco.
+
 ## Peças
 
 | Peça | Observação |
