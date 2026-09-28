@@ -6,7 +6,7 @@ O mascote do Claude Code, vivo, na sua mesa.
 
 A caixa para imprimir em 3D está no MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
-Já montou o seu? O [manual de uso](docs/manual.pt-BR.md) explica as caras, os toques, as cores e as atualizações.
+Já montou o seu? O [manual de uso](docs/manual.pt-BR.md) explica as caras, os toques, as cores, os dois joguinhos e as atualizações.
 
 Claudinho é um plugin do Claude Code que dá corpo ao Clawd: um ESP32 com um
 display Nextion que reage ao que o Claude está fazendo (pensando, usando uma
@@ -335,6 +335,8 @@ scripts/claudinho.sh cor                  # escolhe a cor do rosto na tela
 scripts/claudinho.sh cor R G B [salvar]   # cor exata (com "salvar", fica gravada)
 scripts/claudinho.sh reiniciar
 scripts/claudinho.sh consumo [segundos]   # mostra o consumo agora
+scripts/claudinho.sh velha                # jogo da velha contra o Claudinho
+scripts/claudinho.sh genius               # Genius: repita a sequência de cores
 scripts/claudinho.sh atualizar [arquivo.bin]
 scripts/claudinho.sh tela [arquivo.tft]
 scripts/wifi.sh PORTA "REDE"              # troca o Wi-Fi pela USB (senha escondida)

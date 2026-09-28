@@ -69,6 +69,33 @@ Serve para combinar o rosto com a cor do filamento da caixa.
 Se ninguém tocar por 1 minuto, ele cancela sozinho. Os olhos ficam sempre
 pretos. Quem souber a cor exata pode usar `claudinho.sh cor R G B salvar`.
 
+## Jogo da velha
+
+Um passatempo: peça ao Claude "vamos jogar velha" (ou rode `claudinho.sh
+velha`). Quem joga contra você é o próprio Claudinho, rodando na placa, sem
+gastar token, e cada partida ele está com um humor: às vezes joga perfeito, às
+vezes vacila.
+
+- Você é o **X**: toque no quadrado. Ele responde logo depois, com o **O**.
+- No fim, ele risca a linha vencedora e reage: **triste** se você ganhou,
+  **empolgado** se ele ganhou, **desconfiado** no empate. Depois começa outra
+  partida sozinho, e quem começa alterna.
+- Para sair: **3 toques rápidos no mesmo quadrado**, ou 2 minutos sem tocar.
+- Se o Claude Code precisar de você no meio do jogo, aparece um aviso no canto.
+
+## Genius
+
+Peça ao Claude "vamos jogar Genius" (ou rode `claudinho.sh genius`). Também
+roda na placa, sem gastar token.
+
+- O Claudinho acende uma sequência de cores nos 4 quadrantes; você repete
+  tocando na mesma ordem. O número no meio é a rodada.
+- A cada acerto a sequência ganha mais uma cor e acelera um pouco.
+- Errou: ele mostra o seu placar ("Score") com uma cara que depende de quão
+  longe você foi, e começa outro jogo sozinho.
+- Para sair: **3 toques rápidos no mesmo quadrante** (os toques certos da
+  sequência não contam, então dá para jogar sem medo), ou 2 minutos sem tocar.
+
 ## Atualizar
 
 Peça ao Claude "atualiza o Claudinho". A tela vai mostrar "O PC quer me

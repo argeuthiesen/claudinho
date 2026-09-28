@@ -71,6 +71,34 @@ Handy for matching the face to your case's filament color.
 If nobody touches it for 1 minute, it cancels on its own. The eyes always
 stay black. If you know the exact color: `claudinho.sh cor R G B salvar`.
 
+## Tic-tac-toe
+
+Just for fun: ask Claude "let's play tic-tac-toe" (or run `claudinho.sh
+velha`). Your opponent is Claudinho itself, running on the board, spending no
+tokens, and each game it's in a different mood: sometimes it plays perfectly,
+sometimes it slips.
+
+- You are **X**: tap a square. It answers right after with **O**.
+- At the end it strikes the winning line and reacts: **sad** if you won,
+  **excited** if it won, **suspicious** on a draw. Then a new game starts on
+  its own, and who goes first alternates.
+- To quit: **3 quick taps on the same square**, or 2 minutes without touching.
+- If Claude Code needs you mid-game, a notice shows up in the corner.
+
+## Genius (Simon)
+
+Ask Claude "let's play Genius" (or run `claudinho.sh genius`). It also runs on
+the board, spending no tokens.
+
+- Claudinho lights up a sequence of colors on the 4 quadrants; you repeat it
+  by tapping in the same order. The number in the middle is the round.
+- Every time you get it right, the sequence gets one more color and speeds up
+  a little.
+- Miss one: it shows your score with a face that depends on how far you got,
+  and a new game starts on its own.
+- To quit: **3 quick taps on the same quadrant** (correct taps in the sequence
+  don't count, so play without worry), or 2 minutes without touching.
+
 ## Updating
 
 Ask Claude "update Claudinho". The screen will ask to allow the update: **tap

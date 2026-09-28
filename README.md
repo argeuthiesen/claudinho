@@ -6,7 +6,7 @@ Claude Code's mascot, alive, on your desk.
 
 The 3D-printable case is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
-Already built one? The [user manual](docs/manual.md) covers faces, touch, colors and updates.
+Already built one? The [user manual](docs/manual.md) covers faces, touch, colors, the two built-in games and updates.
 
 Claudinho is a Claude Code plugin that gives Clawd a body: an ESP32 with a
 Nextion display that reacts to what Claude is doing (thinking, using a tool,
@@ -339,6 +339,8 @@ scripts/claudinho.sh cor                  # pick the face color on screen ("cor"
 scripts/claudinho.sh cor R G B [salvar]   # exact color ("salvar" = save it on the board)
 scripts/claudinho.sh reiniciar            # restart
 scripts/claudinho.sh consumo [seconds]    # show usage now
+scripts/claudinho.sh velha                # tic-tac-toe against Claudinho ("velha")
+scripts/claudinho.sh genius               # Genius (Simon): repeat the color sequence
 scripts/claudinho.sh atualizar [file.bin] # update firmware
 scripts/claudinho.sh tela [file.tft]      # update the screen
 scripts/wifi.sh PORT "NETWORK"            # change Wi-Fi over USB (hidden password)

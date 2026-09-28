@@ -229,9 +229,27 @@ tocando no centro, uma prévia do rosto com **Gravar**, **Voltar** (à moldura) 
 **Cancelar** (volta à cor de antes). 1 minuto sem toque cancela. A cor gravada continua depois de reiniciar. Os olhos ficam
 sempre pretos. Quem souber a cor exata: `claudinho.sh cor R G B salvar`.
 
+## Jogo da velha
+
+Quando a pessoa quiser jogar ("vamos jogar velha", "quero jogar com o
+Claudinho"), rode `bash "$R/scripts/claudinho.sh" velha`. É um passatempo que
+roda inteiro na placa: quem joga contra a pessoa é o próprio ESP32, sem gastar
+token. Explique em uma frase: ela é o X, toca nos quadrados; no fim o Claudinho
+reage (triste se ela ganhar, empolgado se ele ganhar) e começa outra partida
+sozinho; para sair, 3 toques rápidos no mesmo quadrado (ou 2 minutos sem tocar).
+
+## Genius
+
+Quando a pessoa quiser jogar Genius (ou "o jogo das cores", "Simon"), rode
+`bash "$R/scripts/claudinho.sh" genius`. Também roda inteiro na placa, sem
+token. Explique em uma frase: o Claudinho acende uma sequência de cores e ela
+repete tocando; a cada acerto a sequência cresce uma cor; errou, ele mostra o
+placar e começa de novo; para sair, 3 toques rápidos no mesmo quadrante (ou 2
+minutos sem tocar).
+
 ## Referência rápida
 
-`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
+`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
 
 `atualizar` e `tela` pedem um toque na tela do Claudinho (avise a pessoa antes).
 Tipos de cara: inicio, prompt, ferramenta, erro, parou, atencao, compact, fim, dormir.

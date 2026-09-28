@@ -57,6 +57,8 @@ static const uint16_t COR_BRANCO = RGB565(0xff, 0xf4, 0xe6);
 
 static const int FONTE_P = 0;   // 16 px
 static const int FONTE_G = 1;   // 48 px
+static const int FONTE_M = 2;   // 24 px negrito
+static const int FONTE_32 = 3;  // 32 px
 static const int LARG = 320;
 
 // ---------------------------------------------------------------- estado
@@ -509,6 +511,7 @@ void trataEvento(const char* tipo, const char* humor) {
   static int ferramentasSeguidas = 0;
   if (strcmp(tipo, "ferramenta") != 0 && strcmp(tipo, "erro") != 0) ferramentasSeguidas = 0;
   if (consumo.naTela && pagina != 0) mudaPagina(0);    // qualquer evento volta ao rosto na hora
+  if (pagina == 6 && !strcmp(tipo, "atencao")) avisoVelha();   // no jogo: so avisa no canto
   if      (!strcmp(tipo, "inicio"))     { poeCara(C_FELIZ, 5000); pedeConsumo(20000, false, false); }
   else if (!strcmp(tipo, "prompt")) {
     if      (!strcmp(humor, "feliz"))      poeCara(C_EMPOLGADO, 5000);
@@ -581,13 +584,16 @@ void desenhaMoldura() {
     limpaTela(corRosto());
     caraDesenhada = false; ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
     formaEsq = Forma(); formaDir = Forma(); bocaNaTela = BP_NENHUMA; esqueceExtras();
+  } else if (pagina >= 6) {
+    // os jogos desenham a propria tela
   } else if (pagina >= 3) {
     desenhaPaleta();
   } else if (pagina == 2) {
     limpaTela(COR_FUNDO);
-    escreve(0,  80, 320, 20, FONTE_P, COR_OURO,    COR_FUNDO, 1, "O PC quer me atualizar.");
-    escreve(0, 108, 320, 20, FONTE_P, COR_TEXTO,   COR_FUNDO, 1, "Toque na tela para permitir");
-    escreve(0, 132, 320, 18, FONTE_P, COR_APAGADO, COR_FUNDO, 1, "(ou aperte BOOT na placa)");
+    escreve(0,  40, 320, 30, FONTE_M,  COR_OURO,    COR_FUNDO, 1, "O PC quer me atualizar");
+    escreve(0,  90, 320, 38, FONTE_32, COR_TEXTO,   COR_FUNDO, 1, "Toque na tela");
+    escreve(0, 130, 320, 38, FONTE_32, COR_TEXTO,   COR_FUNDO, 1, "para permitir");
+    escreve(0, 196, 320, 20, FONTE_P,  COR_APAGADO, COR_FUNDO, 1, "(ou aperte BOOT na placa)");
   } else {
     limpaTela(COR_FUNDO);
     preenche(6, b5h.y, 308, 92, COR_BLOCO);
@@ -823,13 +829,221 @@ void toquePaleta(int tx, int ty) {
   }
 }
 
+// ---------------------------------------------------------------- jogo da velha
+// claudinho.sh velha (a skill chama quando a pessoa pede) abre o tabuleiro na
+// pagina 6. Voce e o X, o Claudinho e o O, e a jogada dele roda aqui mesmo
+// (minimax), sem Claude nem token. Cada partida sorteia o quanto ele erra.
+// No fim: risca a linha, mostra o rosto reagindo com uma palavra, e comeca
+// outra partida sozinha (quem comeca alterna). Passatempo:
+// sem placar e sem toque a mais. Sai com 3 toques rapidos no mesmo quadrado
+// ou 2 min sem toque. "Esperando voce" do Claude Code vira aviso no canto.
+static const unsigned long VELHA_ESPERA_MS = 120000, VELHA_PENSA_MS = 600, VELHA_TRIPLO_MS = 1500;
+static const unsigned long VELHA_RISCO_MS = 1200, VELHA_REACAO_MS = 3500;   // linha riscada, depois o rosto
+static const int VX = 55, VY = 15, VC = 70;          // tabuleiro 210 x 210, centralizado
+int vTab[9];                        // 0 livre, 1 voce (X), 2 Claudinho (O)
+int vResultado = 0;                 // 0 jogando; 1 voce ganhou, 2 Claudinho, 3 empate
+bool vVoceComeca = true, vReacaoNaTela = false, vAviso = false;
+float vErro = 0;                    // chance de o Claudinho jogar ao acaso, sorteada por partida
+unsigned long vJogaEm = 0, vFimEm = 0;
+int vUltCasa = -1, vToques = 0; unsigned long vUltToque = 0;
+static const int LINHAS3[8][3] = {{0,1,2},{3,4,5},{6,7,8},{0,3,6},{1,4,7},{2,5,8},{0,4,8},{2,4,6}};
+
+int vVencedor(const int* t) {       // 1 ou 2 = venceu, 3 = empate, 0 = segue
+  for (auto& l : LINHAS3) if (t[l[0]] && t[l[0]] == t[l[1]] && t[l[1]] == t[l[2]]) return t[l[0]];
+  for (int i = 0; i < 9; i++) if (!t[i]) return 0;
+  return 3;
+}
+int vMinimax(int* t, bool vezDele) {
+  int r = vVencedor(t);
+  if (r == 2) return 10; if (r == 1) return -10; if (r == 3) return 0;
+  int melhor = vezDele ? -100 : 100;
+  for (int i = 0; i < 9; i++) if (!t[i]) {
+    t[i] = vezDele ? 2 : 1; int v = vMinimax(t, !vezDele); t[i] = 0;
+    melhor = vezDele ? max(melhor, v) : min(melhor, v);
+  }
+  return melhor;
+}
+int vJogadaDele() {
+  int livres[9], n = 0; for (int i = 0; i < 9; i++) if (!vTab[i]) livres[n++] = i;
+  if (n == 9) { const int boas[5] = {0, 2, 4, 6, 8}; return boas[random(5)]; }   // tabuleiro vazio: poupa o minimax
+  if (random(1000) < vErro * 1000) return livres[random(n)];
+  int melhor = -100, casa = livres[0];
+  for (int k = 0; k < n; k++) { int i = livres[k]; vTab[i] = 2; int v = vMinimax(vTab, false); vTab[i] = 0;
+    if (v > melhor || (v == melhor && random(2))) { melhor = v; casa = i; } }
+  return casa;
+}
+
+void vCentro(int i, int& cx, int& cy) { cx = VX + (i % 3) * VC + VC / 2; cy = VY + (i / 3) * VC + VC / 2; }
+void vDesenhaPeca(int i) {
+  int cx, cy; vCentro(i, cx, cy); const int r = 22;
+  if (vTab[i] == 1) for (int d = -2; d <= 2; d++) {            // X preto grosso
+    nexCmdf("line %d,%d,%d,%d,%u", cx - r + d, cy - r, cx + r + d, cy + r, COR_OLHO);
+    nexCmdf("line %d,%d,%d,%d,%u", cx + r + d, cy - r, cx - r + d, cy + r, COR_OLHO);
+  } else if (vTab[i] == 2) for (int d = 0; d < 5; d++)         // O branco grosso
+    nexCmdf("cir %d,%d,%d,%u", cx, cy, r - d, COR_BRANCO);
+}
+void vDesenhaAviso() {
+  if (vAviso) { escreve(0, 90, VX, 18, FONTE_P, COR_CRITICO, corRosto(), 1, "Claude");
+                escreve(0, 110, VX, 18, FONTE_P, COR_CRITICO, corRosto(), 1, "chama!"); }
+}
+void vDesenhaTabuleiro() {
+  limpaTela(corRosto());
+  for (int k = 1; k < 3; k++) {                                   // grade preta
+    preenche(VX + k * VC - 2, VY, 4, 3 * VC, COR_OLHO);
+    preenche(VX, VY + k * VC - 2, 3 * VC, 4, COR_OLHO);
+  }
+  for (int i = 0; i < 9; i++) vDesenhaPeca(i);
+  vDesenhaAviso();
+}
+void vNovaPartida() {
+  for (int& c : vTab) c = 0;
+  vResultado = 0; vReacaoNaTela = false;
+  const float ERROS[3] = {0.0f, 0.25f, 0.5f}; vErro = ERROS[random(3)];
+  vDesenhaTabuleiro();
+  vJogaEm = vVoceComeca ? 0 : millis() + VELHA_PENSA_MS;
+  registra("velha: nova partida (erro %d%%, %s comeca)", (int)(vErro * 100), vVoceComeca ? "voce" : "Claudinho");
+}
+void vFimDePartida(int r) {
+  vResultado = r; vJogaEm = 0; vFimEm = millis(); vVoceComeca = !vVoceComeca;
+  for (auto& l : LINHAS3) if (r != 3 && vTab[l[0]] == r && vTab[l[1]] == r && vTab[l[2]] == r) {   // risca a vitoria
+    int x1, y1, x2, y2; vCentro(l[0], x1, y1); vCentro(l[2], x2, y2);
+    for (int d = -2; d <= 2; d++) { nexCmdf("line %d,%d,%d,%d,%u", x1 + d, y1, x2 + d, y2, COR_CRITICO); nexCmdf("line %d,%d,%d,%d,%u", x1, y1 + d, x2, y2 + d, COR_CRITICO); }
+    break;
+  }
+  registra("velha: %s", r == 1 ? "voce ganhou" : r == 2 ? "Claudinho ganhou" : "empate");
+}
+// Rosto reagindo ao resultado, na tela inteira, com uma palavra embaixo.
+void vDesenhaReacao() {
+  Cara c = vResultado == 1 ? C_TRISTE : vResultado == 2 ? C_EMPOLGADO : C_DESCONFIADO;
+  const char* frase = vResultado == 1 ? "You win!" : vResultado == 2 ? "I win!" : "Draw!";
+  limpaTela(corRosto());
+  ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
+  formaEsq = Forma(); formaDir = Forma(); bocaNaTela = BP_NENHUMA; esqueceExtras();
+  Expr x; expressao(c, 0, x); desenhaExpr(x); extras(c, 0);
+  escreve(0, 202, 320, 30, FONTE_M, COR_OLHO, corRosto(), 1, frase);
+}
+void abreVelha() {
+  vVoceComeca = true; vAviso = false; vUltCasa = -1; vToques = 0;
+  mudaPagina(6); paginaDur = VELHA_ESPERA_MS; vNovaPartida();
+}
+void avisoVelha() { if (!vAviso) { vAviso = true; if (!vResultado) vDesenhaAviso(); } }
+void saiVelha(const char* porque) { registra("velha: saiu (%s)", porque); vJogaEm = 0; mudaPagina(0); }
+
+void toqueVelha(int tx, int ty) {
+  paginaDesde = millis();                                          // renova o tempo de inatividade
+  if (tx < VX || tx >= VX + 3 * VC || ty < VY || ty >= VY + 3 * VC) return;
+  int i = ((ty - VY) / VC) * 3 + (tx - VX) / VC;
+  if (i == vUltCasa && millis() - vUltToque < VELHA_TRIPLO_MS) vToques++; else vToques = 1;
+  vUltCasa = i; vUltToque = millis();
+  if (vToques >= 3) { saiVelha("3 toques"); return; }
+  if (vResultado || vJogaEm || vTab[i]) return;                    // fim de partida, vez dele, ou casa ocupada
+  vTab[i] = 1; vDesenhaPeca(i);
+  int r = vVencedor(vTab);
+  if (r) vFimDePartida(r); else vJogaEm = millis() + VELHA_PENSA_MS;
+}
+void cuidaVelha() {
+  if (pagina != 6) return;
+  if (vResultado) {                                                // fim: risco -> rosto -> nova partida
+    unsigned long t = millis() - vFimEm;
+    if (!vReacaoNaTela && t > VELHA_RISCO_MS) { vReacaoNaTela = true; vDesenhaReacao(); }
+    else if (t > VELHA_RISCO_MS + VELHA_REACAO_MS) vNovaPartida();
+    return;
+  }
+  if (!vJogaEm || (long)(millis() - vJogaEm) < 0) return;
+  vJogaEm = 0;
+  int i = vJogadaDele(); vTab[i] = 2; vDesenhaPeca(i);
+  int r = vVencedor(vTab);
+  if (r) vFimDePartida(r);
+}
+
+// ---------------------------------------------------------------- genius
+// claudinho.sh genius abre na pagina 7: 4 quadrantes (verde, vermelho,
+// amarelo, azul); o Claudinho acende uma sequencia e voce repete tocando; a
+// cada acerto ela cresce uma cor e acelera um pouco. Errou: o rosto reage com
+// o placar e comeca outra sozinho. Roda na placa, sem token. Sai com 3 toques
+// rapidos no mesmo quadrante: toques CERTOS da sequencia nao contam (ela pode
+// pedir o mesmo quadrante varias vezes), so os fora de hora (enquanto ele
+// mostra, depois de errar, na tela do placar). Ou 2 min sem toque.
+static const int G_MAX = 64;
+static const unsigned long G_TOQUE_ACESO_MS = 250, G_PAUSA_RODADA_MS = 800, G_REACAO_MS = 3500;
+int gSeq[G_MAX], gLen = 0, gIdx = 0, gFase = 0;   // fase 0 mostrando, 1 sua vez, 2 placar
+int gAceso = -1, gAcesoJ = -1;       // quadrante aceso pela sequencia / pelo seu toque
+unsigned long gProx = 0, gApagaEm = 0, gFimEm = 0;
+int gUltQ = -1, gToques = 0; unsigned long gUltToque = 0;
+static const float G_TOM[4] = {125, 0, 50, 212};               // verde, vermelho, amarelo, azul
+
+uint16_t gCor(int q, bool aceso) { return hsv565(G_TOM[q], aceso ? 0.75f : 0.85f, aceso ? 1.0f : 0.38f); }
+void gQuadrante(int q, bool aceso) {
+  preenche((q % 2) * 162, (q / 2) * 122, 158, 118, gCor(q, aceso));
+  gCentro();
+}
+void gCentro() {                                               // rodada no circulo do meio
+  char t[8]; snprintf(t, sizeof t, "%d", gLen);
+  nexCmdf("cirs 160,120,26,%u", COR_OLHO);
+  escreve(136, 108, 48, 26, FONTE_M, COR_BRANCO, COR_OLHO, 1, t);
+}
+void gDesenhaTudo() {
+  limpaTela(COR_OLHO);
+  for (int q = 0; q < 4; q++) preenche((q % 2) * 162, (q / 2) * 122, 158, 118, gCor(q, false));
+  gCentro();
+}
+unsigned long gTempoAceso() { return max(250L, 520L - 18L * gLen); }
+void gNovaRodada() {
+  if (gLen < G_MAX) gSeq[gLen++] = random(4);
+  gFase = 0; gIdx = 0; gAceso = -1; gProx = millis() + G_PAUSA_RODADA_MS;
+  gCentro();
+}
+void gNovoJogo() { gLen = 0; gAcesoJ = -1; gDesenhaTudo(); gNovaRodada(); registra("genius: novo jogo"); }
+void abreGenius() { gUltQ = -1; gToques = 0; mudaPagina(7); paginaDur = VELHA_ESPERA_MS; gNovoJogo(); }
+void saiGenius(const char* porque) { registra("genius: saiu (%s)", porque); mudaPagina(0); }
+void gPlacar() {
+  int pontos = gLen - 1;
+  gFase = 2; gFimEm = millis();
+  registra("genius: errou, %d pontos", pontos);
+  Cara c = pontos >= 8 ? C_EMPOLGADO : pontos >= 4 ? C_FELIZ : C_DESCONFIADO;
+  char t[20]; snprintf(t, sizeof t, "Score: %d", pontos);
+  limpaTela(corRosto());
+  ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
+  formaEsq = Forma(); formaDir = Forma(); bocaNaTela = BP_NENHUMA; esqueceExtras();
+  Expr x; expressao(c, 0, x); desenhaExpr(x); extras(c, 0);
+  escreve(0, 202, 320, 30, FONTE_M, COR_OLHO, corRosto(), 1, t);
+}
+void toqueGenius(int tx, int ty) {
+  paginaDesde = millis();
+  int q = (ty >= 120 ? 2 : 0) + (tx >= 160 ? 1 : 0);
+  bool certo = gFase == 1 && q == gSeq[gIdx];
+  if (!certo) {                                                  // so toque fora de hora conta para sair
+    if (q == gUltQ && millis() - gUltToque < VELHA_TRIPLO_MS) gToques++; else gToques = 1;
+    gUltQ = q; gUltToque = millis();
+    if (gToques >= 3) { saiGenius("3 toques"); return; }
+    if (gFase == 1) gPlacar();                                   // errou a sequencia
+    return;
+  }
+  gToques = 0; gUltQ = -1;
+  if (gAcesoJ >= 0) gQuadrante(gAcesoJ, false);
+  gAcesoJ = q; gQuadrante(q, true); gApagaEm = millis() + G_TOQUE_ACESO_MS;
+  if (++gIdx >= gLen) gNovaRodada();
+}
+void cuidaGenius() {
+  if (pagina != 7) return;
+  unsigned long agora = millis();
+  if (gFase == 2) { if (agora - gFimEm > G_REACAO_MS) gNovoJogo(); return; }
+  if (gAcesoJ >= 0 && (long)(agora - gApagaEm) >= 0) { gQuadrante(gAcesoJ, false); gAcesoJ = -1; }   // seu toque apaga
+  if (gFase == 1) return;
+  if ((long)(agora - gProx) < 0) return;                         // fase 0: mostrando a sequencia
+  if (gAceso >= 0) { gQuadrante(gAceso, false); gAceso = -1; gProx = agora + 160; gIdx++; return; }
+  if (gIdx < gLen) { gAceso = gSeq[gIdx]; gQuadrante(gAceso, true); gProx = agora + gTempoAceso(); return; }
+  gFase = 1; gIdx = 0;                                           // sua vez
+}
+
 // ---------------------------------------------------------------- manutencao
 bool manutLiberada() { return manutAte && (long)(millis() - manutAte) < 0; }
 void liberaManutencao(const char* como) {
   manutPedidaEm = 0; manutAte = millis() + MANUT_JANELA_MS;
   registra("manutencao: liberada por %s (%lu s)", como, MANUT_JANELA_MS / 1000);
   limpaTela(COR_FUNDO);
-  escreve(0, 108, 320, 20, FONTE_P, COR_OK, COR_FUNDO, 1, "Liberado. Recebendo...");
+  escreve(0,  80, 320, 38, FONTE_32, COR_OK,    COR_FUNDO, 1, "Liberado!");
+  escreve(0, 130, 320, 30, FONTE_M,  COR_TEXTO, COR_FUNDO, 1, "recebendo...");
 }
 void cuidaManutencao() {
   if (!manutPedidaEm) return;
@@ -851,6 +1065,8 @@ void leToque() {
     registra("toque %s em %d,%d (pagina %d)", buf[5] == 1 ? "press" : "solta", tx, ty, pagina);
     if (buf[5] == 1) { pressaoEm = millis(); continue; }
     if (manutPedidaEm) { liberaManutencao("toque"); continue; }
+    if (pagina == 6) { toqueVelha(tx, ty); continue; }
+    if (pagina == 7) { toqueGenius(tx, ty); continue; }
     if (pagina >= 3) { toquePaleta(tx, ty); continue; }
     if (millis() - pressaoEm >= TOQUE_LONGO_MS) { brilhoAlto = !brilhoAlto; registra("brilho %s", brilhoAlto ? "alto" : "baixo"); }
     else { mudaPagina(pagina == 0 ? 1 : 0); Serial.printf("-> pagina %d\n", pagina); }
@@ -1003,6 +1219,10 @@ void webCmd() {
     if (doc["salvar"] | false) gravaCor(corRostoAtual);
     if (pagina == 0) mudaPagina(0);
   }
+  // {"genius":true}: abre o Genius
+  if (doc["genius"] | false) abreGenius();
+  // {"velha":true}: abre o jogo da velha
+  if (doc["velha"] | false) abreVelha();
   // {"paleta":true}: abre a escolha de cor do rosto na tela
   if (doc["paleta"] | false) abrePaleta();
   // {"manutencao":true}: pede o toque que libera /ota e /tft
@@ -1046,8 +1266,8 @@ void webOtaDados() {
     uploadNegado = !autorizado() || !manutLiberada(); otaIniciado = !uploadNegado;
     if (uploadNegado) return;
     limpaTela(COR_FUNDO);
-    escreve(0, 100, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, "atualizando...");
-    escreve(0, 124, 320, 18, FONTE_P, COR_APAGADO, COR_FUNDO, 1, "nao desligue");
+    escreve(0,  80, 320, 38, FONTE_32, COR_OURO,    COR_FUNDO, 1, "Atualizando...");
+    escreve(0, 130, 320, 30, FONTE_M,  COR_APAGADO, COR_FUNDO, 1, "n\xe3o desligue");
     Update.begin(UPDATE_SIZE_UNKNOWN);
   } else if (u.status == UPLOAD_FILE_WRITE) {
     if (!uploadNegado) Update.write(u.buf, u.currentSize);
@@ -1093,8 +1313,8 @@ void webTftDados() {
     tftIniciado = !uploadNegado;
     if (uploadNegado) return;
     limpaTela(COR_FUNDO);
-    escreve(0, 100, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, "gravando tela nova...");
-    escreve(0, 124, 320, 18, FONTE_P, COR_APAGADO, COR_FUNDO, 1, "nao desligue");
+    escreve(0,  86, 320, 30, FONTE_M, COR_OURO,    COR_FUNDO, 1, "Gravando a tela...");
+    escreve(0, 130, 320, 30, FONTE_M, COR_APAGADO, COR_FUNDO, 1, "n\xe3o desligue");
     delay(300);
     tftOk = tftHandshake(tftTam);
   } else if (u.status == UPLOAD_FILE_WRITE) {
@@ -1285,18 +1505,22 @@ void loop() {
   cuidaManutencao();
   if (pagina != 0 && millis() - paginaDesde > paginaDur) {
     if (pagina == 2) manutPedidaEm = 0;
-    if (pagina >= 3) cancelaPaleta("sem toque"); else mudaPagina(0);
+    if (pagina == 6) saiVelha("sem toque");
+    else if (pagina == 7) saiGenius("sem toque");
+    else if (pagina >= 3) cancelaPaleta("sem toque"); else mudaPagina(0);
   }
 
   static unsigned long ultimoTick = 0;
   if (millis() - ultimoTick >= 1000) { ultimoTick = millis(); confereRenovacao(); desenha(); }
   cuidaConsumo();
+  cuidaVelha();
+  cuidaGenius();
 
   // Brilho: dormindo ha mais de 20 s -> 15 %; acordado -> 100 % (ou o que o
   // toque longo escolheu). Poupa backlight e bateria.
   {
     static unsigned long dormeDesde = 0; static int brilhoNaTela = -1;
-    bool dormindo = (caraNaTela == C_DORMINDO);
+    bool dormindo = (pagina == 0 && caraNaTela == C_DORMINDO);   // jogo, paleta e cartao: brilho normal
     if (!dormindo) dormeDesde = 0;
     else if (!dormeDesde) dormeDesde = millis();
     int alvo = (dormindo && millis() - dormeDesde > 20000) ? 15 : (brilhoAlto ? 100 : 15);
