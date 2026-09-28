@@ -126,8 +126,9 @@ on its own (blinking red above 90%).
 
 **Face color:** ask Claude to "change Claudinho's color" (or run
 `claudinho.sh cor`) and pick it on the screen itself: 6 base colors, then 12
-shades of the chosen one around the edges with the tapped shade shown large in
-the middle (hold your filament next to it to compare), and a face preview with
+shades of the chosen one around the edges (with the screen mounted, they sit
+right against the printed frame, so you compare them directly with the
+filament), the tapped shade shown large in the middle, and a face preview with
 Save, Back or Cancel. The eyes always stay black. See the [manual](docs/manual.md).
 
 Tap the screen to see the 5-hour and 7-day windows, when each one resets,

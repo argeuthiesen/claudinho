@@ -130,8 +130,9 @@ resposta, ele mostra sozinho o cartão de consumo por alguns segundos
 
 **Cor do rosto:** peça ao Claude "muda a cor do Claudinho" (ou rode
 `claudinho.sh cor`) e escolha na própria tela: 6 cores base, depois 12 tons
-da escolhida em volta da tela, com o tom tocado grande no centro (encoste o
-filamento para comparar), e uma prévia do rosto com Gravar, Voltar ou
+da escolhida em volta da tela (com a tela montada, eles ficam colados na
+moldura impressa, e dá para comparar direto com o filamento), o tom tocado
+grande no centro, e uma prévia do rosto com Gravar, Voltar ou
 Cancelar. Os olhos ficam sempre pretos. Veja o [manual](docs/manual.pt-BR.md).
 
 Tocando na tela, aparecem as janelas de 5 h e 7 dias, quando cada uma

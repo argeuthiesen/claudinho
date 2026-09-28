@@ -58,8 +58,10 @@ Handy for matching the face to your case's filament color.
 1. Ask Claude "change Claudinho's color" (or run `claudinho.sh cor`).
 2. The screen shows **6 base colors**. Tap the one closest to your filament.
 3. **12 shades of it** appear around the edges, with the tapped shade **shown
-   large in the middle**. Tap the edge shades and hold your filament next to
-   the middle to compare.
+   large in the middle**. With the screen mounted in the case, the edge shades
+   sit right against the printed frame, so you can compare each one directly
+   with the filament, side by side. (Outside the case, hold a piece of
+   filament next to the middle.)
 4. Found it? **Tap the middle.** You get the face in that color with three
    buttons (labels are in Portuguese):
    - **Gravar** (save): keeps the color, even after a restart;

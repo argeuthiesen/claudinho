@@ -58,8 +58,9 @@ Serve para combinar o rosto com a cor do filamento da caixa.
 1. Peça ao Claude: "muda a cor do Claudinho" (ou rode `claudinho.sh cor`).
 2. Na tela aparecem **6 cores base**. Toque na mais parecida com o filamento.
 3. Aparecem **12 tons dela em volta da tela**, com o tom tocado **grande no
-   centro**. Toque nos tons da borda e encoste o filamento no centro para
-   comparar.
+   centro**. Com a tela montada na caixa, os tons da borda ficam colados na
+   moldura impressa: dá para comparar cada um direto com o filamento, lado a
+   lado. (Fora da caixa, encoste um pedaço de filamento no centro.)
 4. Achou? **Toque no centro.** Aparece o rosto nessa cor, com três botões:
    - **Gravar**: guarda a cor (continua depois de reiniciar);
    - **Voltar**: volta aos 12 tons;

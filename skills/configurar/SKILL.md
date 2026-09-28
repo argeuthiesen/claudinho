@@ -222,7 +222,9 @@ Para diagnóstico sem cabo: `claudinho.sh log`.
 Quando a pessoa quiser trocar a cor (por exemplo, para combinar com o filamento),
 rode `bash "$R/scripts/claudinho.sh" cor` e explique o que vai aparecer na tela:
 6 cores base; tocando numa, 12 tons dela numa moldura em volta da tela, com o
-tom tocado grande no centro (sugira encostar o filamento na tela para comparar);
+tom tocado grande no centro. Com a tela montada, os tons da borda ficam colados
+na moldura impressa da caixa: diga que dá para comparar cada um direto com o
+filamento, lado a lado;
 tocando no centro, uma prévia do rosto com **Gravar**, **Voltar** (à moldura) ou
 **Cancelar** (volta à cor de antes). 1 minuto sem toque cancela. A cor gravada continua depois de reiniciar. Os olhos ficam
 sempre pretos. Quem souber a cor exata: `claudinho.sh cor R G B salvar`.
