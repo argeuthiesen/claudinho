@@ -274,7 +274,7 @@ void celula(int cx, int cy, int w, int h, uint16_t cor) { preenche(cx * CEL, cy 
 Caixa ultimaEsq, ultimaDir, ultimaExtra, ultimaBoca;
 // O que esta na tela agora (o simulador de PC compara com um desenho limpo).
 Expr exprNaTela; Cara extrasCaraNaTela = C_NEUTRO; int extrasFaseNaTela = 0;
-uint16_t corRostoAtual = COR_ROSTO;          // ajustavel ao vivo por POST /cmd {"cor":[r,g,b]} para afinar com o filamento
+uint16_t corRostoAtual = COR_ROSTO;          // escolhida na paleta (claudinho.sh cor) ou por /cmd {"cor":[r,g,b]}; gravada na placa
 uint16_t corRosto() { return corRostoAtual; }
 void apaga(Caixa& c) { if (c.w) { celula(c.x, c.y, c.w, c.h, corRosto()); c = {}; } }
 
@@ -581,6 +581,8 @@ void desenhaMoldura() {
     limpaTela(corRosto());
     caraDesenhada = false; ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
     formaEsq = Forma(); formaDir = Forma(); bocaNaTela = BP_NENHUMA; esqueceExtras();
+  } else if (pagina >= 3) {
+    desenhaPaleta();
   } else if (pagina == 2) {
     limpaTela(COR_FUNDO);
     escreve(0,  80, 320, 20, FONTE_P, COR_OURO,    COR_FUNDO, 1, "O PC quer me atualizar.");
@@ -646,7 +648,7 @@ void desenhaJanela(BlocoJanela& b, const char* nome, int pct, long reseta, bool 
 }
 
 void desenha() {
-  if (pagina == 0 || pagina == 2) return;   // olhos, ou pedido de manutencao: nada a atualizar
+  if (pagina == 0 || pagina >= 2) return;   // olhos, manutencao ou paleta: nada a atualizar
   desenhaCabecalho();
   desenhaJanela(b5h, "SESSAO  5 HORAS", dados.h5, dados.h5r, false);
   desenhaJanela(b7d, "SEMANA  7 DIAS",  dados.d7, dados.d7r, true);
@@ -716,6 +718,111 @@ void cuidaConsumo() {
   if (intenso) ultimoIntenso = millis();
 }
 
+// ---------------------------------------------------------------- paleta de cor do rosto
+// claudinho.sh cor (sem numeros) abre a paleta na tela, para combinar o rosto
+// com a cor do filamento. Pagina 3: 6 cores base; pagina 4: 12 variacoes da
+// escolhida, sempre no MESMO tom, numa moldura em volta da tela (do mais claro
+// e pastel ao mais escuro e vivo, em sentido horario), com o tom tocado grande
+// no centro para comparar com o filamento; tocar no centro confirma;
+// pagina 5: previa do rosto com Gravar / Voltar (as 24) / Cancelar. Tocar
+// numa cor ja avanca; 1 min sem toque cancela (volta a cor de antes).
+// Os olhos ficam sempre pretos: a variacao mais escura para antes de some-los.
+static const unsigned long PALETA_ESPERA_MS = 60000;
+struct CorBase { float h, s, v; };
+static const CorBase CORES_BASE[6] = {
+  {21, 0.88f, 0.94f},   // laranja Clawd
+  {0,  0.85f, 0.90f},   // vermelho
+  {48, 0.85f, 0.97f},   // amarelo
+  {125, 0.70f, 0.75f},  // verde
+  {212, 0.75f, 0.90f},  // azul
+  {275, 0.60f, 0.80f},  // roxo
+};
+static const float VAR_S[4] = {0.50f, 0.70f, 0.85f, 1.0f};   // fracao da saturacao da base
+static const float VAR_V[3] = {1.0f, 0.88f, 0.74f};           // brilho
+int paletaBase = 0, paletaTom = -1;   // tom da moldura mostrado no centro (-1: a cor base)
+uint16_t corAntesPaleta = COR_ROSTO;
+
+uint16_t hsv565(float h, float s, float v) {
+  h = fmodf(h + 360.0f, 360.0f);
+  float c = v * s, x = c * (1 - fabsf(fmodf(h / 60.0f, 2) - 1)), m = v - c, r, g, b;
+  if (h < 60)       { r = c; g = x; b = 0; } else if (h < 120) { r = x; g = c; b = 0; }
+  else if (h < 180) { r = 0; g = c; b = x; } else if (h < 240) { r = 0; g = x; b = c; }
+  else if (h < 300) { r = x; g = 0; b = c; } else               { r = c; g = 0; b = x; }
+  return RGB565((int)((r + m) * 255), (int)((g + m) * 255), (int)((b + m) * 255));
+}
+uint16_t corBase(int i) { return i == 0 ? COR_ROSTO : hsv565(CORES_BASE[i].h, CORES_BASE[i].s, CORES_BASE[i].v); }
+uint16_t corVariacao(int base, int lin, int col) {
+  return hsv565(CORES_BASE[base].h, CORES_BASE[base].s * VAR_S[col], VAR_V[lin]);
+}
+
+// Moldura de 12 quadrados de 80 x 60: k 0-3 em cima (esq->dir), 4-5 a direita
+// (cima->baixo), 6-9 embaixo (dir->esq), 10-11 a esquerda (baixo->cima).
+// Centro livre: 160 x 120.
+static const int CEL_W = 80, CEL_H = 60, N_TONS = 12;
+void posMoldura(int k, int& x, int& y) {
+  if (k < 4)       { x = k * CEL_W;         y = 0; }
+  else if (k < 6)  { x = 3 * CEL_W;         y = (k - 3) * CEL_H; }
+  else if (k < 10) { x = (9 - k) * CEL_W;   y = 3 * CEL_H; }
+  else             { x = 0;                 y = (12 - k) * CEL_H; }
+}
+int tomNaMoldura(int tx, int ty) {        // -1: centro
+  for (int k = 0; k < N_TONS; k++) { int x, y; posMoldura(k, x, y);
+    if (tx >= x && tx < x + CEL_W && ty >= y && ty < y + CEL_H) return k; }
+  return -1;
+}
+uint16_t corTom(int k) { return k < 0 ? corBase(paletaBase) : corVariacao(paletaBase, k / 4, k % 4); }
+void desenhaCentroPaleta() {
+  uint16_t c = corTom(paletaTom);
+  preenche(CEL_W + 2, CEL_H + 2, 320 - 2 * CEL_W - 4, 240 - 2 * CEL_H - 4, c);
+  escreve(CEL_W + 2, 150, 320 - 2 * CEL_W - 4, 18, FONTE_P, COR_OLHO, c, 1, "toque para confirmar");
+}
+
+void irPaleta(int p) { mudaPagina(p); paginaDur = PALETA_ESPERA_MS; }
+
+void desenhaPaleta() {
+  if (pagina == 3) {                                     // 6 cores base, 3 x 2
+    limpaTela(COR_FUNDO);
+    for (int i = 0; i < 6; i++) preenche((i % 3) * 106 + 4, (i / 3) * 120 + 4, 100, 112, corBase(i));
+  } else if (pagina == 4) {                              // moldura de 12 tons + centro
+    limpaTela(COR_FUNDO);
+    for (int k = 0; k < N_TONS; k++) { int x, y; posMoldura(k, x, y); preenche(x + 1, y + 1, CEL_W - 2, CEL_H - 2, corTom(k)); }
+    desenhaCentroPaleta();
+  } else {                                               // previa: rosto + botoes
+    limpaTela(corRosto());
+    ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
+    formaEsq = Forma(); formaDir = Forma(); bocaNaTela = BP_NENHUMA; esqueceExtras();
+    Expr x; expressao(C_NEUTRO, 0, x); desenhaExpr(x);
+    preenche(4,   200, 100, 36, COR_OK);      escreve(4,   208, 100, 20, FONTE_P, COR_BRANCO, COR_OK,      1, "Gravar");
+    preenche(110, 200, 100, 36, COR_FUNDO);   escreve(110, 208, 100, 20, FONTE_P, COR_BRANCO, COR_FUNDO,   1, "Voltar");
+    preenche(216, 200, 100, 36, COR_CRITICO); escreve(216, 208, 100, 20, FONTE_P, COR_BRANCO, COR_CRITICO, 1, "Cancelar");
+  }
+}
+
+void abrePaleta() { corAntesPaleta = corRostoAtual; registra("cor: paleta aberta"); irPaleta(3); }
+void cancelaPaleta(const char* porque) {
+  corRostoAtual = corAntesPaleta; registra("cor: cancelada (%s)", porque); mudaPagina(0);
+}
+void gravaCor(uint16_t cor) {
+  corRostoAtual = cor;
+  prefs.begin("claudinho", false); prefs.putUShort("cor", cor); prefs.end();
+  registra("cor: gravada 0x%04X", cor);
+}
+
+// Toque (soltou) em uma das telas da paleta.
+void toquePaleta(int tx, int ty) {
+  if (pagina == 3) { paletaBase = min(1, ty / 120) * 3 + min(2, tx / 106); paletaTom = -1; irPaleta(4); }
+  else if (pagina == 4) {
+    int k = tomNaMoldura(tx, ty);
+    if (k >= 0) { paletaTom = k; desenhaCentroPaleta(); paginaDesde = millis(); }   // mostra no centro
+    else { corRostoAtual = corTom(paletaTom); irPaleta(5); }                         // centro: confirma
+  }
+  else if (ty >= 192) {
+    if (tx < 107)      { gravaCor(corRostoAtual); mudaPagina(0); }
+    else if (tx < 213) irPaleta(4);
+    else               cancelaPaleta("botao");
+  }
+}
+
 // ---------------------------------------------------------------- manutencao
 bool manutLiberada() { return manutAte && (long)(millis() - manutAte) < 0; }
 void liberaManutencao(const char* como) {
@@ -744,6 +851,7 @@ void leToque() {
     registra("toque %s em %d,%d (pagina %d)", buf[5] == 1 ? "press" : "solta", tx, ty, pagina);
     if (buf[5] == 1) { pressaoEm = millis(); continue; }
     if (manutPedidaEm) { liberaManutencao("toque"); continue; }
+    if (pagina >= 3) { toquePaleta(tx, ty); continue; }
     if (millis() - pressaoEm >= TOQUE_LONGO_MS) { brilhoAlto = !brilhoAlto; registra("brilho %s", brilhoAlto ? "alto" : "baixo"); }
     else { mudaPagina(pagina == 0 ? 1 : 0); Serial.printf("-> pagina %d\n", pagina); }
   }
@@ -892,8 +1000,11 @@ void webCmd() {
   if (deserializeJson(doc, web.arg("plain"))) { web.send(400, "text/plain", "json invalido\n"); return; }
   if (doc["cor"].is<JsonArray>()) {
     corRostoAtual = RGB565(doc["cor"][0].as<int>(), doc["cor"][1].as<int>(), doc["cor"][2].as<int>());
+    if (doc["salvar"] | false) gravaCor(corRostoAtual);
     if (pagina == 0) mudaPagina(0);
   }
+  // {"paleta":true}: abre a escolha de cor do rosto na tela
+  if (doc["paleta"] | false) abrePaleta();
   // {"manutencao":true}: pede o toque que libera /ota e /tft
   if (doc["manutencao"] | false) {
     manutPedidaEm = millis(); manutAte = 0;
@@ -1028,6 +1139,7 @@ void iniciaLocal() {
 void carregaConfig() {
   prefs.begin("claudinho", true);
   cfgSsid = prefs.getString("ssid", ""); cfgSenha = prefs.getString("senha", ""); cfgToken = prefs.getString("token", "");
+  corRostoAtual = prefs.getUShort("cor", COR_ROSTO);
   prefs.end();
 }
 
@@ -1141,6 +1253,7 @@ void setup() {
   mudaPagina(0);
 
   carregaConfig();
+  if (corRostoAtual != COR_ROSTO) mudaPagina(0);    // cor gravada: redesenha o rosto que ja apareceu laranja
   WiFi.mode(WIFI_STA);          // para o MAC e o SCAN funcionarem mesmo sem config
   if (cfgSsid.isEmpty()) {
     String mac = macTexto();
@@ -1170,7 +1283,10 @@ void loop() {
     servidor = SRV_SEM_WIFI;
   } else if (servidor == SRV_SEM_WIFI) servidor = SRV_INICIANDO;
   cuidaManutencao();
-  if (pagina != 0 && millis() - paginaDesde > paginaDur) { if (pagina == 2) manutPedidaEm = 0; mudaPagina(0); }
+  if (pagina != 0 && millis() - paginaDesde > paginaDur) {
+    if (pagina == 2) manutPedidaEm = 0;
+    if (pagina >= 3) cancelaPaleta("sem toque"); else mudaPagina(0);
+  }
 
   static unsigned long ultimoTick = 0;
   if (millis() - ultimoTick >= 1000) { ultimoTick = millis(); confereRenovacao(); desenha(); }

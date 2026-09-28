@@ -217,9 +217,19 @@ Pergunte se o Claudinho fez `> <` (olhos apertados de alegria). O `info` deve
 mostrar `"local":true` e os números do plano depois da próxima resposta.
 Para diagnóstico sem cabo: `claudinho.sh log`.
 
+## Mudar a cor do rosto
+
+Quando a pessoa quiser trocar a cor (por exemplo, para combinar com o filamento),
+rode `bash "$R/scripts/claudinho.sh" cor` e explique o que vai aparecer na tela:
+6 cores base; tocando numa, 12 tons dela numa moldura em volta da tela, com o
+tom tocado grande no centro (sugira encostar o filamento na tela para comparar);
+tocando no centro, uma prévia do rosto com **Gravar**, **Voltar** (à moldura) ou
+**Cancelar** (volta à cor de antes). 1 minuto sem toque cancela. A cor gravada continua depois de reiniciar. Os olhos ficam
+sempre pretos. Quem souber a cor exata: `claudinho.sh cor R G B salvar`.
+
 ## Referência rápida
 
-`claudinho.sh info | log | cara <tipo> [humor] | cor R G B | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
+`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
 
 `atualizar` e `tela` pedem um toque na tela do Claudinho (avise a pessoa antes).
 Tipos de cara: inicio, prompt, ferramenta, erro, parou, atencao, compact, fim, dormir.

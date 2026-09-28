@@ -6,6 +6,8 @@ Claude Code's mascot, alive, on your desk.
 
 The 3D-printable case is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
+Already built one? The [user manual](docs/manual.md) covers faces, touch, colors and updates.
+
 Claudinho is a Claude Code plugin that gives Clawd a body: an ESP32 with a
 Nextion display that reacts to what Claude is doing (thinking, using a tool,
 waiting for you, done, error) and shows how much of your plan you've used in
@@ -121,6 +123,12 @@ When idle, between events, the face reflects the 5-hour window usage: normal
 below 75%, tired from 75%, sweating from 90%. When usage crosses 50%, 75% or
 90%, or grows noticeably after a response, it briefly shows the usage card
 on its own (blinking red above 90%).
+
+**Face color:** ask Claude to "change Claudinho's color" (or run
+`claudinho.sh cor`) and pick it on the screen itself: 6 base colors, then 12
+shades of the chosen one around the edges with the tapped shade shown large in
+the middle (hold your filament next to it to compare), and a face preview with
+Save, Back or Cancel. The eyes always stay black. See the [manual](docs/manual.md).
 
 Tap the screen to see the 5-hour and 7-day windows, when each one resets,
 how many terminals are open and the board's IP; after 15 s it goes back to
@@ -326,7 +334,8 @@ The commands are in Portuguese (sorry, it's a Brazilian project):
 scripts/claudinho.sh info                 # status and plan numbers
 scripts/claudinho.sh log                  # board log (no cable needed)
 scripts/claudinho.sh cara <type> [mood]   # test a face ("cara" = face)
-scripts/claudinho.sh cor R G B            # face color ("cor" = color)
+scripts/claudinho.sh cor                  # pick the face color on screen ("cor" = color)
+scripts/claudinho.sh cor R G B [salvar]   # exact color ("salvar" = save it on the board)
 scripts/claudinho.sh reiniciar            # restart
 scripts/claudinho.sh consumo [seconds]    # show usage now
 scripts/claudinho.sh atualizar [file.bin] # update firmware

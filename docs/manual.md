@@ -1,0 +1,93 @@
+# Claudinho manual
+
+**English** · [Português](manual.pt-BR.md)
+
+How to use Claudinho day to day, once it's built and set up. To build and
+install it, see the [README](../README.md).
+
+## What the face shows
+
+Claudinho reacts on its own to what Claude Code is doing:
+
+| Face | When it shows |
+|---|---|
+| Happy | a session started |
+| Thinking | you sent a prompt |
+| Excited | prompt with "thanks", "it works", "perfect", "awesome"... |
+| Worried | prompt with "error", "bug", "doesn't work", "failed"... |
+| Startled | prompt with a swear word |
+| Working | Claude is about to use a tool |
+| Suspicious | 5 tool calls in a row |
+| Angry | a tool call failed |
+| Waiting for you | Claude needs your permission or an answer |
+| Dizzy | compacting the context |
+| Done | Claude just finished responding |
+| Tired | idle, with 5-hour usage above 75% |
+| Sweating | idle, with usage above 90% |
+| Sleeping | no open session, or 3 minutes without news from the computer |
+
+Mood words are matched in English and Portuguese, and your prompt text never
+leaves your computer: only the label ("happy", "worried", "startled") goes to
+the board.
+
+## Plan usage
+
+- **Tap the screen** to see the usage card: 5-hour and 7-day windows, when
+  each one resets, how many terminals are open and the board's IP. After 15
+  seconds it goes back to the face (or tap again).
+- **It also shows it on its own** for a few seconds when Claude finishes a
+  response and usage grew noticeably, or when usage crosses 50%, 75% or 90%.
+  Above 90% the number blinks red. Any new event goes straight back to the
+  face.
+- The numbers only show up after Claude's first response in a session.
+
+## Touch
+
+| Touch | What it does |
+|---|---|
+| Short tap | switches between the face and the usage card |
+| Long press (1.5 s) | toggles brightness between 100% and 15% |
+| Tap when it asks to allow an update | authorizes the update |
+
+When sleeping, it dims itself after 20 seconds.
+
+## Changing the face color
+
+Handy for matching the face to your case's filament color.
+
+1. Ask Claude "change Claudinho's color" (or run `claudinho.sh cor`).
+2. The screen shows **6 base colors**. Tap the one closest to your filament.
+3. **12 shades of it** appear around the edges, with the tapped shade **shown
+   large in the middle**. Tap the edge shades and hold your filament next to
+   the middle to compare.
+4. Found it? **Tap the middle.** You get the face in that color with three
+   buttons (labels are in Portuguese):
+   - **Gravar** (save): keeps the color, even after a restart;
+   - **Voltar** (back): back to the 12 shades;
+   - **Cancelar** (cancel): back to the previous color.
+
+If nobody touches it for 1 minute, it cancels on its own. The eyes always
+stay black. If you know the exact color: `claudinho.sh cor R G B salvar`.
+
+## Updating
+
+Ask Claude "update Claudinho". The screen will ask to allow the update: **tap
+it within 1 minute** (or press the board's BOOT button). Without the tap,
+nothing is sent. That keeps anyone from swapping the firmware over the network
+without being in front of it.
+
+The update takes about 40 seconds and it restarts on its own. If the network
+drops halfway, it keeps the current version; just ask again.
+
+## Asking Claude
+
+No need to memorize commands. Inside Claude Code, just ask:
+
+- "update Claudinho"
+- "change Claudinho's color"
+- "show the usage on Claudinho"
+- "Claudinho stopped reacting" (the skill runs a diagnosis)
+- "I changed my Wi-Fi, reconfigure Claudinho"
+
+The full command list is in the [README](../README.md#commands), and the most
+common problems in [Troubleshooting](../README.md#troubleshooting).

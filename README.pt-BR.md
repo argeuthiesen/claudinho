@@ -6,6 +6,8 @@ O mascote do Claude Code, vivo, na sua mesa.
 
 A caixa para imprimir em 3D está no MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
+Já montou o seu? O [manual de uso](docs/manual.pt-BR.md) explica as caras, os toques, as cores e as atualizações.
+
 Claudinho é um plugin do Claude Code que dá corpo ao Clawd: um ESP32 com um
 display Nextion que reage ao que o Claude está fazendo (pensando, usando uma
 ferramenta, esperando você, terminou, deu erro) e mostra quanto do seu plano
@@ -125,6 +127,12 @@ normal abaixo de 75 %, cansado a partir de 75 %, suando a partir de 90 %.
 Quando o uso passa de 50 %, 75 % ou 90 %, ou sobe bastante depois de uma
 resposta, ele mostra sozinho o cartão de consumo por alguns segundos
 (piscando em vermelho acima de 90 %).
+
+**Cor do rosto:** peça ao Claude "muda a cor do Claudinho" (ou rode
+`claudinho.sh cor`) e escolha na própria tela: 6 cores base, depois 12 tons
+da escolhida em volta da tela, com o tom tocado grande no centro (encoste o
+filamento para comparar), e uma prévia do rosto com Gravar, Voltar ou
+Cancelar. Os olhos ficam sempre pretos. Veja o [manual](docs/manual.pt-BR.md).
 
 Tocando na tela, aparecem as janelas de 5 h e 7 dias, quando cada uma
 renova, quantos terminais estão abertos e o IP da placa; depois de 15 s ele
@@ -322,7 +330,8 @@ Ou simplesmente peça ao Claude: "atualiza o Claudinho".
 scripts/claudinho.sh info                 # estado e números do plano
 scripts/claudinho.sh log                  # log da placa (sem cabo)
 scripts/claudinho.sh cara <tipo> [humor]  # testa uma cara
-scripts/claudinho.sh cor R G B            # cor do rosto
+scripts/claudinho.sh cor                  # escolhe a cor do rosto na tela
+scripts/claudinho.sh cor R G B [salvar]   # cor exata (com "salvar", fica gravada)
 scripts/claudinho.sh reiniciar
 scripts/claudinho.sh consumo [segundos]   # mostra o consumo agora
 scripts/claudinho.sh atualizar [arquivo.bin]

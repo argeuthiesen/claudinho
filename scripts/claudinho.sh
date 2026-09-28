@@ -3,7 +3,8 @@
 #   claudinho.sh info                 estado atual (GET /mini.json)
 #   claudinho.sh log                  log interno do aparelho
 #   claudinho.sh cara <tipo> [humor]  dispara uma cara (inicio, prompt, ferramenta, erro, parou, atencao, compact, fim, dormir)
-#   claudinho.sh cor R G B            cor do fundo ao vivo (nao persiste)
+#   claudinho.sh cor                  abre a paleta na tela (6 cores > 12 tons na moldura, toque no centro > previa com Gravar/Voltar/Cancelar)
+#   claudinho.sh cor R G B [salvar]   cor exata do rosto (com "salvar", fica gravada na placa)
 #   claudinho.sh reiniciar
 #   claudinho.sh atualizar [arquivo.bin]   firmware pela rede (padrao: o do plugin); pede um toque na tela
 #   claudinho.sh tela [arquivo.tft]   grava a tela no Nextion pela rede (padrao: a do plugin); pede um toque na tela
@@ -13,7 +14,7 @@ source "$(dirname "$0")/comum.sh"
 IP=$(le_config CLAUDINHO_IP)
 [ -n "$IP" ] || { echo "Claudinho ainda nao configurado (rode a skill /claudinho:configurar)" >&2; exit 1; }
 J=(-H 'Content-Type: application/json')
-uso() { sed -n '2,10p' "$0"; exit 1; }
+uso() { sed -n '2,11p' "$0"; exit 1; }
 num() { case "$1" in ''|*[!0-9]*) return 1 ;; esac; }
 palavra() { case "$1" in *[!a-z]*) return 1 ;; esac; }      # so letras minusculas (ou vazio)
 cmd() { curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/cmd" -d "$1"; }
@@ -41,8 +42,10 @@ case "${1:-}" in
     palavra "${2:-x}" && palavra "${3:-}" || uso
     curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/evento" -d "{\"tipo\":\"$2\",\"humor\":\"${3:-}\",\"sessao\":\"teste\"}" ;;
   cor)
+    if [ -z "${2:-}" ]; then cmd '{"paleta":true}'; echo "escolha a cor na tela do Claudinho"; exit; fi
     for v in "${2:-}" "${3:-}" "${4:-}"; do num "$v" && [ "$v" -le 255 ] || uso; done
-    cmd "{\"cor\":[$2,$3,$4]}" ;;
+    case "${5:-}" in "") S=false ;; salvar) S=true ;; *) uso ;; esac
+    cmd "{\"cor\":[$2,$3,$4],\"salvar\":$S}" ;;
   reiniciar) cmd '{"reiniciar":true}' ;;
   consumo) S="${2:-20}"; num "$S" || uso; cmd "{\"consumo\":$S}" ;;
   atualizar)

@@ -1,7 +1,7 @@
 // Configuracao de compilacao do Claudinho. Nada pessoal aqui: Wi-Fi e segredo
 // sao gravados na placa na primeira vez (ver o cabecalho do claudinho.ino).
 
-#define VERSAO "1.1.0"
+#define VERSAO "1.2.3"
 
 // Serial do Nextion. A placa e detectada na compilacao.
 #if CONFIG_IDF_TARGET_ESP32C3
