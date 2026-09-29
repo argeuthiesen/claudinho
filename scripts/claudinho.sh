@@ -11,12 +11,14 @@
 #   claudinho.sh consumo [segundos]   mostra a tela de consumo agora (padrao 20 s)
 #   claudinho.sh velha                abre o jogo da velha na tela (sai com 3 toques no mesmo quadrado)
 #   claudinho.sh genius               abre o Genius (repita a sequencia de cores; sai com 3 toques)
+#   claudinho.sh bambu IP | desligar  liga a impressora Bambu (pede o codigo de acesso escondido; ou pela entrada padrao)
+#   claudinho.sh painel               mostra o painel da impressora
 # O segredo nunca vai na linha de comando (ver curl_claudinho no comum.sh).
 source "$(dirname "$0")/comum.sh"
 IP=$(le_config CLAUDINHO_IP)
 [ -n "$IP" ] || { echo "Claudinho ainda nao configurado (rode a skill /claudinho:configurar)" >&2; exit 1; }
 J=(-H 'Content-Type: application/json')
-uso() { sed -n '2,13p' "$0"; exit 1; }
+uso() { sed -n '2,15p' "$0"; exit 1; }
 num() { case "$1" in ''|*[!0-9]*) return 1 ;; esac; }
 palavra() { case "$1" in *[!a-z]*) return 1 ;; esac; }      # so letras minusculas (ou vazio)
 cmd() { curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/cmd" -d "$1"; }
@@ -51,6 +53,19 @@ case "${1:-}" in
   reiniciar) cmd '{"reiniciar":true}' ;;
   velha) cmd '{"velha":true}'; echo "jogo aberto na tela do Claudinho" ;;
   genius) cmd '{"genius":true}'; echo "Genius aberto na tela do Claudinho" ;;
+  painel) cmd '{"painel":true}' ;;
+  bambu)
+    case "${2:-}" in
+      desligar) cmd '{"bambu":{"desligar":true}}' ;;
+      ""|*[!0-9.]*) uso ;;
+      *)
+        # o codigo vai por pipe (nunca na linha de comando) e fica gravado so na placa
+        if [ -t 0 ]; then IFS= read -r -s -p "Codigo de acesso da impressora: " CODIGO; echo; else IFS= read -r CODIGO; fi
+        [ -n "$CODIGO" ] || { echo "codigo vazio; nada foi enviado" >&2; exit 1; }
+        BIP="$2" CODIGO="$CODIGO" python3 -c 'import json,os;print(json.dumps({"bambu":{"ip":os.environ["BIP"],"codigo":os.environ["CODIGO"]}}))' \
+          | curl -s -m 10 -K <(printf 'header = "Authorization: Bearer %s"\n' "$(le_config CLAUDINHO_TOKEN)") "${J[@]}" -X POST "http://$IP/cmd" --data-binary @-
+        unset CODIGO ;;
+    esac ;;
   consumo) S="${2:-20}"; num "$S" || uso; cmd "{\"consumo\":$S}" ;;
   atualizar)
     CHIP=$(mini | grep -o '"placa":"[^"]*"' | cut -d'"' -f4)

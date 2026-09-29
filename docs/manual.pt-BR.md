@@ -96,6 +96,47 @@ roda na placa, sem gastar token.
 - Para sair: **3 toques rápidos no mesmo quadrante** (os toques certos da
   sequência não contam, então dá para jogar sem medo), ou 2 minutos sem tocar.
 
+## Impressora Bambu Lab (opcional)
+
+Se você tem uma impressora 3D da Bambu Lab, o Claudinho acompanha ela também.
+Ele conecta direto na impressora, pela rede de casa: sem nuvem, sem servidor,
+sem gastar token. **Testado na P2S** (com AMS); outros modelos Bambu com
+acesso local (X1, P1, A1) devem funcionar, mas ainda não foram testados.
+
+Para ligar, peça ao Claude "tenho uma impressora Bambu" (ou rode
+`claudinho.sh bambu IP_DA_IMPRESSORA`). Você vai precisar do IP e do **código
+de acesso** da impressora (configurações > Rede). O código é um segredo, como
+a senha do Wi-Fi: você digita escondido, no seu terminal, e ele fica gravado
+só na placa.
+
+**O painel.** O modelo da impressora e o estado (imprimindo, pausada...), o
+nome do arquivo, três colunas (quanto já imprimiu, tempo que falta, camada
+atual), barra de progresso na cor do filamento que está imprimindo,
+temperatura do bico e da mesa, e as 4 cores do AMS com a atual em destaque.
+(O nome que você deu à impressora no app fica só na nuvem da Bambu, por isso
+o painel mostra o modelo.) Imprimindo, ele aparece
+sozinho a cada 5 minutos por 15 segundos. **Toque para fixar**; toque de novo
+para voltar ao rosto. Do cartão de consumo, um toque também leva ao painel.
+
+**Os alertas** ficam na tela **até você tocar** (o toque quer dizer "li"); se
+juntarem vários, aparecem um depois do outro:
+
+| Alerta | Quando |
+|---|---|
+| Começou | começou uma impressão, com o tempo previsto |
+| Pausada | com o motivo: acabou o filamento, você pausou, bico entupido, erro na 1ª camada, tampa frontal, temperatura... |
+| Retomou | voltou a imprimir depois da pausa |
+| Faltam 5 min | faltam 5 minutos |
+| Trocou o filamento | troca de filamento, com a cor nova (um alerta só, atualizado) |
+| Terminou! | com quanto tempo levou |
+| Falhou / Cancelada | falhou (com o código do erro) ou foi cancelada |
+| Aviso HMS | aviso de saúde da impressora, com o código |
+| AMS úmido | a umidade do AMS chegou a 50 % |
+
+Num jogo, na paleta de cores ou numa atualização, os alertas esperam você
+voltar ao rosto. Para desligar: `claudinho.sh bambu desligar` (apaga o código
+da placa).
+
 ## Atualizar
 
 Peça ao Claude "atualiza o Claudinho". A tela vai mostrar "O PC quer me
@@ -115,6 +156,7 @@ Não precisa decorar comando. Dentro do Claude Code, é só pedir:
 - "mostra o consumo no Claudinho"
 - "o Claudinho parou de reagir" (a skill faz o diagnóstico)
 - "troquei o Wi-Fi, reconfigura o Claudinho"
+- "tenho uma impressora Bambu" / "mostra o painel da impressora"
 
 A lista completa de comandos está no [README](../README.pt-BR.md#comandos), e
 os problemas mais comuns, em [Problemas comuns](../README.pt-BR.md#problemas-comuns).

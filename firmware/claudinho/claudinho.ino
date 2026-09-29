@@ -23,6 +23,7 @@
  */
 
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <esp_wifi.h>
 #include <WebServer.h>
 #include <Preferences.h>
@@ -511,6 +512,7 @@ void trataEvento(const char* tipo, const char* humor) {
   static int ferramentasSeguidas = 0;
   if (strcmp(tipo, "ferramenta") != 0 && strcmp(tipo, "erro") != 0) ferramentasSeguidas = 0;
   if (consumo.naTela && pagina != 0) mudaPagina(0);    // qualquer evento volta ao rosto na hora
+  if (pagina == 9 && !strcmp(tipo, "atencao")) mudaPagina(0);   // o Claude precisa de voce: vale mais que o painel
   if (pagina == 6 && !strcmp(tipo, "atencao")) avisoVelha();   // no jogo: so avisa no canto
   if      (!strcmp(tipo, "inicio"))     { poeCara(C_FELIZ, 5000); pedeConsumo(20000, false, false); }
   else if (!strcmp(tipo, "prompt")) {
@@ -584,6 +586,10 @@ void desenhaMoldura() {
     limpaTela(corRosto());
     caraDesenhada = false; ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
     formaEsq = Forma(); formaDir = Forma(); bocaNaTela = BP_NENHUMA; esqueceExtras();
+  } else if (pagina == 9) {
+    painel(true);
+  } else if (pagina == 8) {
+    desenhaAlerta();
   } else if (pagina >= 6) {
     // os jogos desenham a propria tela
   } else if (pagina >= 3) {
@@ -1036,6 +1042,425 @@ void cuidaGenius() {
   gFase = 1; gIdx = 0;                                           // sua vez
 }
 
+// ---------------------------------------------------------------- impressora Bambu (opcional)
+// Desligado ate a pessoa configurar (claudinho.sh bambu IP; o codigo de acesso
+// LAN fica gravado na placa). O Claudinho conecta direto no MQTT da propria
+// impressora (TLS na porta 8883, usuario bblp), sem servidor nem nuvem nem
+// biblioteca: o MQTT e escrito aqui, a criptografia vem do nucleo do ESP32.
+// Assina device/+/report (o numero de serie vem no topico) e le so os campos
+// do painel. Impressora desligada: testa a porta rapido e tenta de novo em 1 min.
+// Pagina 9: painel da impressora. Imprimindo, aparece sozinho a cada 5 min por
+// 15 s; tocar fixa (fica ate tocar de novo).
+// Pagina 8: alertas (comecou, pausou e por que, retomou, faltam 5 min, trocou
+// o filamento, terminou, falhou/cancelada, avisos HMS, AMS umido). Ficam na
+// tela ate um toque (o toque = "li"); varios fazem fila. Em jogo, paleta ou
+// atualizacao, esperam a pessoa voltar ao rosto.
+static const unsigned long B_TENTA_MS = 60000, B_PING_MS = 30000, B_SILENCIO_MS = 100000;
+static const unsigned long B_AUTO_MS = 300000, B_AUTO_DUR_MS = 15000, B_FIXO = 0x7FFFFFFFUL;
+static const uint32_t B_MAX_MSG = 24576;
+String bIp, bCod, bSerial;
+WiFiClientSecure bCli;
+bool bConectado = false, painelFixo = false;
+unsigned long bProxTentativa = 0, bUltDado = 0, bUltPing = 0, bUltAuto = 0;
+int bFase = 0; uint8_t bCab = 0; uint32_t bRestante = 0, bMult = 1, bLidos = 0; uint8_t* bBuf = nullptr; bool bDescarta = false;
+struct {
+  char estado[12] = ""; char nome[48] = "";
+  int pct = -1, restante = -1, camada = -1, camadas = -1, erro = 0, stg = -1, trayNow = 255;
+  float bico = 0, bicoAlvo = 0, mesa = 0, mesaAlvo = 0;
+  uint32_t cor[4] = {0, 0, 0, 0}; char tipo[4][8] = {"", "", "", ""}; bool temAms = false;
+  int umid = -1; char modelo[24] = "";
+} bi;
+
+// ---- alertas (pagina 8)
+enum { A_GERAL, A_FILAMENTO };
+struct Alerta { uint8_t tipo; uint16_t cor; char titulo[20]; char l1[48]; char l2[40]; char hora[6]; uint32_t amostra; };
+static const int A_MAX = 6;
+Alerta aFila[A_MAX]; int aN = 0;
+unsigned long bInicioEm = 0, bPausaPend = 0; bool b5min = false, bUmidAvisada = false; int bUltTray = -1;
+uint32_t bHmsVisto[8][2]; int bHmsN = 0; bool bHmsBase = false;
+
+void abreAlerta() { mudaPagina(8); paginaDur = B_FIXO; }
+void novoAlerta(uint8_t tipo, uint16_t cor, const char* titulo, const char* l1, const char* l2, uint32_t amostra) {
+  Alerta* a = nullptr;
+  if (tipo == A_FILAMENTO) for (int i = 0; i < aN; i++) if (aFila[i].tipo == A_FILAMENTO) a = &aFila[i];   // troca de cor: um aviso so, atualizado
+  if (!a) {
+    if (aN == A_MAX) { memmove(aFila, aFila + 1, sizeof(Alerta) * (A_MAX - 1)); aN--; }
+    a = &aFila[aN++];
+  }
+  a->tipo = tipo; a->cor = cor; a->amostra = amostra;
+  strlcpy(a->titulo, titulo, sizeof a->titulo); strlcpy(a->l1, l1, sizeof a->l1); strlcpy(a->l2, l2, sizeof a->l2);
+  a->hora[0] = 0; if (relogioValido()) horaStr(time(nullptr), a->hora, sizeof a->hora);
+  registra("bambu: alerta %s (%s)", titulo, l2);
+  if (pagina == 8 && a == &aFila[0]) abreAlerta();   // o que esta na tela mudou
+}
+void desenhaAlerta() {
+  limpaTela(COR_FUNDO);
+  if (!aN) return;
+  const Alerta& a = aFila[0];
+  preenche(0, 0, 320, 64, a.cor);
+  escreve(0, 16, 320, 36, FONTE_32, COR_OLHO, a.cor, 1, a.titulo);
+  escreve(12, 80, 296, 20, FONTE_P, COR_APAGADO, COR_FUNDO, 1, a.l1);
+  int y = 112;
+  if (a.amostra) { preenche(136, y, 48, 36, cor565(a.amostra)); y += 44; }
+  escreve(8, y, 304, 30, FONTE_M, COR_TEXTO, COR_FUNDO, 1, a.l2);
+  char t[40];
+  if (a.hora[0]) { snprintf(t, sizeof t, "\xe0s %s", a.hora); escreve(0, 186, 320, 20, FONTE_P, COR_APAGADO, COR_FUNDO, 1, t); }
+  if (aN > 1) snprintf(t, sizeof t, "toque: li  (mais %d)", aN - 1); else strcpy(t, "toque: li");
+  escreve(0, 214, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, t);
+}
+void toqueAlerta() {
+  if (aN) { registra("bambu: alerta lido (%s)", aFila[0].titulo); memmove(aFila, aFila + 1, sizeof(Alerta) * (A_MAX - 1)); aN--; }
+  if (aN) abreAlerta(); else mudaPagina(0);
+}
+// Mostra o proximo alerta quando a tela esta no rosto, no painel ou no consumo automatico.
+void cuidaAlertas() {
+  if (aN && (pagina == 0 || pagina == 9 || (pagina == 1 && consumo.naTela))) abreAlerta();
+}
+
+const char* motivoPausa(int stg) {
+  switch (stg) {
+    case 5: case 30: return "pausa no G-code";
+    case 6:  return "acabou o filamento";
+    case 16: return "voc\xea pausou";
+    case 17: return "tampa frontal caiu";
+    case 20: return "temperatura do bico";
+    case 21: return "temperatura da mesa";
+    case 23: return "pulou passo";
+    case 26: return "perdeu o AMS";
+    case 27: return "ventoinha do bico lenta";
+    case 28: return "temperatura da c\xe2mara";
+    case 32: return "filamento enrolado no bico";
+    case 33: return "erro no cortador";
+    case 34: return "erro na 1\xaa camada";
+    case 35: return "bico entupido";
+  }
+  return nullptr;
+}
+bool imprimindoEm(const char* e) { return !strcmp(e, "RUNNING") || !strcmp(e, "PAUSE") || !strcmp(e, "PREPARE"); }
+void duracao(unsigned long ms, char* t, size_t n) {
+  unsigned long m = ms / 60000;
+  if (m >= 60) snprintf(t, n, "levou %luh%02lu", m / 60, m % 60); else snprintf(t, n, "levou %lu min", m);
+}
+void codigoErro(uint32_t e, char* t, size_t n) { snprintf(t, n, "erro %04X_%04X", (unsigned)(e >> 16), (unsigned)(e & 0xFFFF)); }
+
+// Compara o que chegou com o que havia antes. Primeiro dado depois de ligar: so aprende.
+void bDetecta(const char* antes, int restAntes) {
+  const char* e = bi.estado; char t[40];
+  if (antes[0] && strcmp(e, antes)) {
+    bool era = imprimindoEm(antes), eh = imprimindoEm(e);
+    if (!era && eh) {
+      bInicioEm = millis(); b5min = false; bPausaPend = 0;
+      t[0] = 0; if (bi.restante > 0) snprintf(t, sizeof t, "previsto %dh%02d", bi.restante / 60, bi.restante % 60);
+      novoAlerta(A_GERAL, COR_OK, "Come\xe7ou", bi.nome, t, 0);
+    } else if (!strcmp(e, "PAUSE")) {
+      bPausaPend = millis();                                    // o motivo chega junto ou logo depois
+    } else if (!strcmp(antes, "PAUSE") && eh) {
+      if (bPausaPend) bPausaPend = 0;                           // pausa rapida: nem avisou
+      else novoAlerta(A_GERAL, COR_OK, "Retomou", bi.nome, "imprimindo de novo", 0);
+    } else if (!strcmp(e, "FINISH") && era) {
+      bPausaPend = 0; t[0] = 0; if (bInicioEm) duracao(millis() - bInicioEm, t, sizeof t);
+      novoAlerta(A_GERAL, COR_OK, "Terminou!", bi.nome, t, 0);
+    } else if (!strcmp(e, "FAILED") && era) {
+      bPausaPend = 0;
+      if (bi.erro == 0x0300400C) novoAlerta(A_GERAL, COR_ALERTA, "Cancelada", bi.nome, "impress\xe3o cancelada", 0);
+      else { if (bi.erro) codigoErro(bi.erro, t, sizeof t); else strcpy(t, "sem c\xf3" "digo de erro"); novoAlerta(A_GERAL, COR_CRITICO, "Falhou", bi.nome, t, 0); }
+    }
+  }
+  if (!antes[0]) return;
+  if (!strcmp(e, "RUNNING") && !b5min && bi.restante > 0 && bi.restante <= 5 && restAntes > 5) {
+    b5min = true; novoAlerta(A_GERAL, COR_OURO, "Faltam 5 min", bi.nome, "quase pronta", 0);
+  }
+  // troca de filamento (255 = descarregando no meio da troca: ignora)
+  if (bi.trayNow != 255) {
+    if (bUltTray >= 0 && bi.trayNow != bUltTray && imprimindoEm(e)) {
+      char a[8], b[8];
+      if (bUltTray == 254) strcpy(a, "externo"); else snprintf(a, sizeof a, "slot %d", bUltTray + 1);
+      if (bi.trayNow == 254) strcpy(b, "externo"); else snprintf(b, sizeof b, "slot %d", bi.trayNow + 1);
+      bool noAms = bi.trayNow >= 0 && bi.trayNow < 4;
+      snprintf(t, sizeof t, "%s > %s%s%s", a, b, noAms && bi.tipo[bi.trayNow][0] ? "  " : "", noAms ? bi.tipo[bi.trayNow] : "");
+      novoAlerta(A_FILAMENTO, COR_AZUL, "Trocou o filamento", bi.nome, t, noAms ? bi.cor[bi.trayNow] : 0);
+    }
+    bUltTray = bi.trayNow;
+  }
+}
+void bConfereUmidade() {
+  if (bi.umid < 0) return;
+  if (bi.umid >= 50 && !bUmidAvisada) {
+    bUmidAvisada = true; char t[40]; snprintf(t, sizeof t, "umidade %d%%", bi.umid);
+    novoAlerta(A_GERAL, COR_AZUL, "AMS \xfamido", "hora de secar o filamento", t, 0);
+  } else if (bi.umid < 40) bUmidAvisada = false;
+}
+void bConfereHms(JsonArray h) {
+  uint32_t novo[8][2]; int n = 0;
+  for (JsonObject o : h) { if (n == 8) break; novo[n][0] = o["attr"] | 0UL; novo[n][1] = o["code"] | 0UL; n++; }
+  for (int i = 0; i < n && bHmsBase; i++) {
+    bool visto = false;
+    for (int j = 0; j < bHmsN; j++) if (bHmsVisto[j][0] == novo[i][0] && bHmsVisto[j][1] == novo[i][1]) visto = true;
+    if (visto) continue;
+    uint32_t at = novo[i][0], co = novo[i][1]; int sev = co >> 16;
+    char t[40]; snprintf(t, sizeof t, "%04X_%04X_%04X_%04X", (unsigned)(at >> 16), (unsigned)(at & 0xFFFF), (unsigned)(co >> 16), (unsigned)(co & 0xFFFF));
+    const char* g = sev == 1 ? "fatal" : sev == 2 ? "grave" : sev == 3 ? "aviso" : "informa\xe7\xe3o";
+    novoAlerta(A_GERAL, sev <= 2 ? COR_CRITICO : sev == 3 ? COR_ALERTA : COR_AZUL, "Aviso HMS", g, t, 0);
+  }
+  memcpy(bHmsVisto, novo, sizeof novo); bHmsN = n; bHmsBase = true;
+}
+
+bool bambuLigado() { return !bIp.isEmpty() && !bCod.isEmpty(); }
+bool bImprimindo() { return !strcmp(bi.estado, "RUNNING") || !strcmp(bi.estado, "PAUSE") || !strcmp(bi.estado, "PREPARE"); }
+
+size_t bRlen(uint8_t* o, uint32_t n) { size_t k = 0; do { uint8_t d = n & 0x7F; n >>= 7; o[k++] = d | (n ? 0x80 : 0); } while (n); return k; }
+void bStr(uint8_t* p, size_t& n, const char* s) { size_t l = strlen(s); p[n++] = l >> 8; p[n++] = l & 0xFF; memcpy(p + n, s, l); n += l; }
+void bEnvia(uint8_t tipo, const uint8_t* corpo, size_t n) {
+  uint8_t h[5]; size_t hn = 0; h[hn++] = tipo; hn += bRlen(h + hn, n);
+  bCli.write(h, hn); if (n) bCli.write(corpo, n);
+}
+void bPede(const char* j) {
+  if (bSerial.isEmpty() || !bConectado) return;
+  String t = "device/" + bSerial + "/request";
+  size_t tl = t.length(), jl = strlen(j);
+  uint8_t h[5]; size_t hn = 0; h[hn++] = 0x30; hn += bRlen(h + hn, 2 + tl + jl);
+  uint8_t l[2] = {(uint8_t)(tl >> 8), (uint8_t)(tl & 0xFF)};
+  bCli.write(h, hn); bCli.write(l, 2); bCli.write((const uint8_t*)t.c_str(), tl); bCli.write((const uint8_t*)j, jl);
+}
+void bPushall() {   // estado completo + modelo (o nome dado no app fica so na nuvem)
+  bPede("{\"pushing\":{\"sequence_id\":\"1\",\"command\":\"pushall\"}}");
+  bPede("{\"info\":{\"sequence_id\":\"2\",\"command\":\"get_version\"}}");
+}
+void bConecta() {
+  bProxTentativa = millis() + B_TENTA_MS;
+  static int falhas = 0;
+  WiFiClient teste;                                    // impressora desligada: desiste em 1 s
+  if (!teste.connect(bIp.c_str(), 8883, 1000)) {
+    if (falhas++ < 3) { bProxTentativa = millis() + 10000; registra("bambu: impressora nao responde, tento em 10 s"); }
+    return;                                            // depois disso, 1 vez por minuto e em silencio
+  }
+  falhas = 0;
+  teste.stop();
+  bCli.setInsecure(); bCli.setHandshakeTimeout(8);
+  if (!bCli.connect(bIp.c_str(), 8883)) { registra("bambu: falha na conexao segura"); return; }
+  String cid = "claudinho-" + macTexto(); cid.replace(":", "");
+  uint8_t c[160]; size_t n = 0;
+  const uint8_t var[] = {0, 4, 'M', 'Q', 'T', 'T', 4, 0xC2, 0, 60};
+  memcpy(c, var, sizeof var); n = sizeof var;
+  bStr(c, n, cid.c_str()); bStr(c, n, "bblp"); bStr(c, n, bCod.c_str());
+  bEnvia(0x10, c, n);
+  bFase = 0; bUltDado = bUltPing = millis();
+}
+void bSolta() { if (bBuf) { free(bBuf); bBuf = nullptr; } bFase = 0; }
+
+void bProcessa(const uint8_t* js, size_t n) {
+  static JsonDocument filtro; static bool pronto = false;
+  if (!pronto) {
+    const char* ks[] = {"gcode_state", "mc_percent", "mc_remaining_time", "layer_num", "total_layer_num", "subtask_name",
+                        "nozzle_temper", "nozzle_target_temper", "bed_temper", "bed_target_temper", "print_error", "stg_cur"};
+    for (auto k : ks) filtro["print"][k] = true;
+    filtro["print"]["ams"]["tray_now"] = true;
+    filtro["print"]["ams"]["ams"][0]["tray"][0]["id"] = true;
+    filtro["print"]["ams"]["ams"][0]["tray"][0]["tray_color"] = true;
+    filtro["print"]["ams"]["ams"][0]["tray"][0]["tray_type"] = true;
+    filtro["print"]["ams"]["ams"][0]["humidity_raw"] = true;
+    filtro["print"]["hms"] = true;
+    filtro["info"]["module"][0]["name"] = true;
+    filtro["info"]["module"][0]["product_name"] = true;
+    pronto = true;
+  }
+  JsonDocument d;
+  if (deserializeJson(d, (const char*)js, n, DeserializationOption::Filter(filtro))) return;
+  for (JsonObject m : d["info"]["module"].as<JsonArray>())   // o modulo "ota" e a impressora
+    if (m["name"] == "ota" && m["product_name"].is<const char*>()) {
+      strlcpy(bi.modelo, m["product_name"], sizeof bi.modelo);
+      if (pagina == 9) painel(false);
+    }
+  JsonObject p = d["print"]; if (p.isNull()) return;
+  char antes[12]; strlcpy(antes, bi.estado, sizeof antes); int restAntes = bi.restante;
+  if (p["gcode_state"].is<const char*>()) strlcpy(bi.estado, p["gcode_state"], sizeof bi.estado);
+  if (p["subtask_name"].is<const char*>()) strlcpy(bi.nome, p["subtask_name"], sizeof bi.nome);
+  if (!p["mc_percent"].isNull()) bi.pct = p["mc_percent"];
+  if (!p["mc_remaining_time"].isNull()) bi.restante = p["mc_remaining_time"];
+  if (!p["layer_num"].isNull()) bi.camada = p["layer_num"];
+  if (!p["total_layer_num"].isNull()) bi.camadas = p["total_layer_num"];
+  if (!p["print_error"].isNull()) bi.erro = p["print_error"];
+  if (!p["stg_cur"].isNull()) bi.stg = p["stg_cur"];
+  if (!p["nozzle_temper"].isNull()) bi.bico = p["nozzle_temper"];
+  if (!p["nozzle_target_temper"].isNull()) bi.bicoAlvo = p["nozzle_target_temper"];
+  if (!p["bed_temper"].isNull()) bi.mesa = p["bed_temper"];
+  if (!p["bed_target_temper"].isNull()) bi.mesaAlvo = p["bed_target_temper"];
+  JsonVariant ams = p["ams"];
+  if (!ams["tray_now"].isNull()) bi.trayNow = ams["tray_now"].as<String>().toInt();
+  JsonArray un = ams["ams"];
+  if (!un.isNull() && un.size()) {
+    for (JsonObject t : un[0]["tray"].as<JsonArray>()) {
+      int id = t["id"].as<String>().toInt();
+      if (id < 0 || id > 3) continue;
+      if (t["tray_color"].is<const char*>()) bi.cor[id] = strtoul(t["tray_color"], nullptr, 16);
+      if (t["tray_type"].is<const char*>()) strlcpy(bi.tipo[id], t["tray_type"], sizeof bi.tipo[id]);
+    }
+    if (!un[0]["humidity_raw"].isNull()) bi.umid = un[0]["humidity_raw"].as<String>().toInt();
+    bi.temAms = true;
+  }
+  bDetecta(antes, restAntes);
+  if (p["hms"].is<JsonArray>()) bConfereHms(p["hms"]);
+  bConfereUmidade();
+  if (pagina == 9) painel(false);
+}
+
+void bPacote(const uint8_t* b, uint32_t n) {
+  uint8_t tipo = bCab & 0xF0;
+  if (tipo == 0x20) {                                  // CONNACK
+    if (n >= 2 && b[1] == 0) {
+      bConectado = true;
+      uint8_t c[40]; size_t k = 0; c[k++] = 0; c[k++] = 1; bStr(c, k, "device/+/report"); c[k++] = 0;
+      bEnvia(0x82, c, k);
+      registra("bambu: conectado (memoria livre %u)", (unsigned)ESP.getFreeHeap());
+      bPushall();
+    } else {
+      registra("bambu: codigo de acesso recusado"); bCli.stop(); bProxTentativa = millis() + 5 * B_TENTA_MS;
+    }
+  } else if (tipo == 0x30 && n > 2) {                  // PUBLISH
+    uint8_t qos = (bCab >> 1) & 3; uint16_t tl = (b[0] << 8) | b[1];
+    if (2u + tl > n) return;
+    if (bSerial.isEmpty()) {                           // device/<serie>/report
+      String t((const char*)b + 2, tl); int i = t.indexOf('/'), f = t.lastIndexOf('/');
+      if (i > 0 && f > i) {
+        bSerial = t.substring(i + 1, f);
+        prefs.begin("claudinho", false); prefs.putString("bambu_sn", bSerial); prefs.end();
+        registra("bambu: impressora %s", bSerial.c_str());
+        bPushall();
+      }
+    }
+    uint32_t off = 2 + tl + (qos ? 2 : 0);
+    if (off < n) bProcessa(b + off, n - off);
+  }
+}
+
+void bLe() {
+  uint8_t tmp[256];
+  int orcamento = 8;                                   // no maximo 8 leituras por volta do loop
+  while (bCli.available() && orcamento-- > 0) {
+    bUltDado = millis();
+    if (bFase == 0) { int c = bCli.read(); if (c < 0) break; bCab = c; bRestante = 0; bMult = 1; bFase = 1; continue; }
+    if (bFase == 1) {
+      int c = bCli.read(); if (c < 0) break;
+      bRestante += (c & 0x7F) * bMult; bMult *= 128;
+      if (c & 0x80) continue;
+      bLidos = 0; bDescarta = bRestante > B_MAX_MSG;
+      if (bRestante == 0) { bPacote(nullptr, 0); bFase = 0; continue; }
+      if (!bDescarta) { bBuf = (uint8_t*)malloc(bRestante + 1); if (!bBuf) bDescarta = true; }
+      bFase = 2; continue;
+    }
+    uint32_t falta = bRestante - bLidos;
+    int r = bDescarta ? bCli.read(tmp, min((uint32_t)sizeof tmp, falta)) : bCli.read(bBuf + bLidos, falta);
+    if (r <= 0) break;
+    bLidos += r;
+    if (bLidos >= bRestante) {
+      if (!bDescarta) { bBuf[bLidos] = 0; bPacote(bBuf, bRestante); }
+      bSolta();
+    }
+  }
+}
+
+void cuidaBambu() {
+  if (bPausaPend && millis() - bPausaPend > 4000) {
+    bPausaPend = 0;
+    if (!strcmp(bi.estado, "PAUSE")) {
+      const char* m = motivoPausa(bi.stg); char t[40];
+      if (!m && bi.erro) { codigoErro(bi.erro, t, sizeof t); m = t; }
+      bool voce = bi.stg == 16 || bi.stg == 5 || bi.stg == 30;
+      novoAlerta(A_GERAL, voce ? COR_ALERTA : COR_CRITICO, "Pausada", bi.nome, m ? m : "motivo desconhecido", 0);
+    }
+  }
+  cuidaAlertas();
+  if (!bambuLigado() || WiFi.status() != WL_CONNECTED) return;
+  if (!bCli.connected()) {
+    if (bConectado) { bConectado = false; bSolta(); registra("bambu: conexao caiu"); if (pagina == 9) painel(false); }
+    if ((long)(millis() - bProxTentativa) >= 0) bConecta();
+    return;
+  }
+  bLe();
+  if (bConectado && millis() - bUltPing > B_PING_MS) { bEnvia(0xC0, nullptr, 0); bUltPing = millis(); }
+  if (millis() - bUltDado > B_SILENCIO_MS) { registra("bambu: sem resposta, reconectando"); bCli.stop(); }
+  if (bConectado && bImprimindo() && pagina == 0 && millis() - bUltAuto > B_AUTO_MS) {   // painel a cada 5 min
+    bUltAuto = millis(); abrePainel(false);
+  }
+}
+
+// ---- painel (pagina 9)
+// modelo + estado; arquivo; 3 colunas (impresso, faltam, camada); barra; temperaturas; AMS
+Campo pModelo = {12, 8, 184, 30, FONTE_M, 0, COR_FUNDO}, pEstado = {196, 12, 112, 20, FONTE_P, 2, COR_FUNDO};
+Campo pNome = {12, 40, 296, 20, FONTE_P, 0, COR_FUNDO};
+Campo pRot[3] = {{4, 64, 104, 20, FONTE_P, 1, COR_FUNDO}, {108, 64, 104, 20, FONTE_P, 1, COR_FUNDO}, {212, 64, 104, 20, FONTE_P, 1, COR_FUNDO}};
+Campo pVal[3] = {{4, 84, 104, 38, FONTE_32, 1, COR_FUNDO}, {108, 84, 104, 38, FONTE_32, 1, COR_FUNDO}, {212, 84, 104, 38, FONTE_32, 1, COR_FUNDO}};
+Campo pBico = {12, 148, 148, 20, FONTE_P, 0, COR_FUNDO}, pMesa = {164, 148, 144, 20, FONTE_P, 2, COR_FUNDO};
+int pBarraPct = -2; uint16_t pBarraCor = 0; uint32_t pAmsCor[4]; int pAmsNow = -2; char pAmsTipo[4][8];
+
+uint16_t cor565(uint32_t rgba) { return RGB565((rgba >> 24) & 0xFF, (rgba >> 16) & 0xFF, (rgba >> 8) & 0xFF); }
+bool corClara(uint32_t rgba) { int r = (rgba >> 24) & 0xFF, g = (rgba >> 16) & 0xFF, b = (rgba >> 8) & 0xFF; return (r * 299 + g * 587 + b * 114) / 1000 > 140; }
+
+void painel(bool tudo) {
+  if (tudo) {
+    limpaTela(COR_FUNDO);
+    pModelo.limpa(); pEstado.limpa(); pNome.limpa(); pBico.limpa(); pMesa.limpa();
+    for (int i = 0; i < 3; i++) { pRot[i].limpa(); pVal[i].limpa(); }
+    pBarraPct = -2; pAmsNow = -2; for (int i = 0; i < 4; i++) { pAmsCor[i] = 0xFFFFFFFF; pAmsTipo[i][0] = 1; pAmsTipo[i][1] = 0; }
+  }
+  char t[48];
+  const char* e = bi.estado; uint16_t ce = COR_APAGADO; const char* rot = "Aguardando...";
+  if (!bConectado) { rot = "Sem conex\xe3o"; ce = COR_CRITICO; }
+  else if (!strcmp(e, "RUNNING")) { rot = "Imprimindo"; ce = COR_OK; }
+  else if (!strcmp(e, "PAUSE"))   { rot = "Pausada"; ce = COR_ALERTA; }
+  else if (!strcmp(e, "PREPARE")) { rot = "Preparando"; ce = COR_OURO; }
+  else if (!strcmp(e, "FINISH"))  { rot = "Terminou"; ce = COR_OK; }
+  else if (!strcmp(e, "FAILED"))  { rot = "Falhou"; ce = COR_CRITICO; }
+  else if (!strcmp(e, "IDLE"))    { rot = "Ociosa"; }
+  pModelo.mostra(bi.modelo[0] ? bi.modelo : "Impressora", COR_TEXTO);
+  pEstado.mostra(rot, ce);
+  pNome.mostra(bi.nome, COR_APAGADO);
+  bool imp = bImprimindo();
+  pRot[0].mostra("impresso", COR_APAGADO);
+  if (bi.pct >= 0) snprintf(t, sizeof t, "%d%%", bi.pct); else strcpy(t, "--");
+  pVal[0].mostra(t, COR_TEXTO);
+  pRot[1].mostra("faltam", COR_APAGADO);
+  if (bi.restante > 0 && imp) {
+    if (bi.restante >= 60) snprintf(t, sizeof t, "%dh%02d", bi.restante / 60, bi.restante % 60); else snprintf(t, sizeof t, "%d min", bi.restante);
+  } else strcpy(t, "--");
+  pVal[1].mostra(t, COR_TEXTO);
+  if (bi.camadas > 0) snprintf(t, sizeof t, "camada de %d", bi.camadas); else strcpy(t, "camada");
+  pRot[2].mostra(t, COR_APAGADO);
+  if (bi.camadas > 0) snprintf(t, sizeof t, "%d", bi.camada); else strcpy(t, "--");
+  pVal[2].mostra(t, COR_TEXTO);
+  // barra na cor do filamento que esta imprimindo
+  uint16_t cb = (bi.trayNow >= 0 && bi.trayNow < 4 && bi.cor[bi.trayNow]) ? cor565(bi.cor[bi.trayNow]) : COR_OURO;
+  int pc = max(0, bi.pct);
+  if (pc != pBarraPct || cb != pBarraCor) {
+    pBarraPct = pc; pBarraCor = cb;
+    preenche(12, 126, 296, 14, COR_TRILHO);
+    if (pc > 0) preenche(12, 126, 296 * min(pc, 100) / 100, 14, cb);
+  }
+  snprintf(t, sizeof t, "Bico %d/%d\xb0", (int)lroundf(bi.bico), (int)lroundf(bi.bicoAlvo)); pBico.mostra(t, COR_TEXTO);
+  snprintf(t, sizeof t, "Mesa %d/%d\xb0", (int)lroundf(bi.mesa), (int)lroundf(bi.mesaAlvo)); pMesa.mostra(t, COR_TEXTO);
+  // AMS: 4 slots; o que esta imprimindo ganha moldura branca
+  if (!bi.temAms) return;
+  for (int i = 0; i < 4; i++) {
+    bool atual = bi.trayNow == i;
+    bool mudou = pAmsCor[i] != bi.cor[i] || strcmp(pAmsTipo[i], bi.tipo[i]) || (pAmsNow == i) != atual;
+    if (!mudou) continue;
+    int x = 12 + i * 76, y = 180;
+    preenche(x - 3, y - 3, 70, 56, atual ? COR_BRANCO : COR_FUNDO);
+    uint16_t cs = bi.tipo[i][0] ? cor565(bi.cor[i]) : COR_BLOCO;
+    preenche(x, y, 64, 50, cs);
+    escreve(x, y + 16, 64, 18, FONTE_P, corClara(bi.cor[i]) && bi.tipo[i][0] ? COR_OLHO : COR_BRANCO, cs, 1, bi.tipo[i][0] ? bi.tipo[i] : "vazio");
+    pAmsCor[i] = bi.cor[i]; strlcpy(pAmsTipo[i], bi.tipo[i], 8);
+  }
+  pAmsNow = bi.trayNow;
+}
+void abrePainel(bool fixo) {
+  painelFixo = fixo; mudaPagina(9); paginaDur = fixo ? B_FIXO : B_AUTO_DUR_MS;
+}
+void toquePainel() {
+  if (!painelFixo) { painelFixo = true; paginaDesde = millis(); paginaDur = B_FIXO; }   // fixa
+  else mudaPagina(0);
+}
+
 // ---------------------------------------------------------------- manutencao
 bool manutLiberada() { return manutAte && (long)(millis() - manutAte) < 0; }
 void liberaManutencao(const char* como) {
@@ -1067,8 +1492,11 @@ void leToque() {
     if (manutPedidaEm) { liberaManutencao("toque"); continue; }
     if (pagina == 6) { toqueVelha(tx, ty); continue; }
     if (pagina == 7) { toqueGenius(tx, ty); continue; }
+    if (pagina == 9) { toquePainel(); continue; }
+    if (pagina == 8) { toqueAlerta(); continue; }
     if (pagina >= 3) { toquePaleta(tx, ty); continue; }
     if (millis() - pressaoEm >= TOQUE_LONGO_MS) { brilhoAlto = !brilhoAlto; registra("brilho %s", brilhoAlto ? "alto" : "baixo"); }
+    else if (pagina == 1 && bambuLigado()) abrePainel(true);          // rosto > consumo > impressora > rosto
     else { mudaPagina(pagina == 0 ? 1 : 0); Serial.printf("-> pagina %d\n", pagina); }
   }
 }
@@ -1195,10 +1623,11 @@ void webRaiz() {
 }
 void webMini() {
   if (!autorizado()) { web.send(401, "text/plain", "segredo invalido\n"); return; }
-  char buf[360];
-  snprintf(buf, sizeof buf, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,\"ctx\":%d,\"n\":%d,\"mod\":\"%s\",\"at\":%ld,\"now\":%ld,\"local\":%s,\"rssi\":%d,\"manut\":\"%s\"}\n",
+  char buf[480];
+  snprintf(buf, sizeof buf, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,\"ctx\":%d,\"n\":%d,\"mod\":\"%s\",\"at\":%ld,\"now\":%ld,\"local\":%s,\"rssi\":%d,\"manut\":\"%s\",\"bambu\":%s,\"bcon\":%s,\"best\":\"%s\",\"bpct\":%d}\n",
            VERSAO, dados.h5, dados.h5r, dados.d7, dados.d7r, dados.ctx, dados.n, dados.mod, dados.at, (long)time(nullptr), localRecente() ? "true" : "false", (int)WiFi.RSSI(),
-           manutPedidaEm ? "pedida" : manutLiberada() ? "liberada" : "");
+           manutPedidaEm ? "pedida" : manutLiberada() ? "liberada" : "",
+           bambuLigado() ? "true" : "false", bConectado ? "true" : "false", bi.estado, bi.pct);
   web.send(200, "application/json", buf);
 }
 
@@ -1219,6 +1648,20 @@ void webCmd() {
     if (doc["salvar"] | false) gravaCor(corRostoAtual);
     if (pagina == 0) mudaPagina(0);
   }
+  // {"bambu":{"ip":"...","codigo":"..."}} liga a impressora; {"bambu":{"desligar":true}} desliga
+  if (doc["bambu"].is<JsonObject>()) {
+    JsonObject b = doc["bambu"];
+    prefs.begin("claudinho", false);
+    if (b["desligar"] | false) { prefs.remove("bambu_ip"); prefs.remove("bambu_cod"); prefs.remove("bambu_sn"); bIp = ""; bCod = ""; bSerial = ""; registra("bambu: desligada"); }
+    else if (b["ip"].is<const char*>() && b["codigo"].is<const char*>()) {
+      bIp = b["ip"].as<const char*>(); bCod = b["codigo"].as<const char*>();
+      prefs.putString("bambu_ip", bIp); prefs.putString("bambu_cod", bCod); registra("bambu: configurada (%s)", bIp.c_str());
+    }
+    prefs.end();
+    bCli.stop(); bConectado = false; bSolta(); bProxTentativa = 0; memset(&bi, 0, sizeof bi); bi.trayNow = 255;
+  }
+  // {"painel":true}: mostra o painel da impressora (fixo)
+  if ((doc["painel"] | false) && bambuLigado()) abrePainel(true);
   // {"genius":true}: abre o Genius
   if (doc["genius"] | false) abreGenius();
   // {"velha":true}: abre o jogo da velha
@@ -1360,6 +1803,7 @@ void carregaConfig() {
   prefs.begin("claudinho", true);
   cfgSsid = prefs.getString("ssid", ""); cfgSenha = prefs.getString("senha", ""); cfgToken = prefs.getString("token", "");
   corRostoAtual = prefs.getUShort("cor", COR_ROSTO);
+  bIp = prefs.getString("bambu_ip", ""); bCod = prefs.getString("bambu_cod", ""); bSerial = prefs.getString("bambu_sn", "");
   prefs.end();
 }
 
@@ -1507,7 +1951,7 @@ void loop() {
     if (pagina == 2) manutPedidaEm = 0;
     if (pagina == 6) saiVelha("sem toque");
     else if (pagina == 7) saiGenius("sem toque");
-    else if (pagina >= 3) cancelaPaleta("sem toque"); else mudaPagina(0);
+    else if (pagina >= 3 && pagina <= 5) cancelaPaleta("sem toque"); else mudaPagina(0);
   }
 
   static unsigned long ultimoTick = 0;
@@ -1515,6 +1959,7 @@ void loop() {
   cuidaConsumo();
   cuidaVelha();
   cuidaGenius();
+  cuidaBambu();
 
   // Brilho: dormindo ha mais de 20 s -> 15 %; acordado -> 100 % (ou o que o
   // toque longo escolheu). Poupa backlight e bateria.

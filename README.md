@@ -6,7 +6,7 @@ Claude Code's mascot, alive, on your desk.
 
 The 3D-printable case is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
-Already built one? The [user manual](docs/manual.md) covers faces, touch, colors, the two built-in games and updates.
+Already built one? The [user manual](docs/manual.md) covers faces, touch, colors, the two built-in games, the Bambu printer panel and updates.
 
 Claudinho is a Claude Code plugin that gives Clawd a body: an ESP32 with a
 Nextion display that reacts to what Claude is doing (thinking, using a tool,
@@ -25,6 +25,10 @@ the 5-hour and 7-day windows.
   conversation with Claude and uses tokens like any other.)
 - **Guided setup.** A skill flashes the firmware, sets up Wi-Fi and the
   screen, and tests everything. You just plug in the cable.
+- **Optional: your Bambu Lab printer.** Claudinho can also connect straight
+  to a Bambu 3D printer on your network and show a print panel plus alerts
+  (started, paused and why, finished, failed...) that stay until you tap.
+  Tested on the P2S. See the [manual](docs/manual.md#bambu-lab-printer-optional).
 
 ## Why
 
@@ -341,6 +345,9 @@ scripts/claudinho.sh reiniciar            # restart
 scripts/claudinho.sh consumo [seconds]    # show usage now
 scripts/claudinho.sh velha                # tic-tac-toe against Claudinho ("velha")
 scripts/claudinho.sh genius               # Genius (Simon): repeat the color sequence
+scripts/claudinho.sh bambu PRINTER_IP     # connect a Bambu printer (asks the access code, hidden)
+scripts/claudinho.sh bambu desligar       # disconnect it and erase the code ("desligar" = turn off)
+scripts/claudinho.sh painel               # show the printer panel ("painel" = panel)
 scripts/claudinho.sh atualizar [file.bin] # update firmware
 scripts/claudinho.sh tela [file.tft]      # update the screen
 scripts/wifi.sh PORT "NETWORK"            # change Wi-Fi over USB (hidden password)
@@ -371,14 +378,21 @@ your Anthropic account.
   board on USB: `scripts/esptool.sh --port PORT erase-flash`.
 - **On a shared network** (office, coworking), prefer a devices-only network
   if there is one.
+- **Bambu printer (optional).** Its LAN access code is typed hidden and
+  stored only on the board; the computer doesn't keep it. It goes to the board
+  once, over the local network with Claudinho's secret (same plain HTTP as
+  above). The board talks to the printer over its encrypted MQTT (TLS) but
+  doesn't check the printer's certificate (Bambu printers use a self-signed
+  one), and only reads: it never sends print commands.
 
 ## Tested environments
 
 **Tested end to end:** WSL2 on Windows 11, ESP32-C3 Super Mini, Nextion
-NX3224F024_011.
+NX3224F024_011. Printer module: Bambu Lab P2S with AMS.
 
 **Written to work, not yet tested on real hardware:** native Linux, macOS,
-Windows with Git Bash, ESP32-S3 DevKitC-1.
+Windows with Git Bash, ESP32-S3 DevKitC-1, other Bambu printers with local
+access (X1, P1, A1).
 
 If you use one of these, tell us how it went (open an issue), even if it
 worked on the first try: that's how it gets onto the tested list.

@@ -1,7 +1,7 @@
 {
   "name": "claudinho",
   "displayName": "Claudinho",
-  "version": "1.4.0",
+  "version": "1.5.3",
   "description": "O mascote do Claude Code vivo na sua mesa: um ESP32 com display que reage ao que o Claude está fazendo e mostra o uso do plano. Sem servidor e sem token da Anthropic.",
   "author": {
     "name": "Argeu Thiesen"

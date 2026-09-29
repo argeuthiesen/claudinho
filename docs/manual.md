@@ -99,6 +99,47 @@ the board, spending no tokens.
 - To quit: **3 quick taps on the same quadrant** (correct taps in the sequence
   don't count, so play without worry), or 2 minutes without touching.
 
+## Bambu Lab printer (optional)
+
+If you have a Bambu Lab 3D printer, Claudinho can watch it too. It connects
+straight to the printer over your local network: no cloud, no server, no
+tokens. **Tested on the P2S** (with AMS); other Bambu models with local access
+(X1, P1, A1) should work but haven't been tested yet.
+
+To turn it on, ask Claude "I have a Bambu printer" (or run `claudinho.sh bambu
+PRINTER_IP`). You'll need the printer's IP and **access code** (printer
+settings > Network). The access code is a secret like your Wi-Fi password: you
+type it hidden, in your own terminal, and it's stored only on the board.
+
+**The panel.** The printer model and its state (printing, paused...), the
+file name, three columns (percent printed, time left, current layer), a
+progress bar in the color of the filament being printed, nozzle and bed
+temperatures, and the 4 AMS colors with the current one framed. (The name you
+gave the printer in the app lives only in Bambu's cloud, so the panel shows
+the model.) While printing, it shows up on its
+own every 5 minutes for 15 seconds. **Tap to pin it**; tap again to go back to
+the face. From the usage card, a tap also takes you to the panel.
+
+**The alerts** stay on screen **until you tap** (the tap means "got it"); if
+several pile up, they show one after the other (screen texts are in
+Portuguese):
+
+| Alert | When |
+|---|---|
+| Começou (started) | a print started, with the estimated time |
+| Pausada (paused) | with the reason: out of filament, you paused, clogged nozzle, first layer error, front cover, temperature... |
+| Retomou (resumed) | back to printing after a pause |
+| Faltam 5 min | 5 minutes left |
+| Trocou o filamento | filament change, with the new color (one alert, kept up to date) |
+| Terminou! (finished) | with how long it took |
+| Falhou / Cancelada | failed (with the error code) or cancelled |
+| Aviso HMS | a health warning from the printer, with its code |
+| AMS úmido | AMS humidity reached 50% |
+
+During a game, the color palette or an update, the alerts wait until you're
+back on the face. To turn it off: `claudinho.sh bambu desligar` (erases the
+code from the board).
+
 ## Updating
 
 Ask Claude "update Claudinho". The screen will ask to allow the update: **tap
@@ -118,6 +159,7 @@ No need to memorize commands. Inside Claude Code, just ask:
 - "show the usage on Claudinho"
 - "Claudinho stopped reacting" (the skill runs a diagnosis)
 - "I changed my Wi-Fi, reconfigure Claudinho"
+- "I have a Bambu printer" / "show the printer panel"
 
 The full command list is in the [README](../README.md#commands), and the most
 common problems in [Troubleshooting](../README.md#troubleshooting).

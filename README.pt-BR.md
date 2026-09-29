@@ -6,7 +6,7 @@ O mascote do Claude Code, vivo, na sua mesa.
 
 A caixa para imprimir em 3D está no MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
-Já montou o seu? O [manual de uso](docs/manual.pt-BR.md) explica as caras, os toques, as cores, os dois joguinhos e as atualizações.
+Já montou o seu? O [manual de uso](docs/manual.pt-BR.md) explica as caras, os toques, as cores, os dois joguinhos, o painel da impressora Bambu e as atualizações.
 
 Claudinho é um plugin do Claude Code que dá corpo ao Clawd: um ESP32 com um
 display Nextion que reage ao que o Claude está fazendo (pensando, usando uma
@@ -25,6 +25,10 @@ já foi usado nas janelas de 5 horas e de 7 dias.
   tokens como qualquer outra.)
 - **Configuração guiada.** Uma skill grava o firmware, configura o Wi-Fi e a
   tela, e testa tudo. Você só pluga o cabo.
+- **Opcional: sua impressora Bambu Lab.** O Claudinho também conecta direto
+  numa impressora 3D Bambu da sua rede e mostra um painel da impressão e
+  alertas (começou, pausou e por quê, terminou, falhou...) que ficam até você
+  tocar. Testado na P2S. Veja o [manual](docs/manual.pt-BR.md#impressora-bambu-lab-opcional).
 
 ## Motivação
 
@@ -337,6 +341,9 @@ scripts/claudinho.sh reiniciar
 scripts/claudinho.sh consumo [segundos]   # mostra o consumo agora
 scripts/claudinho.sh velha                # jogo da velha contra o Claudinho
 scripts/claudinho.sh genius               # Genius: repita a sequência de cores
+scripts/claudinho.sh bambu IP_IMPRESSORA  # liga uma impressora Bambu (pede o código de acesso, escondido)
+scripts/claudinho.sh bambu desligar       # desliga e apaga o código da placa
+scripts/claudinho.sh painel               # mostra o painel da impressora
 scripts/claudinho.sh atualizar [arquivo.bin]
 scripts/claudinho.sh tela [arquivo.tft]
 scripts/wifi.sh PORTA "REDE"              # troca o Wi-Fi pela USB (senha escondida)
@@ -365,14 +372,21 @@ conta da Anthropic.
   `scripts/esptool.sh --port PORTA erase-flash`.
 - **Em rede compartilhada** (escritório, coworking), prefira uma rede só para
   dispositivos, se houver.
+- **Impressora Bambu (opcional).** O código de acesso LAN é digitado
+  escondido e fica gravado só na placa; o computador não guarda. Ele vai para
+  a placa uma vez, pela rede local, com o segredo do Claudinho (o mesmo HTTP
+  simples de cima). A placa fala com a impressora pelo MQTT criptografado
+  (TLS) dela, mas não confere o certificado (as Bambu usam um autoassinado), e
+  só lê: nunca manda comandos de impressão.
 
 ## Ambientes testados
 
 **Testado de ponta a ponta:** WSL2 no Windows 11, ESP32-C3 Super Mini,
-Nextion NX3224F024_011.
+Nextion NX3224F024_011. Módulo da impressora: Bambu Lab P2S com AMS.
 
 **Escrito para funcionar, ainda sem teste real:** Linux nativo, macOS,
-Windows com Git Bash, ESP32-S3 DevKitC-1.
+Windows com Git Bash, ESP32-S3 DevKitC-1, outras impressoras Bambu com acesso
+local (X1, P1, A1).
 
 Se você usar um desses, conte como foi (abra uma issue), mesmo que tenha
 funcionado de primeira: é assim que ele entra na lista de testados.

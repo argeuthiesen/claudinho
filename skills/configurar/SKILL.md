@@ -1,6 +1,6 @@
 ---
 name: configurar
-description: Configura o Claudinho (mascote do Claude Code em ESP32 + display Nextion) do zero ou depois de trocar de rede - acha a placa no USB, grava o firmware, configura o Wi-Fi, grava a tela do Nextion, liga a status line e testa. Use também para diagnosticar quando o Claudinho não reage, e para atualizar o firmware.
+description: Configura o Claudinho (mascote do Claude Code em ESP32 + display Nextion) do zero ou depois de trocar de rede - acha a placa no USB, grava o firmware, configura o Wi-Fi, grava a tela do Nextion, liga a status line e testa. Use também para diagnosticar quando o Claudinho não reage, para atualizar o firmware e para ligar uma impressora 3D Bambu Lab (painel e alertas da impressão).
 ---
 
 # Configurar o Claudinho
@@ -9,6 +9,8 @@ Você vai conduzir a pessoa pela configuração, rodando os scripts do plugin. F
 em linguagem simples, um passo por vez, e diga o que está fazendo antes de cada
 comando. **Nunca peça a senha do Wi-Fi no chat:** ela é digitada pela pessoa
 num terminal, escondida, pelo `wifi.sh` (passo 4), e não passa pela conversa.
+O mesmo vale para o **código de acesso da impressora Bambu** (seção própria):
+digitado escondido pela pessoa, gravado só na placa.
 
 Em **todo** comando, use estas variáveis (já resolvidas pelo Claude Code):
 
@@ -247,9 +249,63 @@ repete tocando; a cada acerto a sequência cresce uma cor; errou, ele mostra o
 placar e começa de novo; para sair, 3 toques rápidos no mesmo quadrante (ou 2
 minutos sem tocar).
 
+## Impressora Bambu Lab (opcional)
+
+Quando a pessoa disser que tem uma impressora Bambu ("tenho uma Bambu", "liga
+minha impressora no Claudinho"). **Testado na P2S** (com AMS). Outros modelos
+Bambu que aceitam conexão local (X1, P1, A1) devem funcionar, mas ainda não
+foram testados: diga isso à pessoa.
+
+O Claudinho conecta direto na impressora, pela rede local (sem nuvem, sem
+servidor, sem token). Ele mostra:
+
+- um **painel** (modelo e estado, nome do arquivo, 3 colunas: %, tempo
+  restante e camada; barra na cor do filamento, temperaturas do bico e da
+  mesa, as 4 cores do AMS com a atual em destaque).
+  Imprimindo, aparece sozinho a cada 5 minutos por 15 s; tocar fixa, tocar de
+  novo sai. Do cartão de consumo, um toque leva ao painel;
+- **alertas** que **ficam na tela até um toque** (o toque quer dizer "li"):
+  começou, pausou (com o motivo: acabou o filamento, bico entupido, erro na
+  1ª camada...), retomou, faltam 5 min, trocou o filamento, terminou (com a
+  duração), falhou/cancelada, avisos HMS da impressora e AMS úmido (≥ 50 %).
+  Em jogo, paleta ou atualização, os alertas esperam a volta ao rosto.
+
+Passos:
+
+1. **Na impressora**, em Configurações > Rede (WLAN), anote o **IP** e o
+   **código de acesso** (8 caracteres). Se a conexão for recusada, ligue o
+   modo LAN (e o modo desenvolvedor, conforme o firmware da impressora).
+   Recomende reservar o IP da impressora no roteador.
+2. **O código de acesso é um segredo, como a senha do Wi-Fi: nunca peça no
+   chat.** Monte o comando com o caminho real (resolva `$R` e
+   `$CLAUDINHO_DADOS`) e peça para a pessoa rodar num terminal **fora do
+   Claude Code**:
+
+   ```bash
+   CLAUDINHO_DADOS="<dados>" bash "<R>/scripts/claudinho.sh" bambu IP_DA_IMPRESSORA
+   ```
+
+   O script pede o código escondido e envia para a placa, que grava na
+   memória dela. O computador não guarda o código.
+3. Confira do seu lado com `bash "$R/scripts/claudinho.sh" log`: deve aparecer
+   `bambu: conectado` e `bambu: impressora <número de série>`. Se aparecer
+   `codigo de acesso recusado`, o código está errado ou falta ligar o modo
+   LAN; é só rodar o passo 2 de novo. Se nada aparecer, confira o IP (a
+   impressora tem de estar ligada e na mesma rede).
+4. `claudinho.sh painel` mostra o painel na hora (bom para testar).
+
+Se a pessoa **fizer questão** de passar o código pelo chat, avise uma vez que
+ele ficará registrado na conversa, e só então rode você mesmo, pela entrada
+padrão: `printf '%s\n' 'CODIGO' | bash "$R/scripts/claudinho.sh" bambu IP`.
+Para desligar (apaga o código da placa): `claudinho.sh bambu desligar`.
+
+O código vai do computador para a placa pela rede local, junto com o segredo
+do Claudinho (como os outros comandos): protegido contra quem não tem o
+segredo, mas sem criptografia na rede de casa.
+
 ## Referência rápida
 
-`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
+`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
 
 `atualizar` e `tela` pedem um toque na tela do Claudinho (avise a pessoa antes).
 Tipos de cara: inicio, prompt, ferramenta, erro, parou, atencao, compact, fim, dormir.
