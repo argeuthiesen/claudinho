@@ -331,6 +331,10 @@ command again, nothing breaks.
 
 Or just ask Claude: "update Claudinho".
 
+**Coming from 1.5 or older?** Firmware 1.6 added the scenes, which use a new
+monospace font on the screen: run `scripts/claudinho.sh tela` too (one more
+tap), or the scenes' text won't show up.
+
 ## Commands
 
 The commands are in Portuguese (sorry, it's a Brazilian project):
@@ -348,6 +352,8 @@ scripts/claudinho.sh genius               # Genius (Simon): repeat the color seq
 scripts/claudinho.sh bambu PRINTER_IP     # connect a Bambu printer (asks the access code, hidden)
 scripts/claudinho.sh bambu desligar       # disconnect it and erase the code ("desligar" = turn off)
 scripts/claudinho.sh painel               # show the printer panel ("painel" = panel)
+scripts/claudinho.sh alerta [type]        # sample printer alert: bom, ruim, filamento, hms
+scripts/claudinho.sh cena <type>          # try a scene: codando (editing), terminal, lendo (reading), agente
 scripts/claudinho.sh atualizar [file.bin] # update firmware
 scripts/claudinho.sh tela [file.tft]      # update the screen
 scripts/wifi.sh PORT "NETWORK"            # change Wi-Fi over USB (hidden password)
@@ -365,7 +371,9 @@ talk to the board. It **only controls the toy**: it gives no access at all to
 your Anthropic account.
 
 - **What goes over the network:** the event type (tool, done...), the mood
-  (happy, worried, startled), a short session code and the plan numbers. Your
+  (happy, worried, startled), the kind of tool (editing, terminal, reading,
+  agent: never the file name or the command), a short session code and the
+  plan numbers. Your
   prompt text never leaves the computer.
 - **No encryption on the local network.** It's plain HTTP, like most home
   gadgets. Someone able to spy on your network could discover the secret and
@@ -453,6 +461,12 @@ logged since it started.
 - `firmware/claudinho/`: the firmware (Arduino, ESP32 core 3.x, ArduinoJson 7).
   `firmware/compilar.sh` builds the C3 and S3 `.bin` files into `firmware/bin/`.
 - `nextion/`: the compiled screen for the NX3224F024, plus the `.HMI` project.
+  Fonts: 0-3 DM Sans, 4 Silkscreen, 5 JetBrains Mono (the scenes), all OFL.
+- `firmware/hms/`: the printer's HMS warnings in Portuguese. `hms_pt.json` is
+  the translation (one short phrase, category and level per Bambu text);
+  `python3 firmware/hms/gerar.py` downloads Bambu's official list and
+  regenerates `firmware/claudinho/hms_pt.h`. New codes Bambu adds show up as
+  "untranslated" in its output.
 - `scripts/`: flashing, serial, hooks, status line and `claudinho.sh`.
 - `skills/configurar/`: the skill that runs the setup.
 - `hooks/hooks.json`: the Claude Code events Claudinho listens to.

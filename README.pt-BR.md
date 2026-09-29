@@ -329,6 +329,10 @@ mostrar "System Data Error": repita o comando, não estraga nada.
 
 Ou simplesmente peça ao Claude: "atualiza o Claudinho".
 
+**Vindo da 1.5 ou anterior?** O firmware 1.6 trouxe as cenas, que usam uma
+fonte mono nova na tela: rode também `scripts/claudinho.sh tela` (mais um
+toque), senão o texto das cenas não aparece.
+
 ## Comandos
 
 ```
@@ -344,6 +348,8 @@ scripts/claudinho.sh genius               # Genius: repita a sequência de cores
 scripts/claudinho.sh bambu IP_IMPRESSORA  # liga uma impressora Bambu (pede o código de acesso, escondido)
 scripts/claudinho.sh bambu desligar       # desliga e apaga o código da placa
 scripts/claudinho.sh painel               # mostra o painel da impressora
+scripts/claudinho.sh alerta [tipo]        # alerta de exemplo da impressora: bom, ruim, filamento, hms
+scripts/claudinho.sh cena <tipo>          # mostra uma cena: codando, terminal, lendo, agente
 scripts/claudinho.sh atualizar [arquivo.bin]
 scripts/claudinho.sh tela [arquivo.tft]
 scripts/wifi.sh PORTA "REDE"              # troca o Wi-Fi pela USB (senha escondida)
@@ -359,8 +365,9 @@ falar com a placa. Ele **só controla o boneco**: não dá acesso nenhum à sua
 conta da Anthropic.
 
 - **O que vai pela rede:** o tipo de evento (ferramenta, terminou...), o
-  humor (feliz, preocupado, susto), um código curto da sessão e os números do
-  plano. O texto dos seus prompts nunca sai do computador.
+  humor (feliz, preocupado, susto), o tipo de ferramenta (editando, terminal,
+  lendo, agente: nunca o nome do arquivo nem o comando), um código curto da
+  sessão e os números do plano. O texto dos seus prompts nunca sai do computador.
 - **Sem criptografia na rede local.** É HTTP simples, como a maioria dos
   gadgets caseiros. Quem conseguir espionar a sua rede pode descobrir o
   segredo e mexer no Claudinho (trocar a cara, reiniciar), mas **não trocar o
@@ -444,7 +451,13 @@ desde que ligou.
 
 - `firmware/claudinho/`: o firmware (Arduino, core ESP32 3.x, ArduinoJson 7).
   `firmware/compilar.sh` gera os `.bin` de C3 e S3 em `firmware/bin/`.
-- `nextion/`: a tela compilada para o NX3224F024.
+- `nextion/`: a tela compilada para o NX3224F024, mais o projeto `.HMI`.
+  Fontes: 0-3 DM Sans, 4 Silkscreen, 5 JetBrains Mono (as cenas), todas OFL.
+- `firmware/hms/`: os avisos HMS da impressora em português. O `hms_pt.json`
+  é a tradução (uma frase curta, categoria e nível por texto da Bambu); o
+  `python3 firmware/hms/gerar.py` baixa a lista oficial da Bambu e gera de
+  novo o `firmware/claudinho/hms_pt.h`. Códigos novos que a Bambu criar
+  aparecem como "sem traducao" na saída dele.
 - `scripts/`: gravação, serial, hooks, status line e o `claudinho.sh`.
 - `skills/configurar/`: a skill que conduz a configuração.
 - `hooks/hooks.json`: os eventos do Claude Code que o Claudinho escuta.

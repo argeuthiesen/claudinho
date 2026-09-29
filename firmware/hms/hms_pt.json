@@ -1,0 +1,2456 @@
+[
+ {
+  "en": "Abnormal number or type of connected AMS units detected. Please refer to the Wiki for supported AMS combinations and adjust the current connection.",
+  "pt": "quantidade ou tipo de AMS ligado não suportado",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # the tube inside the AMS is broken, or feed-out hall sensor is faulty and cannot detect the filament.",
+  "pt": "tubo interno quebrado ou sensor não vê o filamento",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The RFID-tag on AMS # slot # cannot be identified.",
+  "pt": "etiqueta RFID do carretel não foi lida",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The RFID-tag on AMS-HT # cannot be identified.",
+  "pt": "etiqueta RFID do carretel não foi lida",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "A heatbed temperature control issue has been detected and the heating module may be damaged. Please power off the device immediately and follow the Wiki to replace the AC board.",
+  "pt": "falha no aquecimento da mesa; desligue já",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "G-code data error detected. The system has automatically reloaded the G-code and resumed task.",
+  "pt": "erro no G-code; recarregado e a impressão seguiu",
+  "cat": "Arquivo / cartão",
+  "nivel": "info"
+ },
+ {
+  "en": "Sliced file abnormality detected multiple times. Task canceled. Please check the sliced file.",
+  "pt": "arquivo fatiado com defeito; impressão cancelada",
+  "cat": "Arquivo / cartão",
+  "nivel": "grave"
+ },
+ {
+  "en": "G-code verification error. The system has automatically reacquired the data and resumed task.",
+  "pt": "erro de verificação do G-code; a impressão seguiu",
+  "cat": "Arquivo / cartão",
+  "nivel": "info"
+ },
+ {
+  "en": "Failed to extrude the filament. Possible cause: extruder or nozzle clog.",
+  "pt": "filamento não sai: bico ou extrusora entupidos",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "MC board certification failed. Possible communication error. Please restart the device.",
+  "pt": "falha de comunicação na placa; reinicie",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # is undergoing dry cooling; please wait for it to cool down before operating.",
+  "pt": "AMS-HT esfriando depois de secar; aguarde",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "Failed to pull out the filament from the extruder. Possible causes: clogged extruder or broken filament.",
+  "pt": "não conseguiu tirar o filamento da extrusora",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "The AMS-HT # motor torque control is malfunctioning. The current sensor may be faulty.",
+  "pt": "motor do AMS com defeito no controle",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Encryption chip failure",
+  "pt": "falha no chip de criptografia",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "The AMS-HT # assist motor torque control is malfunctioning. The current sensor may be faulty.",
+  "pt": "motor auxiliar do AMS com defeito no controle",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The current sensor of AMS-HT # exhaust valve 1 is abnormal; please get in touch with customer support to replace the AMS-HT mainboard.",
+  "pt": "sensor da válvula 1 do AMS com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Temperature sensor on the AMS-HT # heater was malfunction, resulting in abnormal temperature readings.",
+  "pt": "sensor de temperatura do aquecedor com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # The operation of the exhaust valve 1 is abnormal, which may be due to excessive resistance.",
+  "pt": "válvula 1 do AMS travando",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS-HT # assist motor has slipped. The extrusion wheel may be worn down, or the filament may be too thin.",
+  "pt": "motor auxiliar patinou: roda gasta ou fio fino",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # assist motor is stalled，due to excessive resistance in the tube between the filament buffer and the toolhead.",
+  "pt": "motor travou: tubo entre buffer e cabeça",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # Environmental temperature is too low, which will affect the drying capability.",
+  "pt": "ambiente frio demais para secar bem",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "AMS-HT # chamber temperature is too high; auxiliary feeding or RFID reading is currently not allowed.",
+  "pt": "AMS quente demais; RFID e carga pausados",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # assist motor is stalled，due to excessive resistance in the tube near the toolhead.",
+  "pt": "motor travou: resistência no tubo perto da cabeça",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The assist motor phase winding has an open circuit. The assist motor may be faulty.",
+  "pt": "motor auxiliar com bobina aberta",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to pull back the filament from the toolhead to AMS-HT. Possible cause: filament or spool stuck.",
+  "pt": "não conseguiu recolher o filamento ao AMS",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # feed-out Hall sensor is disconnected. The connector may have poor contact.",
+  "pt": "sensor de saída desconectado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # The exhaust valve 1 is not connected, which may be due to poor connector contact.",
+  "pt": "válvula 1 desconectada",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # assist motor is stalled，due to excessive resistance in the tube near AMS.",
+  "pt": "motor travou: resistência no tubo perto do AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Failed to get AMS mapping table; please select \"Resume\" to retry.",
+  "pt": "falha ao ler o mapa do AMS; toque em Retomar",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # heater temperature sensor is offline, which may be due to poor connector contact.",
+  "pt": "sensor de temperatura do aquecedor desligado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # filament has run out. Please insert a new filament.",
+  "pt": "filamento acabou; coloque um novo",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The power adapter voltage is too high, which may damage the heater circuit. Please replace the power adapter.",
+  "pt": "fonte com tensão alta demais; troque a fonte",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # Filament speed and length error: The filament odometry may be faulty.",
+  "pt": "erro no medidor de filamento",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The heater is disconnected, which may be due to poor connector contact.",
+  "pt": "aquecedor desconectado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # filament may be broken.",
+  "pt": "o filamento pode ter partido",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # communication is abnormal; please check the connection cable.",
+  "pt": "falha de comunicação com o AMS; veja o cabo",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # The coil resistance of exhaust valve 2 is abnormal, which may be due to abnormal wiring or damage.",
+  "pt": "bobina da válvula 2 com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # feeder unit motor has no signal, which may be due to poor contact in the motor connector or a motor fault.",
+  "pt": "motor do alimentador sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # The current sensor of assist motor may be faulty.",
+  "pt": "sensor de corrente do motor com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The RFID-tag on AMS-HT # is damaged, or its content cannot be identified.",
+  "pt": "etiqueta RFID danificada ou ilegível",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # filament is empty; please insert a new filament.",
+  "pt": "sem filamento; coloque um novo",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The operation of the exhaust valve 2 is abnormal, which may be due to excessive resistance.",
+  "pt": "válvula 2 do AMS travando",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The assist motor resistance is abnormal. The assist motor may be faulty.",
+  "pt": "motor auxiliar com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The AMS-HT # motor has slipped. The extrusion wheel may be malfunctioning, or the filament may be too thin.",
+  "pt": "motor patinou: roda com defeito ou fio fino",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # heater cooling fan cannot start because the power adapter is not connected.",
+  "pt": "ventoinha do aquecedor sem a fonte ligada",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS-HT # assist motor speed control is malfunctioning. The speed sensor may be faulty.",
+  "pt": "motor auxiliar com defeito na velocidade",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # heater is short-circuited, which may be due to a wiring short or heater damage.",
+  "pt": "aquecedor em curto",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # The odometer has no signal. The odometer connector may have poor contact.",
+  "pt": "medidor de filamento sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # filament odometer has no signal, which may be due to poor contact in the odometer connector or a odometer fault.",
+  "pt": "medidor de filamento sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # feed resistance is too high. Please reduce spool rotation resistance and avoid over-bent or over-long filament tubes.",
+  "pt": "filamento puxando com força; veja carretel e tubos",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # Unable to start drying; please pull out the filament from filament hub and try again.",
+  "pt": "não deu para secar; tire o filamento e tente",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # pulls filament back to AMS timeout.",
+  "pt": "demorou para recolher o filamento ao AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The current sensor of AMS-HT # exhaust valve 2 is abnormal; please get in touch with customer support to replace the AMS-HT mainboard.",
+  "pt": "sensor da válvula 2 do AMS com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # heater cooling fan is blocked, which may be due to the fan being stuck.",
+  "pt": "ventoinha do aquecedor travada",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # assist motor is stalled，due to excessive resistance in the tube between AMS and the printer.",
+  "pt": "motor travou: tubo entre AMS e impressora",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The power adapter voltage is too low, which may result in insufficient drying temperature. Please replace the power adapter.",
+  "pt": "fonte com tensão baixa; seca menos",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The temperature and humidity sensor has an error. The chip may be faulty.",
+  "pt": "sensor de temperatura e umidade com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # feeder unit motor is stalled, cannot rotate the spool.",
+  "pt": "motor não consegue girar o carretel",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS-HT # assist motor is overloaded. The filament may be tangled or stuck.",
+  "pt": "motor sobrecarregado: filamento enroscado",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # assist motor has slipped. Please pull out the filament, cut off the worn part, and then try again.",
+  "pt": "motor patinou; corte a ponta gasta e tente",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # filament may be broken in the tool head.",
+  "pt": "filamento pode ter partido na cabeça",
+  "cat": "Filamento",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # The humidity sensor is disconnected, which may be due to poor connector contact.",
+  "pt": "sensor de umidade desconectado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # The assist motor encoder wires are not connected. The assist motor connector may have poor contact.",
+  "pt": "fios do sensor do motor desconectados",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # Filament buffer position signal lost: the cable or position sensor may be malfunctioning.",
+  "pt": "buffer de filamento sem sinal de posição",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # feed-in Hall sensor is disconnected, which may be due to poor connector contact.",
+  "pt": "sensor de entrada desconectado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "External filament is missing; please load a new filament.",
+  "pt": "sem filamento externo; coloque um novo",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # filament status is abnormal, which may be due to a filament breakage inside the AMS.",
+  "pt": "filamento pode ter partido dentro do AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The coil resistance of exhaust valve 1 is abnormal, which may be due to abnormal wiring or damage.",
+  "pt": "bobina da válvula 1 com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # assist motor is stalled，due to excessive resistance in the tube near the filament buffer。",
+  "pt": "motor travou: tubo perto do buffer",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The drying process may experience thermal runaway. Please turn off the AMS power supply.",
+  "pt": "secagem descontrolada; desligue o AMS",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The filament cutter's cutting distance is too large. The XY motor may lose steps.",
+  "pt": "cortador indo longe demais; motor XY perdeu passo",
+  "cat": "Cortador",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # brushed motor has no signal, which may be due to poor contact in the motor connector or a motor fault.",
+  "pt": "motor do AMS sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to feed the filament outside the AMS-HT. Please clip the end of the filament flat and check to see if the spool is stuck.",
+  "pt": "filamento não puxou; corte a ponta reta",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The heater cooling fan speed is too low, which could be due to excessive fan resistance.",
+  "pt": "ventoinha do aquecedor lenta",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "RFID cannot be read because of a hardware or structural error.",
+  "pt": "RFID não lê por defeito na peça",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Timeout purging old filament. Possible cause: filament stuck or the extruder/nozzle clog.",
+  "pt": "demorou para limpar o filamento velho: entupido?",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to read filament information from AMS-HT #. The RFID tag may be damaged, or the filament is positioned at the edge of the RFID detection device. Please trim 5cm of the filament and try again.",
+  "pt": "não leu o RFID do carretel",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The assist motor has unbalanced tree-phase resistaance. The assist motor may be faulty.",
+  "pt": "motor auxiliar com defeito nas fases",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # The motor assist parameter is lost. Please pull out the filament from the filament hub and then restart the AMS.",
+  "pt": "parâmetro do motor perdido; reinicie o AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # The assist motor three-phase wires are not connected. The assist motor connector may have poor contact.",
+  "pt": "fios do motor auxiliar desconectados",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The AMS-HT # RFID 2 board has an error.",
+  "pt": "placa RFID 2 com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # uses printer power for drying during loading/printing. For better drying performance, please connect a power adapter.",
+  "pt": "secando com a energia da impressora; ligue a fonte",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "AMS-HT # The heater is heating abnormally.",
+  "pt": "aquecedor esquentando errado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # motor was overloaded. The filament may be tangled or the filament buffer may be stuck.",
+  "pt": "motor sobrecarregado: filamento enroscado",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The tube inside the AMS-HT # is broken, or feed-out hall sensor is faulty and cannot detect the filament.",
+  "pt": "tubo interno quebrado ou sensor não vê o filamento",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # filament has run out. Please wait while old filament is purged.",
+  "pt": "filamento acabou; limpando o filamento velho",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT filament ran out. Please put a new filament into the same slot in AMS and resume.",
+  "pt": "filamento acabou; ponha outro no mesmo slot",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # filament has run out and automatically switched to the slot with the same filament.",
+  "pt": "filamento acabou; trocou para um slot igual",
+  "cat": "Filamento",
+  "nivel": "info"
+ },
+ {
+  "en": "AMS-HT # The temperature control error is too large, which may be due to the lid being open or an abnormality with the heater.",
+  "pt": "temperatura do AMS fora: tampa aberta?",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # assist motor is stalled，due to excessive resistance in the tube between AMS and the filament buffer.",
+  "pt": "motor travou: tubo entre AMS e buffer",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # heater malfunction or the current sensor is abnormal.",
+  "pt": "aquecedor ou sensor de corrente com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # The assist motor calibration parameter error. Please pull the filament out of the feed inlet and restart the AMS.",
+  "pt": "calibração do motor perdida; reinicie o AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # has detected a breakage of the PTFE tube during filament loading. Please check whether the PTFE tubes inside and outside the AMS have fallen off or been damaged.",
+  "pt": "tubo PTFE quebrado ou solto ao carregar",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The AMS-HT # RFID 1 board has an error.",
+  "pt": "placa RFID 1 com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to feed the filament into the toolhead. Possible cause: filament or spool stuck.",
+  "pt": "não conseguiu levar o filamento até a cabeça",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # filament has run out, and purging the old filament went abnormally; please check whether the filament is stuck in the tool head.",
+  "pt": "filamento acabou e a limpeza falhou; veja a cabeça",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to extrude AMS-HT # filament; the extruder may be clogged or the filament may be too thin, causing the extruder to slip.",
+  "pt": "filamento não sai: extrusora entupida ou fio fino",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # The exhaust valve 2 is not connected, which may be due to poor connector contact.",
+  "pt": "válvula 2 desconectada",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS-HT # failed to rotate the filament spool when pulling filament back to AMS.",
+  "pt": "não girou o carretel ao recolher o filamento",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS-HT # motor is overloaded. The filament may be tangled or stuck.",
+  "pt": "motor sobrecarregado: filamento enroscado",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # feeds filament out of AMS timeout.",
+  "pt": "demorou para mandar o filamento para fora",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "External spool may be tangled or jammed.",
+  "pt": "carretel externo enroscado ou travado",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS is disabled; please load filament from the spool holder.",
+  "pt": "AMS desligado; use o carretel externo",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "The filament buffer signal is abnormal; the spring may be stuck, or the filament may be tangled.",
+  "pt": "buffer de filamento com sinal estranho",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Please pull the external filament from the extruder.",
+  "pt": "tire o filamento externo da extrusora",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The filament cutter sensor is malfunctioning; please check whether the connector is properly plugged in.",
+  "pt": "sensor do cortador com defeito; veja o conector",
+  "cat": "Cortador",
+  "nivel": "grave"
+ },
+ {
+  "en": "External filament has run out; please load a new filament.",
+  "pt": "filamento externo acabou; coloque um novo",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The filament cutter handle has not been released. The handle or blade may be jammed, or there could be an issue with the filament sensor connection.",
+  "pt": "alavanca do cortador presa",
+  "cat": "Cortador",
+  "nivel": "grave"
+ },
+ {
+  "en": "Studio / Suite is not compatible with this device. Please download the latest version from bambulab.com. Keep the software connected to the device during slicing.",
+  "pt": "Bambu Studio incompatível; atualize",
+  "cat": "Sistema",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Multiple motion step losses are detected. Please first check if there is any foreign object obstruction or abnormal noise on the tool head. You may continue and observe the quality. If obvious layer misalignment occurs, refer to the Wiki for maintenance.",
+  "pt": "motores perderam passo várias vezes",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to read the filament information from AMS-HT #. The AMS main board may be malfunctioning.",
+  "pt": "não leu o carretel: placa do AMS com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to read the filament information from AMS-HT #. A third party RFID tag was detected.",
+  "pt": "carretel com RFID de outra marca",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "Failed to read the filament information from AMS-HT #. The RFID tag may be damaged.",
+  "pt": "etiqueta RFID pode estar danificada",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Failed to read  filament information from AMS-HT #. The RFID tag cannot rotate due to a jam during filament loading or unloading. Please remove the filament and try again.",
+  "pt": "RFID travado ao carregar; tire o filamento",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Filter life is low. Please replace the filter promptly.",
+  "pt": "filtro no fim da vida; troque",
+  "cat": "Câmara / filtro",
+  "nivel": "info"
+ },
+ {
+  "en": "High PM2.5 concentration detected. Please check if the filter is installed or has failed.",
+  "pt": "muita poeira fina no ar; veja o filtro",
+  "cat": "Câmara / filtro",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Authorized slicing feature detected. Ensure all required authorizations are obtained before use. Bambu Lab cannot authorize such use of the product and assumes no liability for any use undertaken without the required authorizations, or otherwise not in compliance with applicable requirements or laws. Check the Wiki for more details.",
+  "pt": "fatiador não autorizado detectado",
+  "cat": "Sistema",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Failed to read the filament information from AMS-HT #. RFID tag verification failed. You can try to use Bambu Lab filament.",
+  "pt": "RFID não validado; use filamento Bambu",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "Wireless hardware error: Please turn Wi-Fi off and back on, or restart your device.",
+  "pt": "erro no Wi-Fi; desligue e ligue o Wi-Fi",
+  "cat": "Rede / internet",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # feeder unit motor has no signal, which may be due to poor contact in the motor connector or a motor fault.",
+  "pt": "motor do alimentador sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The AMS # slot # is overloaded. The filament may be tangled or the filament buffer may be stuck.",
+  "pt": "slot sobrecarregado: filamento enroscado",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # feed-in Hall sensor is disconnected, which may be due to poor connector contact.",
+  "pt": "sensor de entrada desconectado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # slot # assist motor is stalled, due to excessive resistance in the tube between the filament buffer and the toolhead.",
+  "pt": "motor travou: tubo entre buffer e cabeça",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Micro Lidar is offline. Please check the hardware connection.",
+  "pt": "Micro Lidar desconectado",
+  "cat": "Câmera / sensores",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The heater 1 is short-circuited, which may be due to a wiring short or heater damage.",
+  "pt": "aquecedor 1 em curto",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to read the filament information from AMS # slot #. The RFID tag may be damaged.",
+  "pt": "etiqueta RFID pode estar danificada",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Chamber failed to reach the desired temperature. The machine will stop waiting for the chamber temperature.",
+  "pt": "câmara não chegou na temperatura; seguindo",
+  "cat": "Câmara / filtro",
+  "nivel": "info"
+ },
+ {
+  "en": "AMS # The brushed motor 2 has no signal, which may be due to poor contact in the motor connector or a motor fault.",
+  "pt": "motor 2 sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The coil resistance of exhaust valve 1 is abnormal, which may be due to abnormal wiring or damage.",
+  "pt": "bobina da válvula 1 com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # slot # feeds filament out of AMS timeout.",
+  "pt": "demorou para mandar o filamento para fora",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The horizontal laser line is too wide. Please check if the heatbed is dirty.",
+  "pt": "laser largo demais; a mesa está suja?",
+  "cat": "Calibração",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The firmware of AMS-HT # does not match the printer. Please upgrade it on the \"Firmware\" page.",
+  "pt": "firmware do AMS não bate; atualize",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # feed-out Hall sensor is disconnected. The connector may have poor contact.",
+  "pt": "sensor de saída desconectado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # slot # filament has run out and automatically switched to the slot with the same filament.",
+  "pt": "filamento acabou; trocou para um slot igual",
+  "cat": "Filamento",
+  "nivel": "info"
+ },
+ {
+  "en": "The build plate is not placed properly. Please adjust it.",
+  "pt": "placa de impressão fora do lugar; ajuste",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "An external disturbance was detected on force sensor 1. The heatbed plate may have touched something outside the heatbed.",
+  "pt": "sensor de força sentiu toque fora da mesa",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Y axis homing abnormal: the timing belt may be loose.",
+  "pt": "eixo Y com problema: correia frouxa?",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "Chamber temperature is abnormal. The chamber heater's temperature sensor at the air outlet may have a short circuit.",
+  "pt": "temperatura da câmara estranha: sensor em curto?",
+  "cat": "Câmara / filtro",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to read the filament information from AMS # slot #. A third party RFID tag was detected.",
+  "pt": "carretel com RFID de outra marca",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "AMS # The cooling fan of heater 1 is blocked, which may be due to the fan being stuck.",
+  "pt": "ventoinha do aquecedor 1 travada",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to read the filament information from AMS # slot #. The RFID tag cannot rotate due to a jam during the filament loading or unloading. Please pull out the filament and try again.",
+  "pt": "RFID travado ao carregar; tire o filamento",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # filament has run out. Please insert a new filament.",
+  "pt": "filamento acabou; coloque um novo",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Failed to read the filament information from AMS # slot #. The RFID tag may be damaged or positioned at the edge of the RFID detection device. Please remove 5cm filament and try again.",
+  "pt": "não leu o RFID: etiqueta danificada ou torta",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "External disturbance was detected on the heatbed acceleeration sensor. The sensor signal wire may not be affixed.",
+  "pt": "sensor da mesa sentiu tranco: fio solto?",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Unformatted MicroSD Card: please format it.",
+  "pt": "cartão microSD não formatado; formate",
+  "cat": "Arquivo / cartão",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # feeder unit motor is stalled, cannot rotate the spool.",
+  "pt": "motor não consegue girar o carretel",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # is empty; please insert a new filament.",
+  "pt": "slot vazio; coloque um filamento",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The resonance frequency of the X-axis differs significantly from the last calibration. Please clean the carbon rod and conduct a calibration after printing.",
+  "pt": "eixo X diferente da calibração; limpe e calibre",
+  "cat": "Calibração",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The signal of heatbed force sensor 2 is weak. The force sensor may be broken or have poor electric connection.",
+  "pt": "sinal fraco no sensor de força 2 da mesa",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The heater 1 is heating abnormally.",
+  "pt": "aquecedor 1 esquentando errado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Not enough space on MicroSD Card. Video recording and timelapse recording cannot be performed. Please clear some space.",
+  "pt": "microSD cheio; sem vídeo nem timelapse",
+  "cat": "Arquivo / cartão",
+  "nivel": "info"
+ },
+ {
+  "en": "AMS # slot #'s filament may be broken in AMS.",
+  "pt": "filamento pode ter partido dentro do AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # filament odometer has no signal, which may be due to poor contact in the odometer connector or a odometer fault.",
+  "pt": "medidor de filamento sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The temperature sensor of heater 1 is offline, which may be due to poor connector contact.",
+  "pt": "sensor do aquecedor 1 desligado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # slot # failed to rotate the filament spool when pulling filament back to AMS.",
+  "pt": "não girou o carretel ao recolher o filamento",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS # assist motor has slipped. The extrusion wheel may be worn down, or the filament may be too thin.",
+  "pt": "motor auxiliar patinou: roda gasta ou fio fino",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Failed to read the filament information from AMS # slot #. RFID tag verification failed. You can try to use Bambu Lab filament.",
+  "pt": "RFID não validado; use filamento Bambu",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "AMS # slot # filament status is abnormal, which may be due to a filament breakage inside the AMS.",
+  "pt": "filamento pode ter partido dentro do AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The RFID-tag on AMS # Slot2 is damaged, or its content cannot be identified.",
+  "pt": "etiqueta RFID danificada ou ilegível",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The vertical laser line is too wide. Please check if the heatbed is dirty.",
+  "pt": "laser largo demais; a mesa está suja?",
+  "cat": "Calibração",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # filament has run out. Please wait while old filament is purged.",
+  "pt": "filamento acabou; limpando o filamento velho",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "System state is abnormal; please restore to factory settings.",
+  "pt": "sistema com defeito; restaure de fábrica",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # slot # filament has run out, and purging the old filament went abnormally; please check whether the filament is stuck in the tool head.",
+  "pt": "filamento acabou e a limpeza falhou; veja a cabeça",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to download task; please check your network connection.",
+  "pt": "falha ao baixar a impressão; veja a rede",
+  "cat": "Rede / internet",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # Unable to start drying; please pull out the filament from filament hub and try again.",
+  "pt": "não deu para secar; tire o filamento e tente",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Failed to extrude AMS # slot # filament; the extruder may be clogged or the filament may be too thin, causing the extruder to slip.",
+  "pt": "filamento não sai: extrusora entupida ou fio fino",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # slot # assist motor is stalled, due to excessive resistance in the tube near AMS.",
+  "pt": "motor travou: resistência no tubo perto do AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The device is in the engineering state; please pay attention to information security related matters.",
+  "pt": "impressora em modo engenharia; cuidado",
+  "cat": "Sistema",
+  "nivel": "info"
+ },
+ {
+  "en": "The AMS # slot # motor has slipped. The extrusion wheel may be malfunctioning, or the filament may be too thin.",
+  "pt": "motor patinou: roda com defeito ou fio fino",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Failed to read the filament information from AMS # slot #. The AMS main board may be malfunctioning.",
+  "pt": "não leu o carretel: placa do AMS com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # slot # assist motor is stalled, due to excessive resistance in the tube between AMS and the printer.",
+  "pt": "motor travou: tubo entre AMS e impressora",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Chamber temperature is abnormal. The temperature sensor at the power supply may have a short circuit.",
+  "pt": "temperatura da câmara estranha: sensor em curto?",
+  "cat": "Câmara / filtro",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # slot # assist motor is stalled, due to excessive resistance in the tube near the toolhead.",
+  "pt": "motor travou: resistência no tubo perto da cabeça",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Failed to connect to the internet; please check the network connection.",
+  "pt": "sem internet; a impressão continua",
+  "cat": "Rede / internet",
+  "nivel": "info"
+ },
+ {
+  "en": "A new Micro Lidar was detected. Please calibrate it on the Calibration page before use.",
+  "pt": "Micro Lidar novo; calibre antes de usar",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # assist motor is stalled, due to excessive resistance in the tube near the filament buffer.",
+  "pt": "motor travou: tubo perto do buffer",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # front cover is open. This may affect the drying performance or cause the filament to absorb moisture.",
+  "pt": "tampa do AMS aberta; atrapalha a secagem",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # filament may be broken in the tool head.",
+  "pt": "filamento pode ter partido na cabeça",
+  "cat": "Filamento",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The assist motor phase winding has an open circuit. The assist motor may be faulty.",
+  "pt": "motor auxiliar com bobina aberta",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Motor-B has a short-circuit. It may have failed.",
+  "pt": "motor B em curto; pode ter queimado",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "The RFID-tag on AMS # Slot2 cannot be identified.",
+  "pt": "etiqueta RFID do carretel não foi lida",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The hotend cooling fan is running slowly. It may be obstructed. Please check for debris and clean if necessary.",
+  "pt": "ventoinha do bico lenta; veja se tem sujeira",
+  "cat": "Ventoinhas",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Micro Lidar parameter is abnormal. Please contact customer support.",
+  "pt": "parâmetro do Micro Lidar com erro; suporte",
+  "cat": "Câmera / sensores",
+  "nivel": "grave"
+ },
+ {
+  "en": "The Filament Buffer module is malfunctioning. Please restart the device.",
+  "pt": "buffer de filamento com defeito; reinicie",
+  "cat": "Filamento",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # slot # assist motor has slipped. Please pull out the filament, cut off the worn part, and then try again.",
+  "pt": "motor patinou; corte a ponta gasta e tente",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS # slot # motor torque control is malfunctioning. The current sensor may be faulty.",
+  "pt": "motor do slot com defeito no controle",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The firmware of AMS # does not match the printer. Please upgrade it on the \"Firmware\" page.",
+  "pt": "firmware do AMS não bate; atualize",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Motor-A has an open-circuit. There may be a loose connection, or the motor may have failed.",
+  "pt": "motor A com circuito aberto: fio solto?",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "Data transmission over the serial port is abnormal; the software system may be faulty.",
+  "pt": "erro de comunicação interna; sistema com falha",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "The RFID-tag on AMS # Slot3 is damaged, or its content cannot be identified.",
+  "pt": "etiqueta RFID danificada ou ilegível",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Chamber temperature is abnormal. The chamber heater's temperature sensor may have a short circuit.",
+  "pt": "temperatura da câmara estranha: sensor em curto?",
+  "cat": "Câmara / filtro",
+  "nivel": "grave"
+ },
+ {
+  "en": "Liveview service login failed; please check your network connection.",
+  "pt": "falha ao entrar na câmera ao vivo; veja a rede",
+  "cat": "Rede / internet",
+  "nivel": "info"
+ },
+ {
+  "en": "The vertical laser is not lit. Please check if it's covered or hardware connection has a problem.",
+  "pt": "laser vertical apagado: coberto ou desconectado",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The signal of heatbed force sensor 2 is too weak. The sensor wiring may be broken.",
+  "pt": "sinal fraco no sensor de força 2: fio partido?",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # chamber temperature is too high; auxiliary feeding or RFID reading is currently not allowed.",
+  "pt": "AMS quente demais; RFID e carga pausados",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The front cover of the toolhead fell off.",
+  "pt": "a tampa da frente da cabeça caiu",
+  "cat": "Bico / extrusora",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The RFID-tag on AMS # Slot4 is damaged, or its content cannot be identified.",
+  "pt": "etiqueta RFID danificada ou ilegível",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # pulls filament back to AMS timeout.",
+  "pt": "demorou para recolher o filamento ao AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "MQTT Command verification failed. Please update Studio/Suite (including the network plugin) or Handy to the latest version, then restart the software and try again.",
+  "pt": "comando recusado; atualize o Bambu Studio",
+  "cat": "Sistema",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # slot # assist motor is stalled, due to excessive resistance in the tube between AMS and the filament buffer.",
+  "pt": "motor travou: tubo entre AMS e buffer",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # is undergoing dry cooling; please wait for it to cool down before operating.",
+  "pt": "AMS esfriando depois de secar; aguarde",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "Chamber temperature is abnormal. The chamber heater's temperature sensor may have an open circuit.",
+  "pt": "sensor da câmara com circuito aberto",
+  "cat": "Câmara / filtro",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The exhaust valve 1 is not connected, which may be due to poor connector contact.",
+  "pt": "válvula 1 desconectada",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The current sensor of assist motor may be faulty.",
+  "pt": "sensor de corrente do motor com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The extrusion motor driver is abnormal. The MOSFET may have a short circuit.",
+  "pt": "driver do motor da extrusora com defeito",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "The RFID-tag on AMS # Slot1 is damaged, or its content cannot be identified.",
+  "pt": "etiqueta RFID danificada ou ilegível",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS # slot # motor is overloaded. The filament may be tangled or stuck.",
+  "pt": "slot sobrecarregado: filamento enroscado",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # Filament speed and length error: The filament odometry may be faulty.",
+  "pt": "erro no medidor de filamento",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The motor assist parameter is lost. Please pull out the filament from the filament hub and then restart the AMS.",
+  "pt": "parâmetro do motor perdido; reinicie o AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The signal of heatbed force sensor 1 is too weak. The sensor wiring may be broken.",
+  "pt": "sinal fraco no sensor de força 1: fio partido?",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The assist motor calibration parameter error. Please pull out the filament from the filament hub and then restart the AMS.",
+  "pt": "calibração do motor perdida; reinicie o AMS",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Live View camera is not connected. Please check the hardware and cable connections.",
+  "pt": "câmera desconectada; veja o cabo",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The operation of the exhaust valve 2 is abnormal, which may be due to excessive resistance.",
+  "pt": "válvula 2 do AMS travando",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS # assist motor torque control is malfunctioning. The current sensor may be faulty.",
+  "pt": "motor auxiliar com defeito no controle",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The cooling fan speed of heater 2 is too low, which could be due to excessive fan resistance.",
+  "pt": "ventoinha do aquecedor 2 lenta",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The nozzle is clogged with filament.",
+  "pt": "bico entupido de filamento",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "The build plate may not be properly placed. If this message appears repeatedly, please check the Wiki for more explanations.",
+  "pt": "placa de impressão pode estar fora do lugar",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The assist motor resistance is abnormal. The assist motor may be faulty.",
+  "pt": "motor auxiliar com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "An abnormality occurs during the heating process of the heatbed; the heating modules may be broken.",
+  "pt": "falha no aquecimento da mesa",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "Chamber heating failed. The power supply temperature may be too high.",
+  "pt": "câmara não aqueceu: fonte quente demais",
+  "cat": "Câmara / filtro",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The heatbed temperature is abnormal; the sensor may have a short circuit.",
+  "pt": "sensor da mesa em curto",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "The RFID-tag on AMS # Slot3 cannot be identified.",
+  "pt": "etiqueta RFID do carretel não foi lida",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The heater 2 is disconnected, which may be due to poor connector contact.",
+  "pt": "aquecedor 2 desconectado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Chamber heating failed. The heater may not be blowing hot air.",
+  "pt": "câmara não aqueceu: aquecedor sem ar quente",
+  "cat": "Câmara / filtro",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The brushed motor 1 has no signal, which may be due to poor contact in the motor connector or a motor fault.",
+  "pt": "motor 1 sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Heatbed force sensor 1 is too sensitive. It may be stuck between the strain arm and heatbed support, or the adjusting screw may be too tight.",
+  "pt": "sensor de força 1 sensível demais: preso?",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The resonance frequency of the X axis is low. The timing belt may be loose.",
+  "pt": "eixo X com frequência baixa: correia frouxa?",
+  "cat": "Motores / eixos",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The humidity sensor is disconnected, which may be due to poor connector contact.",
+  "pt": "sensor de umidade desconectado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The assist motor three-phase wires are not connected. The assist motor connector may have poor contact.",
+  "pt": "fios do motor auxiliar desconectados",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The assist motor encoder wires are not connected. The assist motor connector may have poor contact.",
+  "pt": "fios do sensor do motor desconectados",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The odometer has no signal. The odometer connector may have poor contact.",
+  "pt": "medidor de filamento sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The AMS # assist motor speed control is malfunctioning. The speed sensor may be faulty.",
+  "pt": "motor auxiliar com defeito na velocidade",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Parts skipped before first layer inspection; the inspection is not supported for the current print.",
+  "pt": "peças puladas; sem inspeção da 1ª camada",
+  "cat": "Câmera / sensores",
+  "nivel": "info"
+ },
+ {
+  "en": "AMS # uses printer power for drying during loading/printing. For better drying performance, please connect a power adapter.",
+  "pt": "secando com a energia da impressora; ligue a fonte",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "The heatbed temperature is abnormal; the sensor may have an open circuit.",
+  "pt": "sensor da mesa com circuito aberto",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # communication is abnormal; please check the connection cable.",
+  "pt": "falha de comunicação com o AMS; veja o cabo",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The coil resistance of exhaust valve 2 is abnormal, which may be due to abnormal wiring or damage.",
+  "pt": "bobina da válvula 2 com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The nozzle temperature is abnormal; the heater may have a short circuit.",
+  "pt": "aquecedor do bico em curto",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "Unauthorized user: please check your account information.",
+  "pt": "usuário não autorizado; veja sua conta",
+  "cat": "Rede / internet",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Filament buffer position signal error: the position sensor may be malfunctioning.",
+  "pt": "buffer de filamento com erro de posição",
+  "cat": "Filamento",
+  "nivel": "grave"
+ },
+ {
+  "en": "The screen is malfunctioning; please restart the device.",
+  "pt": "a tela da impressora falhou; reinicie",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "The AMS # RFID 1 board has an error.",
+  "pt": "placa RFID 1 com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "An external disturbance was detected on force sensor 3. The heatbed plate may have touched something outside the heatbed.",
+  "pt": "sensor de força 3 sentiu toque fora da mesa",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # Heater 1, heater malfunction or abnormal current sensor detected.",
+  "pt": "aquecedor 1 ou sensor de corrente com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Motor-Z has an open-circuit. The connection may be loose, or the motor may have failed.",
+  "pt": "motor Z com circuito aberto: fio solto?",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The cooling fan speed of heater 1 is too low, which could be due to excessive fan resistance.",
+  "pt": "ventoinha do aquecedor 1 lenta",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The signal of heatbed force sensor 1 is weak. The force sensor may be broken or have poor electric connection.",
+  "pt": "sinal fraco no sensor de força 1 da mesa",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The operation of the exhaust valve 1 is abnormal, which may be due to excessive resistance.",
+  "pt": "válvula 1 do AMS travando",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The temperature sensor of heater 2 is offline, which may be due to poor connector contact.",
+  "pt": "sensor do aquecedor 2 desligado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to feed the filament outside the AMS. Please clip the end of the filament flat and check to see if the spool is stuck.",
+  "pt": "filamento não puxou; corte a ponta reta",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The cooling fan of heater 2 is blocked, which may be due to the fan being stuck.",
+  "pt": "ventoinha do aquecedor 2 travada",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The assist motor has unbalanced tree-phase resistaance. The assist motor may be faulty.",
+  "pt": "motor auxiliar com defeito nas fases",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # Heater 2, heater malfunction or abnormal current sensor detected.",
+  "pt": "aquecedor 2 ou sensor de corrente com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Filament exposure metering failed because laser reflection is too weak on this material. First layer inspection may be inaccurate.",
+  "pt": "laser não mede este material; 1ª camada imprecisa",
+  "cat": "Câmera / sensores",
+  "nivel": "info"
+ },
+ {
+  "en": "The heatbed acceleration sensor detected unexpected continuous force. The sensor may be stuck, or the analog front end may be broken.",
+  "pt": "sensor da mesa sente força contínua: preso?",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # Environmental temperature is too low, which will affect the drying capability.",
+  "pt": "ambiente frio demais para secar bem",
+  "cat": "AMS",
+  "nivel": "info"
+ },
+ {
+  "en": "The first layer inspection module rebooted abnormally. The inspection result may be inaccurate.",
+  "pt": "módulo de inspeção reiniciou; resultado incerto",
+  "cat": "Câmera / sensores",
+  "nivel": "info"
+ },
+ {
+  "en": "An abnormality occured in heating modules of heatbed previously. To continue using your printer, please refer to the wiki to troubleshoot.",
+  "pt": "mesa já teve falha no aquecimento; veja o wiki",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "An external disturbance was detected on force sensor 2. The heatbed plate may have touched something outside the heatbed.",
+  "pt": "sensor de força 2 sentiu toque fora da mesa",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The temperature of the heated bed exceeds the limit and automatically adjusts to the limit temperature.",
+  "pt": "mesa passou do limite; temperatura ajustada",
+  "cat": "Mesa aquecida",
+  "nivel": "info"
+ },
+ {
+  "en": "Heatbed force sensor 3 is too sensitive. It may be stuck between the strain arm and heatbed support, or the adjusting screw may be too tight.",
+  "pt": "sensor de força 3 sensível demais: preso?",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The signal of heatbed force sensor 3 is too weak. The sensor wiring may be broken.",
+  "pt": "sinal fraco no sensor de força 3: fio partido?",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "Force sensor 3 on the heatbed is abnormal. This may be caused by heatbed lifting jamming or circuit damage.",
+  "pt": "sensor de força 3 com defeito ou mesa travando",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to report task state; please check your network connection.",
+  "pt": "falha ao informar o estado; veja a rede",
+  "cat": "Rede / internet",
+  "nivel": "info"
+ },
+ {
+  "en": "First layer inspection timed out abnormally, and the current results may be inaccurate.",
+  "pt": "inspeção da 1ª camada demorou; resultado incerto",
+  "cat": "Câmera / sensores",
+  "nivel": "info"
+ },
+ {
+  "en": "The speed of the part cooling fan is too slow or stopped. It may be stuck, or the connector may not be plugged in properly.",
+  "pt": "ventoinha da peça lenta ou parada",
+  "cat": "Ventoinhas",
+  "nivel": "grave"
+ },
+ {
+  "en": "The nozzle temperature is abnormal; the sensor may have a short circuit. Please check whether the connector is properly plugged in.",
+  "pt": "sensor do bico em curto; veja o conector",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "The RFID-tag on AMS # Slot1 cannot be identified.",
+  "pt": "etiqueta RFID do carretel não foi lida",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The build plate localization marker was not detected. Please check if the build plate is aligned correctly.",
+  "pt": "marcador da placa não achado; alinhe a placa",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The heatbed temperature is abnormal; the heater is over temperature.",
+  "pt": "mesa quente demais",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "Micro Lidar camera is malfunctioning. Please refer to the Wiki for troubleshooting.",
+  "pt": "câmera do Micro Lidar com defeito",
+  "cat": "Câmera / sensores",
+  "nivel": "grave"
+ },
+ {
+  "en": "Time synchronization failed",
+  "pt": "falha ao acertar o relógio",
+  "cat": "Rede / internet",
+  "nivel": "info"
+ },
+ {
+  "en": "AMS # has detected a breakage of the PTFE tube during filament loading. Please check whether the PTFE tubes inside and outside the AMS have fallen off or been damaged.",
+  "pt": "tubo PTFE quebrado ou solto ao carregar",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Micro Lidar laser parameters have drifted. Please re-calibrate your printer.",
+  "pt": "laser do Micro Lidar desregulado; calibre",
+  "cat": "Calibração",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # door detection is abnormal, the Hall sensor connection may be loose or disconnected.",
+  "pt": "sensor da porta do AMS-HT solto",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The brushed motor 4 has no signal, which may be due to poor contact in the motor connector or a motor fault.",
+  "pt": "motor 4 sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The toolhead is malfunctioning. Please restart the device.",
+  "pt": "cabeça de impressão com defeito; reinicie",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "Chamber cooling may be too slow. You can open the front door or top cover to help cooling if the air in the chamber is non-toxic.",
+  "pt": "câmara esfriando devagar; abra a porta se puder",
+  "cat": "Câmara / filtro",
+  "nivel": "info"
+ },
+ {
+  "en": "Motor-B has an open-circuit. The connection may be loose, or the motor may have failed.",
+  "pt": "motor B com circuito aberto: fio solto?",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "The signal of heatbed force sensor 3 is weak. The force sensor may be broken or have poor electric connection.",
+  "pt": "sinal fraco no sensor de força 3 da mesa",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "X-axis homing abnormal: please check if the toolhead is stuck or the carbon rod resistance is too high.",
+  "pt": "eixo X com problema: cabeça presa ou barra dura?",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "First layer inspection terminated due to abnormal Lidar data.",
+  "pt": "inspeção da 1ª camada parou: erro do Lidar",
+  "cat": "Câmera / sensores",
+  "nivel": "info"
+ },
+ {
+  "en": "Please check if the filament is coming out of the nozzle. If not, gently push the material and try to extrude again.",
+  "pt": "veja se sai filamento do bico; empurre de leve",
+  "cat": "Bico / extrusora",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS Hub communication is abnormal; the cable may be not well connected.",
+  "pt": "falha de comunicação com o hub do AMS; veja o cabo",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The motor driver is overheating. Its radiator may be loose, or its cooling fan may be damaged.",
+  "pt": "driver do motor esquentando; veja a ventoinha",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "A system panic occurred. Please restart the device.",
+  "pt": "o sistema travou; reinicie a impressora",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "The nozzle temperature is abnormal; the sensor may have an open circuit.",
+  "pt": "sensor do bico com circuito aberto",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "The communication of chamber temperature controller is abnormal.",
+  "pt": "falha de comunicação com o controle da câmara",
+  "cat": "Câmara / filtro",
+  "nivel": "grave"
+ },
+ {
+  "en": "The resonance frequency of the Y-axis differs greatly from the last calibration. Please clean the Y-axis liner rod and conduct a calibration after printing.",
+  "pt": "eixo Y diferente da calibração; limpe e calibre",
+  "cat": "Calibração",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The heatbed has worked at full load for a long time. The temperature control system may be abnormal.",
+  "pt": "mesa no máximo há muito tempo; controle estranho",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The accessory firmware does not match the device. Please upgrade it on the \"Firmware\" page.",
+  "pt": "firmware do acessório não bate; atualize",
+  "cat": "Sistema",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Device login failed; please check your account information.",
+  "pt": "falha no login da impressora; veja sua conta",
+  "cat": "Rede / internet",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Nozzle height seems to be too low. Please check if the nozzle is worn or tilted. Re-calibrate Lidar if the nozzle has been replaced.",
+  "pt": "bico baixo demais: gasto ou torto?",
+  "cat": "Bico / extrusora",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The RFID-tag on AMS # Slot4 cannot be identified.",
+  "pt": "etiqueta RFID do carretel não foi lida",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Chamber heating failed. The thermal resistance is too high.",
+  "pt": "câmara não aqueceu: resistência térmica alta",
+  "cat": "Câmara / filtro",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS # assist motor is overloaded. The filament may be tangled or stuck.",
+  "pt": "motor sobrecarregado: filamento enroscado",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Purged filament may have piled up in the waste chute. Please check and clean the chute.",
+  "pt": "filamento purgado acumulou na calha; limpe",
+  "cat": "Bico / extrusora",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The heater 2 is heating abnormally.",
+  "pt": "aquecedor 2 esquentando errado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The heater 2 is short-circuited, which may be due to a wiring short or heater damage.",
+  "pt": "aquecedor 2 em curto",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Nozzle temperature control is abnormal. The hot end may not be installed. To heat the heating assembly without the hotend, enable Maintenance Mode.",
+  "pt": "controle do bico estranho: hotend instalado?",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "The MC module is malfunctioning; please restart the device or check device cable connection.",
+  "pt": "placa de movimento com defeito; reinicie",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "The heatbed temperature is abnormal; the heater may have a short circuit.",
+  "pt": "aquecedor da mesa em curto",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "First layer inspection is not supported for the current print job.",
+  "pt": "sem inspeção da 1ª camada nesta impressão",
+  "cat": "Câmera / sensores",
+  "nivel": "info"
+ },
+ {
+  "en": "Chamber heating failed. Possible causes: the chamber is not fully enclosed, ambient temperature is too low, or the power supply heat dissipation vent is blocked.",
+  "pt": "câmara não aqueceu: aberta ou ambiente frio",
+  "cat": "Câmara / filtro",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # The brushed motor 3 has no signal, which may be due to poor contact in the motor connector or a motor fault.",
+  "pt": "motor 3 sem sinal",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The exhaust valve 2 is not connected, which may be due to poor connector contact.",
+  "pt": "válvula 2 desconectada",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The heatbed leveling data is abnormal. Please check whether there are any foreign objects on the heatbed and Z slider. If so, please remove them and try again.",
+  "pt": "nivelamento da mesa estranho: sujeira na mesa?",
+  "cat": "Calibração",
+  "nivel": "grave"
+ },
+ {
+  "en": "The AMS # RFID 2 board has an error.",
+  "pt": "placa RFID 2 com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The Chamber Temperature Controller module is malfunctioning. Please restart the device.",
+  "pt": "controle da câmara com defeito; reinicie",
+  "cat": "Câmara / filtro",
+  "nivel": "grave"
+ },
+ {
+  "en": "Internal service is malfunctioning. Please restart the device.",
+  "pt": "serviço interno com defeito; reinicie",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "The resistance of Motor-B is abnormal; the motor may have failed.",
+  "pt": "motor B com resistência errada; pode ter queimado",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "Possible first layer defects have been detected. Please check the first layer quality and decide if the job should be stopped.",
+  "pt": "possível defeito na 1ª camada; confira a peça",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The vertical laser is not bright enough at homing position. Please clean or replace the heatbed if this message appears repeatedly.",
+  "pt": "laser vertical fraco; limpe a mesa",
+  "cat": "Calibração",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The heatbed temperature control is abnormal; the AC board may be broken.",
+  "pt": "controle da mesa estranho: placa AC com defeito",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "The current sensor of Motor-B is abnormal. This may be caused by a failure of the hardware sampling circuit.",
+  "pt": "sensor de corrente do motor B com defeito",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "Inspecting the first layer: please wait a moment.",
+  "pt": "inspecionando a 1ª camada; aguarde",
+  "cat": "Câmera / sensores",
+  "nivel": "info"
+ },
+ {
+  "en": "The current sensor of Motor-A is abnormal. This may be caused by a failure of the hardware sampling circuit.",
+  "pt": "sensor de corrente do motor A com defeito",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The drying process may experience thermal runaway. Please turn off the AMS power supply.",
+  "pt": "secagem descontrolada; desligue o AMS",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "X axis homing abnormal: the timing belt may be loose.",
+  "pt": "eixo X com problema: correia frouxa?",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "The horizontal laser is not lit. Please check if it's covered or hardware connection has a problem.",
+  "pt": "laser horizontal apagado: coberto ou desligado",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The resistance of the extruder servo motor is abnormal; the motor may have failed.",
+  "pt": "motor da extrusora com resistência errada",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "Abnormal accelerometer data detected. Please try restarting the device.",
+  "pt": "acelerômetro com dados estranhos; reinicie",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The horizontal laser is not bright enough at homing position. Please clean or replace the heatbed if this message appears repeatedly.",
+  "pt": "laser horizontal fraco; limpe a mesa",
+  "cat": "Calibração",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The extruder servo motor has an open circuit. The connection may be loose, or the motor may have failed.",
+  "pt": "motor da extrusora com circuito aberto",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "The SD Card controller is malfunctioning.",
+  "pt": "controle do cartão SD com defeito",
+  "cat": "Arquivo / cartão",
+  "nivel": "grave"
+ },
+ {
+  "en": "Wireless hardware error: please turn off/on WiFi or restart the device.",
+  "pt": "erro no Wi-Fi; desligue e ligue o Wi-Fi",
+  "cat": "Rede / internet",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The task file is unauthorized.",
+  "pt": "arquivo de impressão não autorizado",
+  "cat": "Arquivo / cartão",
+  "nivel": "grave"
+ },
+ {
+  "en": "Chamber temperature setting value exceed the limit, the boundary value will be set.",
+  "pt": "temperatura da câmara acima do limite; ajustada",
+  "cat": "Câmara / filtro",
+  "nivel": "info"
+ },
+ {
+  "en": "AMS # The heater 1 is disconnected, which may be due to poor connector contact.",
+  "pt": "aquecedor 1 desconectado",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The current firmware version is abnormal and job cannot start. Please ensure the device is connected to the network and go to the \"Firmware\" page to update.",
+  "pt": "firmware com problema; atualize pela rede",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to calibrate Micro Lidar. Please make sure the calibration chart is clean and not obscured. Then, run machine calibration again.",
+  "pt": "falha ao calibrar o Micro Lidar; limpe o alvo",
+  "cat": "Calibração",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The media pipeline is malfunctioning. Please restart the device. If multiple attempts fail, please contact customer support.",
+  "pt": "falha no vídeo interno; reinicie",
+  "cat": "Sistema",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS # Filament buffer position signal lost: the cable or position sensor may be malfunctioning.",
+  "pt": "buffer de filamento sem sinal de posição",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The Z axis motor seems to be stuck when moving. Please check if there is any foreign matter on the Z sliders or Z timing belt wheels.",
+  "pt": "eixo Z travando: sujeira nas guias ou correia?",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # slot # feed resistance is too high. Please reduce spool rotation resistance and avoid over-bent or over-long filament tubes.",
+  "pt": "filamento puxando com força; veja carretel e tubos",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS # heater 1 cooling fan cannot start because the power adapter is not connected.",
+  "pt": "ventoinha do aquecedor 1 sem a fonte ligada",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The AMS # heater 2 cooling fan cannot start because the power adapter is not connected.",
+  "pt": "ventoinha do aquecedor 2 sem a fonte ligada",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The device malfunctioned; please restart.",
+  "pt": "a impressora falhou; reinicie",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "The Vision Encoder Plate is either not placed or incorrectly placed. Please ensure it is correctly positioned on the heatbed.",
+  "pt": "placa de calibração ausente ou fora do lugar",
+  "cat": "Calibração",
+  "nivel": "atencao"
+ },
+ {
+  "en": "AMS-HT # certification failed. Please reconnect the cable or restart the printer.",
+  "pt": "falha na autenticação do AMS; religue o cabo",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The power adapter voltage is too high, which may damage the heater circuit. Please replace the power adapter.",
+  "pt": "fonte com tensão alta demais; troque a fonte",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # certification failed. Please reconnect the cable or restart the printer.",
+  "pt": "falha na autenticação do AMS; religue o cabo",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The power adapter voltage is too low, which may result in insufficient drying temperature. Please replace the power adapter.",
+  "pt": "fonte com tensão baixa; seca menos",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Some external modules are incompatible with the device's firmware version, which may affect normal operation. Please go to the \"Firmware\" page while connected to the internet to upgrade.",
+  "pt": "módulos incompatíveis com o firmware; atualize",
+  "cat": "Sistema",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The front door Hall sensor is abnormal; please check whether the connection wire is loose.",
+  "pt": "sensor da porta frontal solto",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Some modules are incompatible with the device's firmware version, which may affect use. Please go to the \"Firmware\" page to update after connected to the internet, or you may update offline according to wiki.",
+  "pt": "módulos incompatíveis com o firmware; atualize",
+  "cat": "Sistema",
+  "nivel": "atencao"
+ },
+ {
+  "en": "User information has expired; please log in again.",
+  "pt": "login expirou; entre na conta de novo",
+  "cat": "Rede / internet",
+  "nivel": "info"
+ },
+ {
+  "en": "The current sensor of AMS # exhaust valve 1 is abnormal; please get in touch with customer support to replace the AMS mainboard.",
+  "pt": "sensor da válvula 1 do AMS com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The current sensor of AMS # exhaust valve 2 is abnormal; please get in touch with customer support to replace the AMS mainboard.",
+  "pt": "sensor da válvula 2 do AMS com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS # The temperature control error is too large, which may be due to the lid being open or an abnormality with the heater.",
+  "pt": "temperatura do AMS fora: tampa aberta?",
+  "cat": "AMS",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Communication error detected with AMS, AMS lite or AMS HT. Please reconnect the module cable or restart the printer when it is idle.",
+  "pt": "falha de comunicação com o AMS; veja o cabo",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Carbon rods need cleaning now.",
+  "pt": "hora de limpar as barras de carbono",
+  "cat": "Motores / eixos",
+  "nivel": "info"
+ },
+ {
+  "en": "Threaded rods need lubrication now.",
+  "pt": "hora de lubrificar os fusos",
+  "cat": "Motores / eixos",
+  "nivel": "info"
+ },
+ {
+  "en": "Time-lapse kit communication error. Please reconnect the cable or restart the printer.",
+  "pt": "falha no kit de timelapse; religue o cabo",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Temperature sensor 1 on the AMS # heater has malfunctioned, resulting in abnormal temperature readings.",
+  "pt": "sensor de temperatura 1 do aquecedor com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "Temperature sensor 2 on the AMS # heater has malfunctioned, resulting in abnormal temperature readings.",
+  "pt": "sensor de temperatura 2 do aquecedor com defeito",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The task has been completed. Automatic air purification is in progress.",
+  "pt": "pronto; limpando o ar da câmara",
+  "cat": "Câmara / filtro",
+  "nivel": "info"
+ },
+ {
+  "en": "High chamber temperature detected. If the hotend is overheating or emitting smoke, immediately power off the printer. Please refer to the Wiki for detailed troubleshooting instructions.",
+  "pt": "câmara muito quente; se sair fumaça, desligue já",
+  "cat": "Câmara / filtro",
+  "nivel": "grave"
+ },
+ {
+  "en": "Abnormal nozzle temperature control detected; the heating module may be damaged. Please disconnect the power immediately and stop using the device, and contact customer support for troubleshooting guidance.",
+  "pt": "falha no aquecimento do bico; desligue já",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "No MicroSD card detected. The liveview camera cannot record a time-lapse.",
+  "pt": "sem cartão microSD; sem timelapse",
+  "cat": "Arquivo / cartão",
+  "nivel": "info"
+ },
+ {
+  "en": "Micro SD Card capacity is insufficient to cache print files.",
+  "pt": "microSD sem espaço para os arquivos",
+  "cat": "Arquivo / cartão",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Failed to pull back the filament from the toolhead to AMS. Possible cause: filament or spool stuck.",
+  "pt": "não conseguiu recolher o filamento ao AMS",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Force sensor 2 on the heatbed is abnormal. This may be caused by heatbed lifting jamming or circuit damage.",
+  "pt": "sensor de força 2 com defeito ou mesa travando",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "AMS filament ran out. Please put a new filament into the same slot in AMS and resume.",
+  "pt": "filamento acabou; ponha outro no mesmo slot",
+  "cat": "Filamento",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Nozzle height seems to be too high. Please check if there is residual filament attached to the nozzle.",
+  "pt": "bico alto demais: filamento grudado no bico?",
+  "cat": "Bico / extrusora",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The hotend cooling fan speed is too slow or stopped. It may be stuck or the connector may not be plugged in properly.",
+  "pt": "ventoinha do bico lenta ou parada",
+  "cat": "Ventoinhas",
+  "nivel": "grave"
+ },
+ {
+  "en": "Heatbed homing failed. The environmental vibration is too great.",
+  "pt": "mesa não achou a posição: vibração demais",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "MicroSD Card performance degradation has been detected. It may affect print jobs, logs, and video records. Please format or change the MicroSD card.",
+  "pt": "microSD ficando lento; formate ou troque",
+  "cat": "Arquivo / cartão",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The signal of the heatbed acceleration sensor is weak. The sensor may have fallen off or been damaged.",
+  "pt": "sensor de aceleração da mesa fraco: soltou?",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to connect to the internet. Please check the network connection.",
+  "pt": "sem internet; a impressão continua",
+  "cat": "Rede / internet",
+  "nivel": "info"
+ },
+ {
+  "en": "Chamber temperature is abnormal. The chamber heater's temperature sensor at the air outlet may have an open circuit.",
+  "pt": "sensor da câmara com circuito aberto",
+  "cat": "Câmara / filtro",
+  "nivel": "grave"
+ },
+ {
+  "en": "The nozzle temperature is abnormal; the heater is over temperature.",
+  "pt": "bico quente demais",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "The Micro SD card is in Read-Only mode. Video recording and Timelapse recording cannot be performed. Please refer to the Wiki for assistance.",
+  "pt": "microSD só leitura; sem vídeo nem timelapse",
+  "cat": "Arquivo / cartão",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The factory data of the AP board is abnormal; please replace the AP board with a new one.",
+  "pt": "dados de fábrica da placa AP com defeito",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "A system hang occurred. Please restart the device.",
+  "pt": "o sistema travou; reinicie a impressora",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "The resonance frequency of the Y axis is low. The timing belt may be loose.",
+  "pt": "eixo Y com frequência baixa: correia frouxa?",
+  "cat": "Motores / eixos",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The current sensor of Motor-Z is abnormal. This may be caused by a failure of the hardware sampling circuit.",
+  "pt": "sensor de corrente do motor Z com defeito",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "Y-axis homing abnormal: please check if the toolhead is stuck or the Y carriage has too much resistance.",
+  "pt": "eixo Y com problema: cabeça presa ou carro duro?",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "Heatbed force sensor 2 is too sensitive. It may be stuck between the strain arm and heatbed support, or the adjusting screw may be too tight.",
+  "pt": "sensor de força 2 sensível demais: preso?",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The system voltage is unstable. Triggering the power failure protection function.",
+  "pt": "energia instável; proteção contra queda ativada",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "Hardware incompatible; please check the Micro Lidar.",
+  "pt": "hardware incompatível; veja o Micro Lidar",
+  "cat": "Câmera / sensores",
+  "nivel": "grave"
+ },
+ {
+  "en": "Chamber heating failed. The speed of the heating fan is too low.",
+  "pt": "câmara não aqueceu: ventoinha lenta",
+  "cat": "Câmara / filtro",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Force sensor 1 on the heatbed is abnormal. This may be caused by heatbed lifting jamming or circuit damage.",
+  "pt": "sensor de força 1 com defeito ou mesa travando",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "The extruder servo motor's current sensor is abnormal. A failure of the hardware sampling circuit may cause this.",
+  "pt": "sensor do motor da extrusora com defeito",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "The bed temperature exceeds filament's vitrification temperature, which may cause nozzle clog. Please keep the front door of the printer open. Door open detection has been temporarily turned off.",
+  "pt": "mesa quente para este filamento; abra a porta",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Synchronization between the Micro Lidar and MC is abnormal. Please restart your printer.",
+  "pt": "Micro Lidar dessincronizado; reinicie",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Chamber temperature is abnormal. The temperature sensor at power supply may have an open circuit.",
+  "pt": "sensor da câmara com circuito aberto",
+  "cat": "Câmara / filtro",
+  "nivel": "grave"
+ },
+ {
+  "en": "Heatbed homing abnormal: there may be a bulge on the heatbed or the nozzle tip may not be clean.",
+  "pt": "mesa com problema: calombo ou bico sujo?",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The nozzle temperature is abnormal; the heater may have an open circuit.",
+  "pt": "aquecedor do bico com circuito aberto",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "The Micro Lidar LED may be broken.",
+  "pt": "LED do Micro Lidar pode ter queimado",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "A possible spaghetti failure has been detected. Please check the print quality and decide whether to stop the job. Cleaning the build plate with detergent or drying the filament can effectively reduce the risk of spaghetti failure.",
+  "pt": "possível espaguete! confira a impressão",
+  "cat": "Câmera / sensores",
+  "nivel": "grave"
+ },
+ {
+  "en": "The resistance of Motor-A is abnormal; the motor may have failed.",
+  "pt": "motor A com resistência errada; pode ter queimado",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "Motor-A has a short-circuit. It may have failed.",
+  "pt": "motor A em curto; pode ter queimado",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "The door seems to be open.",
+  "pt": "a porta parece estar aberta",
+  "cat": "Câmara / filtro",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The resistance of Motor-Z is abnormal; the motor may have failed.",
+  "pt": "motor Z com resistência errada; pode ter queimado",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "Streaming function error. Please check the network and try again. You can restart or update the printer if the issue persists.",
+  "pt": "erro no vídeo ao vivo; veja a rede",
+  "cat": "Rede / internet",
+  "nivel": "info"
+ },
+ {
+  "en": "Motor-Z has a short-circuit. It may have failed.",
+  "pt": "motor Z em curto; pode ter queimado",
+  "cat": "Motores / eixos",
+  "nivel": "grave"
+ },
+ {
+  "en": "A system hang occurred. It has been recovered by automatic restart.",
+  "pt": "o sistema travou e reiniciou sozinho",
+  "cat": "Sistema",
+  "nivel": "info"
+ },
+ {
+  "en": "The factory data of AP board is abnormal; please replace the AP board with a new one.",
+  "pt": "dados de fábrica da placa AP com defeito",
+  "cat": "Sistema",
+  "nivel": "grave"
+ },
+ {
+  "en": "The AMS module is malfunctioning. Please restart the device.",
+  "pt": "AMS com defeito; reinicie a impressora",
+  "cat": "AMS",
+  "nivel": "grave"
+ },
+ {
+  "en": "The nozzle is covered with filament, or the build plate is crooked.",
+  "pt": "bico coberto de filamento ou placa torta",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ },
+ {
+  "en": "Failed to resume previous print.",
+  "pt": "não conseguiu retomar a impressão anterior",
+  "cat": "Arquivo / cartão",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The bed temperature exceeds the filament's vitrification temperature, which may cause a nozzle clog. Please keep the front door of the printer open or lower the bed temperature.",
+  "pt": "mesa quente para este filamento; abra a porta",
+  "cat": "Mesa aquecida",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The heatbed temperature is abnormal; the heater may have an open circuit, or the thermal switch may be open.",
+  "pt": "aquecedor da mesa aberto ou chave térmica aberta",
+  "cat": "Mesa aquecida",
+  "nivel": "grave"
+ },
+ {
+  "en": "Micro Lidar lens seems to be dirty. Please clean the lens.",
+  "pt": "lente do Micro Lidar suja; limpe",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "Failed to get image from Live View Camera. Spaghetti and waste chute pileup detection is not available at this time.",
+  "pt": "câmera sem imagem; sem detecção de espaguete",
+  "cat": "Câmera / sensores",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The hotend cooling fan speed is slow. It may be stuck and need cleaning.",
+  "pt": "ventoinha do bico lenta; limpe",
+  "cat": "Ventoinhas",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The content of task file is unreadable; please resend the task.",
+  "pt": "arquivo ilegível; mande a impressão de novo",
+  "cat": "Arquivo / cartão",
+  "nivel": "atencao"
+ },
+ {
+  "en": "The extruder servo motor has a short-circuit. It may have failed.",
+  "pt": "motor da extrusora em curto; pode ter queimado",
+  "cat": "Bico / extrusora",
+  "nivel": "grave"
+ }
+]

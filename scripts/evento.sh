@@ -12,12 +12,17 @@ tipo="$1"; IP=$(le_config CLAUDINHO_IP); TOKEN=$(le_config CLAUDINHO_TOKEN)
 
 # stdin: JSON do evento. session_id vira um hash curto (o id real nao sai do
 # PC); no prompt, o texto so serve para escolher o humor e nao e enviado.
+# Na ferramenta vai so a categoria (codando, terminal, lendo, agente, web),
+# para a cena na tela: nome de arquivo e comando nunca saem do PC.
 leitura=$(python3 -c 'import sys,json,hashlib
 try: d=json.load(sys.stdin)
 except Exception: d={}
 print(hashlib.sha1((d.get("session_id") or "").encode()).hexdigest()[:8])
-print((d.get("prompt") or "").lower().replace("\n"," "))' 2>/dev/null || true)
-sessao=$(printf '%s\n' "$leitura" | sed -n 1p); texto=$(printf '%s\n' "$leitura" | sed -n 2p)
+print((d.get("prompt") or "").lower().replace("\n"," "))
+f=d.get("tool_name") or ""
+print("codando" if f in ("Edit","Write","MultiEdit","NotebookEdit") else "terminal" if f in ("Bash","PowerShell") else
+      "lendo" if f in ("Read","Grep","Glob","LS") else "agente" if f in ("Agent","Task") else "web" if f in ("WebSearch","WebFetch") else "")' 2>/dev/null || true)
+sessao=$(printf '%s\n' "$leitura" | sed -n 1p); texto=$(printf '%s\n' "$leitura" | sed -n 2p); acao=$(printf '%s\n' "$leitura" | sed -n 3p)
 
 humor=""
 if [ "$tipo" = prompt ]; then
@@ -26,8 +31,8 @@ if [ "$tipo" = prompt ]; then
   elif printf '%s' "$texto" | grep -qE 'obrigad|valeu|perfeito|funfou|funcionou|excelente|thanks|thank you|perfect|awesome|great job|it works'; then humor=feliz
   fi
 fi
-# tipo, humor e sessao sao palavras fixas ou hexadecimal: nao precisam de escape.
+# tipo, humor, acao e sessao sao palavras fixas ou hexadecimal: nao precisam de escape.
 # Segredo e corpo vao pela entrada padrao do curl (-K -), fora da linha de comando.
-{ printf 'header = "Authorization: Bearer %s"\nheader = "Content-Type: application/json"\ndata = "{\\"tipo\\":\\"%s\\",\\"humor\\":\\"%s\\",\\"sessao\\":\\"%s\\"}"\n' \
-    "$TOKEN" "$tipo" "$humor" "$sessao" | curl -s -m 2 -o /dev/null -X POST "http://$IP/evento" -K - ; } >/dev/null 2>&1 &
+{ printf 'header = "Authorization: Bearer %s"\nheader = "Content-Type: application/json"\ndata = "{\\"tipo\\":\\"%s\\",\\"humor\\":\\"%s\\",\\"acao\\":\\"%s\\",\\"sessao\\":\\"%s\\"}"\n' \
+    "$TOKEN" "$tipo" "$humor" "$acao" "$sessao" | curl -s -m 2 -o /dev/null -X POST "http://$IP/evento" -K - ; } >/dev/null 2>&1 &
 exit 0

@@ -269,6 +269,11 @@ servidor, sem token). Ele mostra:
   1ª camada...), retomou, faltam 5 min, trocou o filamento, terminou (com a
   duração), falhou/cancelada, avisos HMS da impressora e AMS úmido (≥ 50 %).
   Em jogo, paleta ou atualização, os alertas esperam a volta ao rosto.
+  Os avisos HMS aparecem em português (categoria + frase curta + código
+  pequeno), com a lista oficial da Bambu embutida; os **informativos** (sem
+  internet, relógio, câmera ao vivo...) saem sozinhos em 20 s e não se
+  repetem por 30 min. `claudinho.sh alerta bom|ruim|filamento|hms` mostra um
+  exemplo.
 
 Passos:
 
@@ -303,9 +308,20 @@ O código vai do computador para a placa pela rede local, junto com o segredo
 do Claudinho (como os outros comandos): protegido contra quem não tem o
 segredo, mas sem criptografia na rede de casa.
 
+## Cenas
+
+Enquanto o Claude usa ferramentas, a tela mostra uma cena em vez da cara de
+trabalhando: editor de código (editar arquivo), terminal (comandos), chuva do
+Matrix (ler/procurar) e organograma (subagentes), com um mini Claudinho no
+canto. É tudo de mentira: o hook manda só a categoria, nunca arquivo ou
+comando. Se a pessoa perguntar, explique isso; para mostrar uma:
+`claudinho.sh cena codando|terminal|lendo|agente`. As cenas usam a fonte 5
+(JetBrains Mono) da tela: quem atualizar o firmware para 1.6 ou mais precisa
+também da tela nova (`claudinho.sh tela`, pede um toque).
+
 ## Referência rápida
 
-`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
+`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
 
 `atualizar` e `tela` pedem um toque na tela do Claudinho (avise a pessoa antes).
 Tipos de cara: inicio, prompt, ferramenta, erro, parou, atencao, compact, fim, dormir.

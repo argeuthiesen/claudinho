@@ -16,7 +16,7 @@ Claudinho reacts on its own to what Claude Code is doing:
 | Excited | prompt with "thanks", "it works", "perfect", "awesome"... |
 | Worried | prompt with "error", "bug", "doesn't work", "failed"... |
 | Startled | prompt with a swear word |
-| Working | Claude is about to use a tool |
+| Working | Claude is about to use a tool (or one of the scenes below) |
 | Suspicious | 5 tool calls in a row |
 | Angry | a tool call failed |
 | Waiting for you | Claude needs your permission or an answer |
@@ -29,6 +29,26 @@ Claudinho reacts on its own to what Claude Code is doing:
 Mood words are matched in English and Portuguese, and your prompt text never
 leaves your computer: only the label ("happy", "worried", "startled") goes to
 the board.
+
+## Scenes while Claude works
+
+While Claude uses tools, instead of the working face Claudinho plays a little
+scene, with a mini Claudinho (arms, legs and all) in the corner:
+
+| Claude is... | Scene |
+|---|---|
+| editing a file | a code editor: a terminal types `code claudinho.ino`, then colored code is typed line by line and scrolls |
+| running a command | a terminal typing commands, with output scrolling |
+| reading or searching the code | the Matrix rain |
+| delegating to a subagent | an org chart: Claude on top, agents appearing below |
+
+It's all make-believe, stored on the board: the code and commands on screen are
+fake. Only the category (editing, terminal, reading, agent) leaves your
+computer; file names and commands never do. Each scene stays at least 8
+seconds, so the screen doesn't flicker; 12 seconds with no tool, it goes back
+to the face. Any other event (done, needs you, error) goes straight to the
+face. Tap to see the usage card. To try one: `claudinho.sh cena codando`
+(`terminal`, `lendo`, `agente`).
 
 ## Plan usage
 
@@ -120,7 +140,10 @@ the model.) While printing, it shows up on its
 own every 5 minutes for 15 seconds. **Tap to pin it**; tap again to go back to
 the face. From the usage card, a tap also takes you to the panel.
 
-**The alerts** stay on screen **until you tap** (the tap means "got it"); if
+**The alerts** show "IMPRESSORA 3D" (3D printer) and the model at the top, a
+big title in the alert's color, the part name, the detail, and a little
+Claudinho at the bottom: jumping for good news, waving its arms when something
+needs you. They stay on screen **until you tap** (the tap means "got it"); if
 several pile up, they show one after the other (screen texts are in
 Portuguese):
 
@@ -133,11 +156,25 @@ Portuguese):
 | Trocou o filamento | filament change, with the new color (one alert, kept up to date) |
 | Terminou! (finished) | with how long it took |
 | Falhou / Cancelada | failed (with the error code) or cancelled |
-| Aviso HMS | a health warning from the printer, with its code |
+| HMS warnings | the printer's health warnings, in plain words (see below) |
 | AMS úmido | AMS humidity reached 50% |
 
+**HMS warnings, in plain words.** Bambu printers report problems as HMS codes
+(like `0500-0200-0002-0005`). Claudinho carries Bambu's whole list (about 2,000
+codes), rewritten as short Portuguese phrases: the title is the area (AMS,
+nozzle / extruder, heated bed, network / internet...), the detail says what
+happened, and the code stays small at the bottom, to look up in Bambu's wiki.
+The color follows how serious it is: blue is informative, yellow needs
+attention, red is serious.
+
+**Tap or 20 seconds.** Informative warnings (no internet, clock sync, live
+view, filter life...) **leave on their own after 20 seconds** and don't repeat
+for 30 minutes: when the internet drops and comes back, it won't pop up every
+time. Everything else waits for your tap.
+
 During a game, the color palette or an update, the alerts wait until you're
-back on the face. To turn it off: `claudinho.sh bambu desligar` (erases the
+back on the face. To see what they look like: `claudinho.sh alerta bom` (good
+news), `ruim` (a pause), `filamento` or `hms`. To turn it off: `claudinho.sh bambu desligar` (erases the
 code from the board).
 
 ## Updating

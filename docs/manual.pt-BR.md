@@ -16,7 +16,7 @@ O Claudinho reage sozinho ao que o Claude Code está fazendo:
 | Empolgado | prompt com "obrigado", "valeu", "funcionou", "perfeito"... |
 | Preocupado | prompt com "erro", "bug", "não funciona", "travou"... |
 | Susto | prompt com palavrão |
-| Trabalhando | o Claude vai usar uma ferramenta |
+| Trabalhando | o Claude vai usar uma ferramenta (ou uma das cenas abaixo) |
 | Desconfiado | 5 ferramentas seguidas |
 | Bravo | uma ferramenta falhou |
 | Esperando você | o Claude precisa da sua permissão ou de uma resposta |
@@ -29,6 +29,27 @@ O Claudinho reage sozinho ao que o Claude Code está fazendo:
 As palavras do humor são procuradas em português e em inglês, e o texto do
 prompt nunca sai do seu computador: só a etiqueta ("feliz", "preocupado",
 "susto") vai para a placa.
+
+## Cenas enquanto o Claude trabalha
+
+Enquanto o Claude usa ferramentas, no lugar da cara de trabalhando o
+Claudinho mostra uma cena, com um Claudinho pequeno (com bracinhos e
+perninhas) no canto:
+
+| O Claude está... | Cena |
+|---|---|
+| editando um arquivo | um editor de código: um terminal digita `code claudinho.ino`, e o código colorido vai sendo digitado e rolando |
+| rodando um comando | um terminal digitando comandos, com a saída rolando |
+| lendo ou procurando no código | a chuva do Matrix |
+| delegando para um subagente | um organograma: o Claude em cima, os agentes surgindo embaixo |
+
+É tudo de mentira, guardado na placa: o código e os comandos da tela são
+inventados. Do seu computador sai só a categoria (editando, terminal, lendo,
+agente); nome de arquivo e comando nunca saem. Cada cena fica pelo menos 8
+segundos, para a tela não piscar; 12 segundos sem ferramenta, volta ao rosto.
+Qualquer outro evento (terminou, precisa de você, erro) volta ao rosto na
+hora. Tocar mostra o cartão de consumo. Para ver uma: `claudinho.sh cena
+codando` (`terminal`, `lendo`, `agente`).
 
 ## O consumo do plano
 
@@ -118,8 +139,11 @@ o painel mostra o modelo.) Imprimindo, ele aparece
 sozinho a cada 5 minutos por 15 segundos. **Toque para fixar**; toque de novo
 para voltar ao rosto. Do cartão de consumo, um toque também leva ao painel.
 
-**Os alertas** ficam na tela **até você tocar** (o toque quer dizer "li"); se
-juntarem vários, aparecem um depois do outro:
+**Os alertas** mostram "IMPRESSORA 3D" e o modelo no alto, um título grande na
+cor do alerta, o nome da peça, o detalhe e um Claudinho pequeno embaixo:
+pulando nas notícias boas, abanando os braços quando algo precisa de você.
+Ficam na tela **até você tocar** (o toque quer dizer "li"); se juntarem
+vários, aparecem um depois do outro:
 
 | Alerta | Quando |
 |---|---|
@@ -130,11 +154,25 @@ juntarem vários, aparecem um depois do outro:
 | Trocou o filamento | troca de filamento, com a cor nova (um alerta só, atualizado) |
 | Terminou! | com quanto tempo levou |
 | Falhou / Cancelada | falhou (com o código do erro) ou foi cancelada |
-| Aviso HMS | aviso de saúde da impressora, com o código |
+| Avisos HMS | os avisos de saúde da impressora, em palavras simples (veja abaixo) |
 | AMS úmido | a umidade do AMS chegou a 50 % |
 
+**Avisos HMS em português.** As impressoras Bambu avisam problemas com códigos
+HMS (como `0500-0200-0002-0005`). O Claudinho leva a lista inteira da Bambu
+(uns 2.000 códigos), reescrita em frases curtas: o título é a área (AMS,
+bico / extrusora, mesa aquecida, rede / internet...), o detalhe diz o que
+aconteceu, e o código fica pequeno embaixo, para procurar no wiki da Bambu. A
+cor segue a gravidade: azul é informativo, amarelo pede atenção, vermelho é
+grave.
+
+**Toque ou 20 segundos.** Os avisos informativos (sem internet, acerto do
+relógio, câmera ao vivo, vida do filtro...) **saem sozinhos em 20 segundos** e
+não se repetem por 30 minutos: se a internet cair e voltar, não fica
+pipocando. Todo o resto espera o seu toque.
+
 Num jogo, na paleta de cores ou numa atualização, os alertas esperam você
-voltar ao rosto. Para desligar: `claudinho.sh bambu desligar` (apaga o código
+voltar ao rosto. Para ver como ficam: `claudinho.sh alerta bom` (notícia
+boa), `ruim` (uma pausa), `filamento` ou `hms`. Para desligar: `claudinho.sh bambu desligar` (apaga o código
 da placa).
 
 ## Atualizar

@@ -24,6 +24,7 @@
 
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
+#include "hms_pt.h"      // avisos HMS da Bambu em portugues (gerado por firmware/hms/gerar.py)
 #include <esp_wifi.h>
 #include <WebServer.h>
 #include <Preferences.h>
@@ -100,6 +101,8 @@ bool caraDesenhada = false;
 struct { Cara cara = C_NEUTRO; unsigned long ate = 0; } evento;   // cara vinda de evento, com validade
 
 int  pagina = 0;
+bool forcaCena = false;      // evento de teste: troca a cena sem esperar o minimo
+int  miniP = 4;              // tamanho do pixel do mini Clawd (4 nas cenas, 6 nos alertas)
 unsigned long paginaDesde = 0;
 unsigned long paginaDur = VOLTA_PAGINA_MS;    // quanto a tela de numeros fica antes de voltar ao rosto
 
@@ -512,7 +515,8 @@ void trataEvento(const char* tipo, const char* humor) {
   static int ferramentasSeguidas = 0;
   if (strcmp(tipo, "ferramenta") != 0 && strcmp(tipo, "erro") != 0) ferramentasSeguidas = 0;
   if (consumo.naTela && pagina != 0) mudaPagina(0);    // qualquer evento volta ao rosto na hora
-  if (pagina == 9 && !strcmp(tipo, "atencao")) mudaPagina(0);   // o Claude precisa de voce: vale mais que o painel
+  if (pagina == 9 && !strcmp(tipo, "atencao")) mudaPagina(0);
+  if (pagina == 10 && strcmp(tipo, "ferramenta")) mudaPagina(0);   // qualquer outro evento: sai da cena e mostra a cara   // o Claude precisa de voce: vale mais que o painel
   if (pagina == 6 && !strcmp(tipo, "atencao")) avisoVelha();   // no jogo: so avisa no canto
   if      (!strcmp(tipo, "inicio"))     { poeCara(C_FELIZ, 5000); pedeConsumo(20000, false, false); }
   else if (!strcmp(tipo, "prompt")) {
@@ -522,7 +526,9 @@ void trataEvento(const char* tipo, const char* humor) {
     else                                   poeCara(C_PENSANDO, 120000);
   }
   else if (!strcmp(tipo, "ferramenta")) {
-    if (++ferramentasSeguidas == 5) poeCara(C_DESCONFIADO, 4000);
+    ++ferramentasSeguidas;
+    if (cenaPorFerramenta(forcaCena)) {}                                     // editor, terminal, Matrix ou organograma
+    else if (ferramentasSeguidas == 5) poeCara(C_DESCONFIADO, 4000);
     else if (caraDesejada() != C_DESCONFIADO) poeCara(C_TRABALHANDO, 120000);
   }
   else if (!strcmp(tipo, "erro"))       poeCara(C_BRAVO, 3500);
@@ -590,6 +596,8 @@ void desenhaMoldura() {
     painel(true);
   } else if (pagina == 8) {
     desenhaAlerta();
+  } else if (pagina == 10) {
+    cenaInicio();
   } else if (pagina >= 6) {
     // os jogos desenham a propria tela
   } else if (pagina >= 3) {
@@ -1068,45 +1076,64 @@ struct {
   int pct = -1, restante = -1, camada = -1, camadas = -1, erro = 0, stg = -1, trayNow = 255;
   float bico = 0, bicoAlvo = 0, mesa = 0, mesaAlvo = 0;
   uint32_t cor[4] = {0, 0, 0, 0}; char tipo[4][8] = {"", "", "", ""}; bool temAms = false;
-  int umid = -1; char modelo[24] = "";
+  int umid = -1; char modelo[24] = ""; long inicio = 0;   // inicio: hora em que a impressao comecou (da impressora)
 } bi;
 
 // ---- alertas (pagina 8)
 enum { A_GERAL, A_FILAMENTO };
-struct Alerta { uint8_t tipo; uint16_t cor; char titulo[20]; char l1[48]; char l2[40]; char hora[6]; uint32_t amostra; };
+struct Alerta { uint8_t tipo; uint16_t cor; char titulo[24]; char l1[56]; char l2[60]; char codigo[24]; char hora[6]; uint32_t amostra; bool fixo; };   // fixo: espera o toque
 static const int A_MAX = 6;
+static const unsigned long A_INFO_MS = 20000, A_INFO_REPETE_MS = 1800000;   // informativo: some em 20 s; nao repete em 30 min
 Alerta aFila[A_MAX]; int aN = 0;
 unsigned long bInicioEm = 0, bPausaPend = 0; bool b5min = false, bUmidAvisada = false; int bUltTray = -1;
 uint32_t bHmsVisto[8][2]; int bHmsN = 0; bool bHmsBase = false;
 
-void abreAlerta() { mudaPagina(8); paginaDur = B_FIXO; }
+void abreAlerta() { mudaPagina(8); paginaDur = aFila[0].fixo ? B_FIXO : A_INFO_MS; }
 void novoAlerta(uint8_t tipo, uint16_t cor, const char* titulo, const char* l1, const char* l2, uint32_t amostra) {
-  Alerta* a = nullptr;
+  Alerta* a = nullptr; bool cabecaMudou = false;
   if (tipo == A_FILAMENTO) for (int i = 0; i < aN; i++) if (aFila[i].tipo == A_FILAMENTO) a = &aFila[i];   // troca de cor: um aviso so, atualizado
   if (!a) {
-    if (aN == A_MAX) { memmove(aFila, aFila + 1, sizeof(Alerta) * (A_MAX - 1)); aN--; }
+    if (aN == A_MAX) { memmove(aFila, aFila + 1, sizeof(Alerta) * (A_MAX - 1)); aN--; cabecaMudou = true; }   // fila cheia: sai o mais velho
     a = &aFila[aN++];
   }
-  a->tipo = tipo; a->cor = cor; a->amostra = amostra;
-  strlcpy(a->titulo, titulo, sizeof a->titulo); strlcpy(a->l1, l1, sizeof a->l1); strlcpy(a->l2, l2, sizeof a->l2);
+  a->tipo = tipo; a->cor = cor; a->amostra = amostra; a->fixo = true;
+  strlcpy(a->titulo, titulo, sizeof a->titulo); strlcpy(a->l2, l2, sizeof a->l2); a->codigo[0] = 0;
+  if (l1 == bi.nome && l1[0]) snprintf(a->l1, sizeof a->l1, "pe\xe7" "a: %s", l1);   // o nome da peca, com rotulo
+  else strlcpy(a->l1, l1, sizeof a->l1);
   a->hora[0] = 0; if (relogioValido()) horaStr(time(nullptr), a->hora, sizeof a->hora);
   registra("bambu: alerta %s (%s)", titulo, l2);
-  if (pagina == 8 && a == &aFila[0]) abreAlerta();   // o que esta na tela mudou
+  if (pagina == 8 && (a == &aFila[0] || cabecaMudou)) abreAlerta();   // o que esta na tela mudou
 }
 void desenhaAlerta() {
   limpaTela(COR_FUNDO);
   if (!aN) return;
   const Alerta& a = aFila[0];
-  preenche(0, 0, 320, 64, a.cor);
-  escreve(0, 16, 320, 36, FONTE_32, COR_OLHO, a.cor, 1, a.titulo);
-  escreve(12, 80, 296, 20, FONTE_P, COR_APAGADO, COR_FUNDO, 1, a.l1);
-  int y = 112;
-  if (a.amostra) { preenche(136, y, 48, 36, cor565(a.amostra)); y += 44; }
-  escreve(8, y, 304, 30, FONTE_M, COR_TEXTO, COR_FUNDO, 1, a.l2);
-  char t[40];
-  if (a.hora[0]) { snprintf(t, sizeof t, "\xe0s %s", a.hora); escreve(0, 186, 320, 20, FONTE_P, COR_APAGADO, COR_FUNDO, 1, t); }
-  if (aN > 1) snprintf(t, sizeof t, "toque: li  (mais %d)", aN - 1); else strcpy(t, "toque: li");
-  escreve(0, 214, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, t);
+  char t[64];
+  // cabecalho: de onde vem, e um traco na cor do alerta
+  escreve(12, 6, 180, 28, FONTE_M, COR_TEXTO, COR_FUNDO, 0, "IMPRESSORA 3D");
+  escreve(190, 10, 118, 20, FONTE_P, COR_APAGADO, COR_FUNDO, 2, bi.modelo[0] ? bi.modelo : "Bambu Lab");
+  preenche(0, 38, 320, 3, a.cor);
+  bool grande = strlen(a.titulo) <= 12;
+  escreve(0, grande ? 46 : 54, 320, grande ? 54 : 38, grande ? FONTE_G : FONTE_32, a.cor, COR_FUNDO, 1, a.titulo);
+  escreve(8, 102, 304, 20, FONTE_P, COR_APAGADO, COR_FUNDO, 1, a.l1);
+  // detalhe: uma ou duas linhas (quebra no espaco), com a amostra da cor na troca de filamento
+  if (a.amostra) {
+    preenche(16, 126, 34, 30, COR_BRANCO); preenche(18, 128, 30, 26, cor565(a.amostra));
+    escreve(58, 126, 254, 30, FONTE_M, COR_TEXTO, COR_FUNDO, 0, a.l2);
+  } else if (strlen(a.l2) <= 26) {
+    escreve(8, 130, 304, 30, FONTE_M, COR_TEXTO, COR_FUNDO, 1, a.l2);
+  } else {
+    int n = strlen(a.l2), q = 26; while (q > 0 && a.l2[q] != ' ') q--; if (q == 0) q = 26;
+    strlcpy(t, a.l2, min(q + 1, (int)sizeof t)); escreve(8, 122, 304, 26, FONTE_M, COR_TEXTO, COR_FUNDO, 1, t);
+    escreve(8, 148, 304, 26, FONTE_M, COR_TEXTO, COR_FUNDO, 1, a.l2 + min(n, q + (a.l2[q] == ' ' ? 1 : 0)));
+  }
+  // embaixo: o Claudinho (pula ou abana os bracos), a hora, o "toque: li" e o codigo
+  alertaMini(0);
+  if (a.hora[0]) { snprintf(t, sizeof t, "\xe0s %s", a.hora); escreve(110, 178, 200, 20, FONTE_P, COR_APAGADO, COR_FUNDO, 1, t); }
+  const char* acao = a.fixo ? "toque: li" : "sai sozinho";
+  if (aN > 1) snprintf(t, sizeof t, "%s  (mais %d)", acao, aN - 1); else strcpy(t, acao);
+  escreve(110, 200, 200, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, t);
+  if (a.codigo[0]) escreve(110, 222, 200, 18, FONTE_P, COR_TRILHO, COR_FUNDO, 1, a.codigo);
 }
 void toqueAlerta() {
   if (aN) { registra("bambu: alerta lido (%s)", aFila[0].titulo); memmove(aFila, aFila + 1, sizeof(Alerta) * (A_MAX - 1)); aN--; }
@@ -1114,7 +1141,7 @@ void toqueAlerta() {
 }
 // Mostra o proximo alerta quando a tela esta no rosto, no painel ou no consumo automatico.
 void cuidaAlertas() {
-  if (aN && (pagina == 0 || pagina == 9 || (pagina == 1 && consumo.naTela))) abreAlerta();
+  if (aN && (pagina == 0 || pagina == 9 || pagina == 10 || (pagina == 1 && consumo.naTela))) abreAlerta();
 }
 
 const char* motivoPausa(int stg) {
@@ -1158,7 +1185,10 @@ void bDetecta(const char* antes, int restAntes) {
       if (bPausaPend) bPausaPend = 0;                           // pausa rapida: nem avisou
       else novoAlerta(A_GERAL, COR_OK, "Retomou", bi.nome, "imprimindo de novo", 0);
     } else if (!strcmp(e, "FINISH") && era) {
-      bPausaPend = 0; t[0] = 0; if (bInicioEm) duracao(millis() - bInicioEm, t, sizeof t);
+      bPausaPend = 0; t[0] = 0;
+      long agora = time(nullptr);                               // a hora da impressora vale mesmo depois de reiniciar
+      if (bi.inicio > 1600000000L && relogioValido() && agora > bi.inicio) duracao((agora - bi.inicio) * 1000UL, t, sizeof t);
+      else if (bInicioEm) duracao(millis() - bInicioEm, t, sizeof t);
       novoAlerta(A_GERAL, COR_OK, "Terminou!", bi.nome, t, 0);
     } else if (!strcmp(e, "FAILED") && era) {
       bPausaPend = 0;
@@ -1190,6 +1220,19 @@ void bConfereUmidade() {
     novoAlerta(A_GERAL, COR_AZUL, "AMS \xfamido", "hora de secar o filamento", t, 0);
   } else if (bi.umid < 40) bUmidAvisada = false;
 }
+// HMS: a tabela gerada (hms_pt.h) da categoria, o nivel e uma frase curta em
+// portugues; o codigo vai pequeno embaixo. Codigo que a tabela nao conhece:
+// categoria pela familia do codigo.
+const char* hmsCatFamilia(uint32_t at) {
+  switch (at >> 24) {
+    case 0x03: return "Impressora";
+    case 0x05: return "Sistema";
+    case 0x07: case 0x18: return "AMS";
+    case 0x0C: return "C\xe2mera / sensores";
+    case 0x29: return "C\xe2mara / filtro";
+  }
+  return "Aviso da impressora";
+}
 void bConfereHms(JsonArray h) {
   uint32_t novo[8][2]; int n = 0;
   for (JsonObject o : h) { if (n == 8) break; novo[n][0] = o["attr"] | 0UL; novo[n][1] = o["code"] | 0UL; n++; }
@@ -1197,10 +1240,33 @@ void bConfereHms(JsonArray h) {
     bool visto = false;
     for (int j = 0; j < bHmsN; j++) if (bHmsVisto[j][0] == novo[i][0] && bHmsVisto[j][1] == novo[i][1]) visto = true;
     if (visto) continue;
-    uint32_t at = novo[i][0], co = novo[i][1]; int sev = co >> 16;
-    char t[40]; snprintf(t, sizeof t, "%04X_%04X_%04X_%04X", (unsigned)(at >> 16), (unsigned)(at & 0xFFFF), (unsigned)(co >> 16), (unsigned)(co & 0xFFFF));
-    const char* g = sev == 1 ? "fatal" : sev == 2 ? "grave" : sev == 3 ? "aviso" : "informa\xe7\xe3o";
-    novoAlerta(A_GERAL, sev <= 2 ? COR_CRITICO : sev == 3 ? COR_ALERTA : COR_AZUL, "Aviso HMS", g, t, 0);
+    uint32_t at = novo[i][0], co = novo[i][1];
+    char cod[24]; snprintf(cod, sizeof cod, "HMS %04X-%04X-%04X-%04X", (unsigned)(at >> 16), (unsigned)(at & 0xFFFF), (unsigned)(co >> 16), (unsigned)(co & 0xFFFF));
+    const HmsCodigo* e = hmsBusca(at, co);
+    bool info = e ? e->nivel == 0 : (co >> 16) >= 4;
+    if (info) {                                        // informativo repetido (internet caindo e voltando): fica quieto
+      static struct { uint32_t a, c; unsigned long em; } visto[6]; static int prox = 0;
+      bool repetido = false;
+      for (auto& v : visto) if (v.em && v.a == at && v.c == co && millis() - v.em < A_INFO_REPETE_MS) repetido = true;
+      if (repetido) { registra("bambu: %s repetido, ignorado", cod); continue; }
+      visto[prox] = {at, co, millis()}; prox = (prox + 1) % 6;
+    }
+    const char* cat; const char* frase; char onde[32] = ""; uint16_t cor;
+    if (e) {
+      cat = HMS_CAT[e->cat]; frase = HMS_TXT[e->txt];
+      cor = e->nivel == 0 ? COR_AZUL : e->nivel == 1 ? COR_ALERTA : COR_CRITICO;
+      if (e->unid) {
+        if (e->slot) snprintf(onde, sizeof onde, "%s %c  \xb7  slot %d", e->ht ? "AMS-HT" : "AMS", e->unid, e->slot);
+        else snprintf(onde, sizeof onde, "%s %c", e->ht ? "AMS-HT" : "AMS", e->unid);
+      }
+    } else {                                           // a Bambu inventou um codigo novo
+      int sev = co >> 16;
+      cat = hmsCatFamilia(at); frase = "procure o c\xf3" "digo no wiki da Bambu";
+      cor = sev <= 2 ? COR_CRITICO : sev == 3 ? COR_ALERTA : COR_AZUL;
+    }
+    novoAlerta(A_GERAL, cor, cat, onde[0] ? onde : (bImprimindo() ? bi.nome : ""), frase, 0);
+    strlcpy(aFila[aN - 1].codigo, cod, sizeof aFila[aN - 1].codigo); aFila[aN - 1].fixo = !info;
+    if (pagina == 8 && aN == 1) abreAlerta();          // redesenha com o codigo
   }
   memcpy(bHmsVisto, novo, sizeof novo); bHmsN = n; bHmsBase = true;
 }
@@ -1260,6 +1326,7 @@ void bProcessa(const uint8_t* js, size_t n) {
     filtro["print"]["ams"]["ams"][0]["tray"][0]["tray_type"] = true;
     filtro["print"]["ams"]["ams"][0]["humidity_raw"] = true;
     filtro["print"]["hms"] = true;
+    filtro["print"]["gcode_start_time"] = true;
     filtro["info"]["module"][0]["name"] = true;
     filtro["info"]["module"][0]["product_name"] = true;
     pronto = true;
@@ -1281,6 +1348,7 @@ void bProcessa(const uint8_t* js, size_t n) {
   if (!p["total_layer_num"].isNull()) bi.camadas = p["total_layer_num"];
   if (!p["print_error"].isNull()) bi.erro = p["print_error"];
   if (!p["stg_cur"].isNull()) bi.stg = p["stg_cur"];
+  if (!p["gcode_start_time"].isNull()) bi.inicio = p["gcode_start_time"].as<String>().toInt();
   if (!p["nozzle_temper"].isNull()) bi.bico = p["nozzle_temper"];
   if (!p["nozzle_target_temper"].isNull()) bi.bicoAlvo = p["nozzle_target_temper"];
   if (!p["bed_temper"].isNull()) bi.mesa = p["bed_temper"];
@@ -1461,6 +1529,380 @@ void toquePainel() {
   else mudaPagina(0);
 }
 
+// ---------------------------------------------------------------- cenas (pagina 10)
+// Enquanto o Claude usa ferramentas, em vez da cara de trabalhando o Claudinho
+// mostra uma cena: editor de codigo (Edit/Write), terminal (Bash), chuva do
+// Matrix (Read/Grep/Glob) ou organograma (Agent). Tudo de mentira, guardado
+// aqui: o que o Claude faz de verdade nunca vem para a placa (o hook manda so
+// a categoria). Cada cena fica pelo menos 8 s; 12 s sem ferramenta, volta ao
+// rosto. Um mini Clawd (com bracinhos e perninhas) fica no canto.
+// Letra mono: fonte 5 (JetBrains Mono, 16 px de altura, 7 px por letra).
+// Nada de aspas nem barra invertida nos textos: vao direto no xstr.
+enum { S_NENHUMA = -1, S_CODANDO, S_TERMINAL, S_LENDO, S_AGENTE };
+static const int FONTE_MONO = 5, MONO_W = 7, MONO_LH = 17;
+static const unsigned long CENA_MIN_MS = 8000, CENA_FIM_MS = 12000;
+int cenaAtual = S_NENHUMA; unsigned long cenaDesde = 0, cenaProx = 0;
+char acaoEvento[12] = "";
+
+int cenaDe(const char* a) {
+  if (!strcmp(a, "codando"))  return S_CODANDO;
+  if (!strcmp(a, "terminal")) return S_TERMINAL;
+  if (!strcmp(a, "lendo"))    return S_LENDO;
+  if (!strcmp(a, "agente"))   return S_AGENTE;
+  return S_NENHUMA;
+}
+
+// ---- mini Clawd (pixel de 4): corpo 10x7, bracinhos 2x2 dos lados, 4 perninhas
+#define MINI_W (14 * miniP)
+#define MINI_H (9 * miniP)
+int miniX = 0, miniY = 0; uint16_t miniFundo = 0;
+void miniCel(int cx, int cy, int w, int h, uint16_t c) { preenche(miniX + cx * miniP, miniY + cy * miniP, w * miniP, h * miniP, c); }
+void miniClawd(int x, int y, uint16_t fundo) {
+  miniX = x; miniY = y; miniFundo = fundo;
+  uint16_t r = corRosto();
+  preenche(x, y, MINI_W, MINI_H, fundo);
+  miniCel(2, 0, 10, 7, r);
+  miniCel(0, 3, 2, 2, r); miniCel(12, 3, 2, 2, r);
+  miniCel(3, 7, 1, 2, r); miniCel(5, 7, 1, 2, r); miniCel(8, 7, 1, 2, r); miniCel(10, 7, 1, 2, r);
+  miniCel(4, 2, 1, 3, COR_OLHO); miniCel(9, 2, 1, 3, COR_OLHO);
+}
+void miniBracos(int sobe) {          // 0 nenhum, 1 esquerdo, 2 direito (digitando), 3 os dois
+  uint16_t r = corRosto();
+  miniCel(0, 2, 2, 3, miniFundo); miniCel(12, 2, 2, 3, miniFundo);
+  miniCel(0, (sobe & 1) ? 2 : 3, 2, 2, r); miniCel(12, (sobe & 2) ? 2 : 3, 2, 2, r);
+}
+void miniOlhos(int dx) {             // -1 esquerda, 0 frente, 1 direita (lendo)
+  miniCel(3, 2, 8, 3, corRosto());
+  miniCel(4 + dx, 2, 1, 3, COR_OLHO); miniCel(9 + dx, 2, 1, 3, COR_OLHO);
+}
+
+// ---- editor: codigo de mentira, com cores de sintaxe, digitado e rolando
+#define CK "\x01"   // palavra-chave
+#define CF "\x02"   // funcao
+#define CS "\x03"   // texto
+#define CC "\x04"   // comentario
+#define CN "\x05"   // numero
+#define CP "\x06"   // resto
+#define CT "\x07"   // tipo
+static const char* const CODIGO[] = {
+  CC "// acorda o Claudinho",
+  CT "void " CF "acorda" CP "() {",
+  CT "  int " CP "n = " CN "42" CP ";",
+  CK "  if " CP "(n > " CN "0" CP ") {",
+  CP "    tela." CF "pisca" CP "(" CN "3" CP ");",
+  CF "    fala" CP "(" CS "'oi!'" CP ");",
+  CP "  }",
+  CK "  for " CP "(" CT "int " CP "i = " CN "0" CP "; i < n; i++)",
+  CP "    olho[i] = " CK "true" CP ";",
+  CP "}",
+  "",
+  CC "// quanto custa? nada.",
+  CT "int " CF "tokens" CP "() {",
+  CK "  return " CN "0" CP ";",
+  CP "}",
+  "",
+  CT "bool " CF "feliz" CP "(" CT "int " CP "humor) {",
+  CK "  while " CP "(humor < " CN "10" CP ")",
+  CP "    humor += " CF "cafe" CP "();",
+  CK "  return true" CP ";",
+  CP "}",
+  "",
+  CC "/* TODO: dominar o mundo */",
+  CT "void " CF "loop" CP "() {",
+  CF "  acorda" CP "();",
+  CF "  delay" CP "(" CN "10" CP ");",
+  CP "}",
+  "",
+};
+static const int N_CODIGO = sizeof CODIGO / sizeof CODIGO[0];
+static const int ED_TOPO = 22, ED_X = 30, ED_LINHAS = 12;
+static const uint16_t ED_FUNDO = RGB565(30, 30, 30);
+int edTopo = 0, edCol = 0, edEspera = 0, edPre = 0;   // edPre: letras ja digitadas do preambulo (-1 = no editor)
+static const char ED_PRE[] = "code claudinho.ino";
+
+uint16_t edCor(char c) {
+  switch (c) {
+    case 1: return RGB565(86, 156, 214);
+    case 2: return RGB565(220, 220, 170);
+    case 3: return RGB565(206, 145, 120);
+    case 4: return RGB565(106, 153, 85);
+    case 5: return RGB565(181, 206, 168);
+    case 7: return RGB565(78, 201, 176);
+  }
+  return RGB565(212, 212, 212);
+}
+int edTam(int li) { int n = 0; for (const char* p = CODIGO[li % N_CODIGO]; *p; p++) if (*p >= 8) n++; return n; }
+int edY(int row) { return ED_TOPO + row * MONO_LH; }
+int edLarg(int row) { return (edY(row) + 16 > miniY) ? miniX - 2 : 320; }   // nao apaga o mini Clawd
+// Desenha os "ate" primeiros caracteres da linha li (-1 = todos), por pedacos da mesma cor.
+void edLinha(int row, int li, int ate) {
+  int y = edY(row), col = 0, n = 0; char seg[48]; uint16_t cor = edCor(6);
+  preenche(0, y, edLarg(row), 16, ED_FUNDO);
+  char num[6]; snprintf(num, sizeof num, "%d", li % 1000 + 1);
+  escreve(0, y, 24, 16, FONTE_MONO, RGB565(110, 110, 110), ED_FUNDO, 2, num);
+  for (const char* p = CODIGO[li % N_CODIGO]; ; p++) {
+    bool fim = !*p || (ate >= 0 && col >= ate && *p >= 8);
+    if ((fim || *p < 8) && n) { seg[n] = 0; escreve(ED_X + (col - n) * MONO_W, y, n * MONO_W, 16, FONTE_MONO, cor, ED_FUNDO, 0, seg); n = 0; }
+    if (fim) break;
+    if (*p < 8) { cor = edCor(*p); continue; }
+    if (n < 46) seg[n++] = *p;
+    col++;
+  }
+}
+void edCursor() { preenche(ED_X + edCol * MONO_W, edY(ED_LINHAS - 1) + 1, MONO_W, 14, RGB565(230, 230, 230)); }
+// Preambulo: um terminal digita "code claudinho.ino" e o editor abre.
+void edInicio() {
+  limpaTela(0);
+  escreve(6, 20, MONO_W, 16, FONTE_MONO, RGB565(150, 255, 170), 0, 0, "$");
+  edPre = 0;
+}
+void edAbre() {
+  limpaTela(ED_FUNDO);
+  preenche(0, 0, 320, 20, RGB565(45, 45, 45)); preenche(0, 0, 112, 20, ED_FUNDO); preenche(0, 18, 112, 2, corRosto());
+  escreve(6, 2, 104, 16, FONTE_MONO, RGB565(220, 220, 220), ED_FUNDO, 0, "claudinho.ino");
+  miniClawd(320 - MINI_W - 4, 240 - MINI_H - 2, ED_FUNDO);
+  edTopo = (edTopo + 5) % N_CODIGO;
+  for (int r = 0; r < ED_LINHAS - 1; r++) edLinha(r, edTopo + r, -1);
+  edCol = 0; edEspera = 0; edCursor();
+}
+void edPasso() {
+  if (edPre >= 0) {
+    int n = strlen(ED_PRE);
+    if (edPre < n) {
+      char b[24]; memcpy(b, ED_PRE, ++edPre); b[edPre] = 0;
+      escreve(6 + 2 * MONO_W, 20, edPre * MONO_W, 16, FONTE_MONO, RGB565(60, 220, 90), 0, 0, b);
+      cenaProx = millis() + 35 + random(40);
+    } else if (edPre++ == n) cenaProx = millis() + 350;   // Enter
+    else { edPre = -1; edAbre(); cenaProx = millis() + 200; }
+    return;
+  }
+  int li = edTopo + ED_LINHAS - 1, tam = edTam(li);
+  if (edCol < tam) {                     // mais uma letra
+    edCol++; edLinha(ED_LINHAS - 1, li, edCol); edCursor();
+    miniBracos(1 + (edCol & 1));
+    cenaProx = millis() + 60 + random(80);
+    return;
+  }
+  if (edEspera++ < 4) { miniBracos(0); cenaProx = millis() + 120; return; }   // respira no fim da linha
+  edTopo++; edEspera = 0; edCol = 0;     // rola uma linha
+  for (int r = 0; r < ED_LINHAS - 1; r++) edLinha(r, edTopo + r, -1);
+  preenche(0, edY(ED_LINHAS - 1), edLarg(ED_LINHAS - 1), 16, ED_FUNDO);
+  edCursor();
+  cenaProx = millis() + 150;
+}
+
+// ---- terminal: comandos digitados ('$' no comeco) e respostas rolando
+static const char* const TERM[] = {
+  "$git status",
+  "On branch main",
+  "nothing to commit, tree clean",
+  "$make",
+  "Compiling claudinho.ino ...",
+  "Linking firmware.bin",
+  "Build OK (63% flash)",
+  "$ping -c 2 claudinho.local",
+  "64 bytes: time=3.1 ms",
+  "64 bytes: time=2.8 ms",
+  "$./testes.sh",
+  "rosto ......... ok",
+  "painel ........ ok",
+  "velha ......... ok",
+  "12 passed, 0 failed",
+  "$clear",
+  "$make upload",
+  "Uploading 1246409 bytes",
+  "[##########] 100%",
+  "Done. Claudinho acordou.",
+  "$uptime",
+  "up 42 days, load 0.01",
+  "$clear",
+};
+static const int N_TERM = sizeof TERM / sizeof TERM[0];
+static const int TE_TOPO = 24, TE_X = 6, TE_LINHAS = 12;
+static const uint16_t TE_FUNDO = RGB565(8, 8, 8), TE_VERDE = RGB565(60, 220, 90), TE_CLARO = RGB565(150, 255, 170);
+int teLinha = 0, teCol = 0, teVis[TE_LINHAS], teN = 0;
+
+int teY(int row) { return TE_TOPO + row * MONO_LH; }
+int teLarg(int row) { return (teY(row) + 16 > miniY) ? miniX - 2 : 320; }
+// Desenha a linha i do roteiro na fileira row; comando mostra "$ " e so "ate" letras (-1 = inteiro).
+void teDesenha(int row, int i, int ate) {
+  const char* t = TERM[i]; int y = teY(row);
+  preenche(0, y, teLarg(row), 16, TE_FUNDO);
+  if (t[0] == '$') {
+    escreve(TE_X, y, MONO_W, 16, FONTE_MONO, TE_CLARO, TE_FUNDO, 0, "$");
+    char b[48]; int n = strlen(t + 1); if (ate >= 0 && ate < n) n = ate; if (n > 46) n = 46;
+    memcpy(b, t + 1, n); b[n] = 0;
+    if (n) escreve(TE_X + 2 * MONO_W, y, n * MONO_W, 16, FONTE_MONO, TE_VERDE, TE_FUNDO, 0, b);
+    if (ate >= 0) preenche(TE_X + (2 + n) * MONO_W, y + 1, MONO_W, 14, TE_VERDE);   // cursor
+  } else if (t[0]) {
+    escreve(TE_X, y, strlen(t) * MONO_W, 16, FONTE_MONO, TE_VERDE, TE_FUNDO, 0, t);
+  }
+}
+void teLimpa() { preenche(0, 20, 320, 220, TE_FUNDO); teN = 0; miniClawd(320 - MINI_W - 4, 240 - MINI_H - 2, TE_FUNDO); }
+void teInicio() {
+  limpaTela(TE_FUNDO);
+  preenche(0, 0, 320, 20, RGB565(40, 40, 40));
+  circulo(11, 10, 4, RGB565(237, 106, 94)); circulo(25, 10, 4, RGB565(245, 191, 79)); circulo(39, 10, 4, RGB565(98, 197, 84));
+  escreve(100, 2, 120, 16, FONTE_MONO, RGB565(200, 200, 200), RGB565(40, 40, 40), 1, ">_ bash");
+  teLimpa(); teCol = -1;
+}
+// Poe a linha i numa fileira nova (rola se precisar) e devolve a fileira.
+int teNova(int i) {
+  if (teN == TE_LINHAS) {
+    memmove(teVis, teVis + 1, sizeof(int) * (TE_LINHAS - 1)); teN--;
+    for (int r = 0; r < teN; r++) teDesenha(r, teVis[r], -1);
+  }
+  teVis[teN] = i; return teN++;
+}
+void tePasso() {
+  const char* t = TERM[teLinha];
+  if (t[0] != '$') {                                   // resposta: aparece inteira
+    teDesenha(teNova(teLinha), teLinha, -1);
+    teLinha = (teLinha + 1) % N_TERM; teCol = -1;
+    cenaProx = millis() + 120 + random(200);
+    return;
+  }
+  if (teCol < 0) { teCol = 0; teDesenha(teNova(teLinha), teLinha, 0); cenaProx = millis() + 500; return; }
+  int tam = strlen(t + 1);
+  if (teCol < tam) {                                   // digitando o comando
+    teCol++; teDesenha(teN - 1, teLinha, teCol);
+    miniBracos(1 + (teCol & 1));
+    cenaProx = millis() + 50 + random(90);
+    return;
+  }
+  miniBracos(0);
+  teDesenha(teN - 1, teLinha, -1);                     // Enter
+  if (!strcmp(t, "$clear")) teLimpa();
+  teLinha = (teLinha + 1) % N_TERM; teCol = -1;
+  cenaProx = millis() + 400;
+}
+
+// ---- chuva do Matrix: 20 colunas, cabeca clara, rastro verde, a ponta some
+static const int MX_COLS = 20, MX_LIN = 15, MX_DX = 16, MX_POR_VEZ = 6;
+struct { int8_t cab, tam, vel, acc; } mx[MX_COLS];
+static const char MX_CHARS[] = "0123456789ABCDEFZ$#@*+=<>:;!?";
+int mxVez = 0, mxOlhar = 0; unsigned long mxOlharEm = 0;
+
+void mxNova(int c) { mx[c].cab = -random(1, 14); mx[c].tam = random(5, 12); mx[c].vel = random(1, 4); mx[c].acc = 0; }
+bool mxLivre(int c, int r) { return r >= 0 && r < MX_LIN && !(c * MX_DX + MX_DX > miniX && r * 16 + 16 > miniY); }
+void mxLetra(int c, int r, uint16_t cor) {
+  if (!mxLivre(c, r)) return;
+  char s[2] = {MX_CHARS[random(sizeof MX_CHARS - 1)], 0};
+  escreve(c * MX_DX + 4, r * 16, MX_DX - 4, 16, FONTE_MONO, cor, 0, 0, s);
+}
+void mxInicio() {
+  limpaTela(0);
+  miniClawd(320 - MINI_W - 4, 240 - MINI_H - 2, 0);
+  for (int c = 0; c < MX_COLS; c++) { mxNova(c); mx[c].cab = random(-6, 10); }
+  mxVez = 0; mxOlhar = 0; mxOlharEm = millis();
+}
+void mxPasso() {
+  int feitos = 0;
+  for (int k = 0; k < MX_COLS && feitos < MX_POR_VEZ; k++) {   // poucas colunas por vez: a serial e o limite
+    int c = (mxVez + k) % MX_COLS;
+    if (++mx[c].acc < mx[c].vel) continue;
+    mx[c].acc = 0; feitos++;
+    int h = ++mx[c].cab;
+    mxLetra(c, h - 1, RGB565(0, 190, 60));                     // a cabeca de antes vira rastro
+    mxLetra(c, h, RGB565(210, 255, 210));                      // cabeca nova, clara
+    int cauda = h - mx[c].tam;
+    if (mxLivre(c, cauda)) preenche(c * MX_DX, cauda * 16, MX_DX, 16, 0);
+    if (cauda >= MX_LIN) mxNova(c);
+  }
+  mxVez = (mxVez + MX_POR_VEZ) % MX_COLS;
+  if (millis() - mxOlharEm > 700) { mxOlharEm = millis(); mxOlhar = mxOlhar <= 0 ? 1 : -1; miniOlhos(mxOlhar); }
+  cenaProx = millis() + 40;
+}
+
+// ---- organograma: o Claude em cima, os agentes surgindo embaixo
+static const int AG_CX[3] = {52, 160, 268}, AG_Y = 126;
+int agN = 0, agPulo = 0; unsigned long agPuloAte = 0;
+uint16_t agCorBloco() { return RGB565(0x42, 0x40, 0x41); }
+void agCaixa(int i) {
+  int cx = AG_CX[i];
+  preenche(cx - 1, 98, 3, AG_Y - 98, COR_OURO);
+  preenche(cx - 46, AG_Y, 92, 44, COR_OURO); preenche(cx - 44, AG_Y + 2, 88, 40, agCorBloco());
+  char t[16]; snprintf(t, sizeof t, "agente %d", agN > 3 && i == 2 ? agN : i + 1);
+  escreve(cx - 44, AG_Y + 6, 88, 16, FONTE_P, COR_TEXTO, agCorBloco(), 1, t);
+}
+void agMini(int dy) { preenche(132, 12, MINI_W, MINI_H + 8, COR_FUNDO); miniClawd(132, 16 + dy, COR_FUNDO); }
+void novoAgente() {
+  agN++;
+  if (agN == 1) preenche(52, 96, 219, 3, COR_OURO);
+  agCaixa(min(agN, 3) - 1);
+  agMini(-4); agPuloAte = millis() + 300;                      // pulinho a cada agente novo
+}
+void agInicio() {
+  limpaTela(COR_FUNDO);
+  agMini(0);
+  escreve(0, 56, 320, 18, FONTE_P, COR_TEXTO, COR_FUNDO, 1, "Claude");
+  preenche(159, 76, 3, 20, COR_OURO);
+  escreve(0, 204, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, "delegando");
+  agN = 0; agPuloAte = 0; novoAgente();
+}
+void agPasso() {
+  if (agPuloAte && (long)(millis() - agPuloAte) >= 0) { agPuloAte = 0; agMini(0); }
+  static int pontos = 0; pontos = (pontos + 1) % 4;
+  char t[8] = "   "; for (int i = 0; i < pontos; i++) t[i] = '.';
+  for (int i = 0; i < min(agN, 3); i++) escreve(AG_CX[i] - 44, AG_Y + 24, 88, 16, FONTE_P, COR_APAGADO, agCorBloco(), 1, t);
+  cenaProx = millis() + 350;
+}
+
+// ---- o Claudinho dos alertas da impressora: pula nas boas, abana os bracos nas outras
+static const int AL_X = 18, AL_Y = 184;
+int alFase = 0; unsigned long alProx = 0;
+bool alertaBom() { uint16_t c = aN ? aFila[0].cor : 0; return c == COR_OK || c == COR_OURO; }
+void alertaMini(int fase) {
+  miniP = 6;
+  int dy = (alertaBom() && (fase & 1)) ? -6 : 0;
+  preenche(AL_X, AL_Y - 6, 14 * miniP, 9 * miniP + 6, COR_FUNDO);
+  miniClawd(AL_X, AL_Y + dy, COR_FUNDO);
+  if (alertaBom()) { if (dy) miniBracos(3); }      // no ar: os dois bracos para cima
+  else miniBracos(1 + (fase & 1));                 // abanando: um de cada vez
+}
+void cuidaAlertaAnim() {
+  if (pagina != 8 || !aN || (long)(millis() - alProx) < 0) return;
+  alProx = millis() + (alertaBom() ? 350 : 280);
+  alertaMini(++alFase);
+}
+
+// ---- controle
+void cenaInicio() {
+  cenaProx = millis(); miniP = 4;
+  if (cenaAtual == S_CODANDO) edInicio();
+  else if (cenaAtual == S_TERMINAL) teInicio();
+  else if (cenaAtual == S_LENDO) mxInicio();
+  else agInicio();
+}
+void abreCena(int s) {
+  cenaAtual = s; cenaDesde = millis();
+  mudaPagina(10); paginaDur = CENA_FIM_MS;
+}
+void cuidaCena() {
+  if (pagina != 10 || (long)(millis() - cenaProx) < 0) return;
+  if (cenaAtual == S_CODANDO) edPasso();
+  else if (cenaAtual == S_TERMINAL) tePasso();
+  else if (cenaAtual == S_LENDO) mxPasso();
+  else agPasso();
+}
+// Evento de ferramenta: abre, renova ou troca a cena. Devolve true se a cena
+// cuidou do evento (entao a cara de trabalhando fica para depois).
+bool cenaPorFerramenta(bool forca) {   // forca: teste (claudinho.sh cena) troca na hora
+  int s = cenaDe(acaoEvento);
+  if (pagina == 10) {
+    paginaDesde = millis();
+    if (forca && s != S_NENHUMA && s != cenaAtual) { abreCena(s); return true; }                            // ainda trabalhando: a cena fica
+    poeCara(C_TRABALHANDO, 120000);                    // e a cara de depois continua valendo
+    if (s == S_AGENTE && cenaAtual == S_AGENTE) novoAgente();
+    else if (s != S_NENHUMA && s != cenaAtual && millis() - cenaDesde >= CENA_MIN_MS) abreCena(s);
+    return true;
+  }
+  if (s == S_NENHUMA || pagina != 0) return false;
+  poeCara(C_TRABALHANDO, 120000);                      // quando a cena acabar, volta nesta cara
+  abreCena(s);
+  return true;
+}
+
 // ---------------------------------------------------------------- manutencao
 bool manutLiberada() { return manutAte && (long)(millis() - manutAte) < 0; }
 void liberaManutencao(const char* como) {
@@ -1494,10 +1936,10 @@ void leToque() {
     if (pagina == 7) { toqueGenius(tx, ty); continue; }
     if (pagina == 9) { toquePainel(); continue; }
     if (pagina == 8) { toqueAlerta(); continue; }
-    if (pagina >= 3) { toquePaleta(tx, ty); continue; }
+    if (pagina >= 3 && pagina <= 5) { toquePaleta(tx, ty); continue; }
     if (millis() - pressaoEm >= TOQUE_LONGO_MS) { brilhoAlto = !brilhoAlto; registra("brilho %s", brilhoAlto ? "alto" : "baixo"); }
     else if (pagina == 1 && bambuLigado()) abrePainel(true);          // rosto > consumo > impressora > rosto
-    else { mudaPagina(pagina == 0 ? 1 : 0); Serial.printf("-> pagina %d\n", pagina); }
+    else { mudaPagina(pagina == 0 || pagina == 10 ? 1 : 0); Serial.printf("-> pagina %d\n", pagina); }
   }
 }
 
@@ -1609,11 +2051,12 @@ void webEvento() {
   JsonDocument doc;
   if (deserializeJson(doc, web.arg("plain"))) { web.send(400, "text/plain", "json invalido\n"); return; }
   const char* tipo = doc["tipo"] | ""; const char* humor = doc["humor"] | ""; const char* sessao = doc["sessao"] | "";
+  strlcpy(acaoEvento, doc["acao"] | "", sizeof acaoEvento); forcaCena = doc["forca"] | false;
   if (!strcmp(tipo, "fim")) tiraSessao(sessao); else marcaSessao(sessao);
   dados.n = contaSessoes();
   if (strcmp(tipo, "fim") != 0) dados.at = time(nullptr);   // atividade = sinal de vida
   recebeuLocal();
-  registra("local evento: %s %s (n=%d)", tipo, humor, dados.n);
+  registra("local evento: %s %s%s (n=%d)", tipo, humor, acaoEvento, dados.n);
   trataEvento(tipo, humor);
   web.send(200, "text/plain", "ok\n");
 }
@@ -1668,6 +2111,16 @@ void webCmd() {
   if (doc["velha"] | false) abreVelha();
   // {"paleta":true}: abre a escolha de cor do rosto na tela
   if (doc["paleta"] | false) abrePaleta();
+  // {"alerta":"bom"|"ruim"|"filamento"}: alerta de exemplo da impressora (para ver a tela)
+  if (doc["alerta"].is<const char*>()) {
+    const char* k = doc["alerta"];
+    const char* pc = "pe\xe7" "a: Montagem + Montagem";
+    if (!strcmp(k, "ruim")) novoAlerta(A_GERAL, COR_CRITICO, "Pausada", pc, "acabou o filamento", 0);
+    else if (!strcmp(k, "filamento")) novoAlerta(A_FILAMENTO, COR_AZUL, "Trocou o filamento", pc, "slot 1 > slot 2  PLA", 0x898989FF);
+    else if (!strcmp(k, "hms")) { JsonDocument h; JsonArray a = h.to<JsonArray>(); bHmsBase = true; bHmsN = 0;
+      JsonObject o = a.add<JsonObject>(); o["attr"] = 0x05000200UL; o["code"] = 0x00020005UL; bConfereHms(a); }
+    else novoAlerta(A_GERAL, COR_OURO, "Faltam 5 min", pc, "quase pronta", 0);
+  }
   // {"manutencao":true}: pede o toque que libera /ota e /tft
   if (doc["manutencao"] | false) {
     manutPedidaEm = millis(); manutAte = 0;
@@ -1951,7 +2404,9 @@ void loop() {
     if (pagina == 2) manutPedidaEm = 0;
     if (pagina == 6) saiVelha("sem toque");
     else if (pagina == 7) saiGenius("sem toque");
-    else if (pagina >= 3 && pagina <= 5) cancelaPaleta("sem toque"); else mudaPagina(0);
+    else if (pagina >= 3 && pagina <= 5) cancelaPaleta("sem toque");
+    else if (pagina == 8) { if (aN && aFila[0].fixo) abreAlerta(); else toqueAlerta(); }   // so o informativo sai sozinho
+    else mudaPagina(0);
   }
 
   static unsigned long ultimoTick = 0;
@@ -1960,6 +2415,8 @@ void loop() {
   cuidaVelha();
   cuidaGenius();
   cuidaBambu();
+  cuidaCena();
+  cuidaAlertaAnim();
 
   // Brilho: dormindo ha mais de 20 s -> 15 %; acordado -> 100 % (ou o que o
   // toque longo escolheu). Poupa backlight e bateria.
