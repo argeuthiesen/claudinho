@@ -1078,7 +1078,7 @@ struct {
   int pct = -1, restante = -1, camada = -1, camadas = -1, erro = 0, stg = -1, trayNow = 255;
   float bico = 0, bicoAlvo = 0, mesa = 0, mesaAlvo = 0;
   uint32_t cor[4] = {0, 0, 0, 0}; char tipo[4][8] = {"", "", "", ""}; bool temAms = false;
-  int umid = -1; float amsTemp = -100; char modelo[24] = ""; long inicio = 0;   // inicio: hora em que a impressao comecou (da impressora)
+  int umid = -1, camara = -1; float amsTemp = -100; char modelo[24] = ""; long inicio = 0;   // inicio: hora em que a impressao comecou (da impressora)
 } bi;
 
 // ---- alertas (pagina 8)
@@ -1329,6 +1329,7 @@ void bProcessa(const uint8_t* js, size_t n) {
     filtro["print"]["ams"]["ams"][0]["temp"] = true;
     filtro["print"]["hms"] = true;
     filtro["print"]["gcode_start_time"] = true;
+    filtro["print"]["device"]["ctc"]["info"]["temp"] = true;   // camara de impressao (P2S, X1, H2)
     filtro["info"]["module"][0]["name"] = true;
     filtro["info"]["module"][0]["product_name"] = true;
     pronto = true;
@@ -1350,6 +1351,9 @@ void bProcessa(const uint8_t* js, size_t n) {
   if (!p["total_layer_num"].isNull()) bi.camadas = p["total_layer_num"];
   if (!p["print_error"].isNull()) bi.erro = p["print_error"];
   if (!p["stg_cur"].isNull()) bi.stg = p["stg_cur"];
+  if (!p["device"]["ctc"]["info"]["temp"].isNull()) {       // as vezes vem empacotado (alvo << 16 | atual)
+    long v = p["device"]["ctc"]["info"]["temp"]; bi.camara = v > 0xFFFF ? (v & 0xFFFF) : v;
+  }
   if (!p["gcode_start_time"].isNull()) bi.inicio = p["gcode_start_time"].as<String>().toInt();
   if (!p["nozzle_temper"].isNull()) bi.bico = p["nozzle_temper"];
   if (!p["nozzle_target_temper"].isNull()) bi.bicoAlvo = p["nozzle_target_temper"];
@@ -1461,7 +1465,7 @@ Campo pModelo = {12, 2, 184, 30, FONTE_M, 0, COR_FUNDO}, pEstado = {196, 6, 112,
 Campo pNome = {12, 30, 296, 20, FONTE_P, 0, COR_FUNDO};
 Campo pRot[3] = {{4, 48, 104, 18, FONTE_P, 1, COR_FUNDO}, {108, 48, 104, 18, FONTE_P, 1, COR_FUNDO}, {212, 48, 104, 18, FONTE_P, 1, COR_FUNDO}};
 Campo pVal[3] = {{4, 64, 104, 36, FONTE_32, 1, COR_FUNDO}, {108, 64, 104, 36, FONTE_32, 1, COR_FUNDO}, {212, 64, 104, 36, FONTE_32, 1, COR_FUNDO}};
-Campo pBico = {12, 113, 148, 20, FONTE_P, 0, COR_FUNDO}, pMesa = {164, 113, 144, 20, FONTE_P, 2, COR_FUNDO};
+Campo pBico = {12, 113, 104, 20, FONTE_P, 0, COR_FUNDO}, pMesa = {116, 113, 92, 20, FONTE_P, 1, COR_FUNDO}, pCamara = {208, 113, 100, 20, FONTE_P, 2, COR_FUNDO};
 int pBarraPct = -2; uint16_t pBarraCor = 0; uint32_t pAmsCor[4]; int pAmsNow = -2; char pAmsTipo[4][8];
 
 uint16_t cor565(uint32_t rgba) { return RGB565((rgba >> 24) & 0xFF, (rgba >> 16) & 0xFF, (rgba >> 8) & 0xFF); }
@@ -1471,7 +1475,7 @@ void painel(bool tudo) {
   if (tudo) {
     limpaTela(COR_FUNDO);
     desenhaBotoes();
-    pModelo.limpa(); pEstado.limpa(); pNome.limpa(); pBico.limpa(); pMesa.limpa();
+    pModelo.limpa(); pEstado.limpa(); pNome.limpa(); pBico.limpa(); pMesa.limpa(); pCamara.limpa();
     for (int i = 0; i < 3; i++) { pRot[i].limpa(); pVal[i].limpa(); }
     pBarraPct = -2; pAmsNow = -2; for (int i = 0; i < 4; i++) { pAmsCor[i] = 0xFFFFFFFF; pAmsTipo[i][0] = 1; pAmsTipo[i][1] = 0; }
   }
@@ -1513,6 +1517,8 @@ void painel(bool tudo) {
   }
   snprintf(t, sizeof t, "Bico %d/%d\xb0", (int)lroundf(bi.bico), (int)lroundf(bi.bicoAlvo)); pBico.mostra(t, COR_TEXTO);
   snprintf(t, sizeof t, "Mesa %d/%d\xb0", (int)lroundf(bi.mesa), (int)lroundf(bi.mesaAlvo)); pMesa.mostra(t, COR_TEXTO);
+  if (bi.camara >= 0) snprintf(t, sizeof t, "C\xe2mara %d\xb0", bi.camara); else t[0] = 0;
+  pCamara.mostra(t, COR_TEXTO);
   // AMS: 4 slots; o que esta imprimindo ganha moldura branca
   if (!bi.temAms) return;
   for (int i = 0; i < 4; i++) {

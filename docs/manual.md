@@ -144,7 +144,7 @@ type it hidden, in your own terminal, and it's stored only on the board.
 **The panel.** The printer model and its state (printing, paused...), the
 AMS humidity and temperature (measured inside the AMS, where the spools are),
 three columns (percent printed, time left, current layer), a progress bar in
-the color of the filament being printed, nozzle and bed temperatures, and the
+the color of the filament being printed, nozzle, bed and chamber temperatures, and the
 4 AMS colors with the current one framed. (The name you gave the printer in
 the app lives only in Bambu's cloud, so the panel shows the model. The print
 job name isn't shown either: over the local network the printer only sends

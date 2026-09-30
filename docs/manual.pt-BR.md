@@ -143,7 +143,7 @@ só na placa.
 umidade e a temperatura do AMS (medidas dentro dele, onde ficam os
 carretéis), três colunas (quanto já imprimiu, tempo que falta, camada atual),
 barra de progresso na cor do filamento que está imprimindo, temperatura do
-bico e da mesa, e as 4 cores do AMS com a atual em destaque. (O nome que você
+bico, da mesa e da câmara, e as 4 cores do AMS com a atual em destaque. (O nome que você
 deu à impressora no app fica só na nuvem da Bambu, por isso o painel mostra o
 modelo. O nome da impressão também não aparece: pela rede local a impressora
 só manda o "projeto + placa" do Bambu Studio ou o nome do perfil do
