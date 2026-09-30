@@ -263,6 +263,29 @@ connect the power supply and the computer's USB at the same time.
 The screen is mounted rotated 270°: the Nextion's visible area isn't centered
 on its board, and only in this position does it end up centered in the case.
 
+### Coming soon: a single-board version
+
+A new board is on its way from China: the **E32R28T**, an ESP32 with a 2.8"
+touch screen built in (320×240, the same resolution as the Nextion). As soon as
+it arrives, Claudinho gets a version for it, and it simplifies a lot:
+
+- **One board instead of two.** ESP32 and screen come together: no wires to
+  solder between them, no separate power for the display.
+- **No Nextion Editor and no `.tft`.** The ESP32 draws the screen itself, with
+  the fonts built into the firmware. Updating becomes one step (just the
+  firmware, no more "update the screen too"), and setup loses a step.
+- **Battery connector with a charger on the board.** Plug in a small LiPo and
+  Claudinho becomes portable (the printer monitor in another room), without
+  the extra charger and step-up modules.
+- **Speaker connector.** Sound: beeps in Genius, a chime when Claude needs you,
+  the printer alerts.
+- **Faster drawing**, so smoother scenes and animations.
+
+The case grows a little (from about 80 × 52 mm to 90 × 58 mm) and will get its
+own model on MakerWorld. The current version, with the Nextion, stays
+supported. Nothing here is tested yet: this section will change when the board
+is on the desk.
+
 ## Installation
 
 1. Create a folder for the project and open Claude Code in it:

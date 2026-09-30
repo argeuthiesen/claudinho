@@ -259,11 +259,14 @@ foram testados: diga isso à pessoa.
 O Claudinho conecta direto na impressora, pela rede local (sem nuvem, sem
 servidor, sem token). Ele mostra:
 
-- um **painel** (modelo e estado, nome do arquivo, 3 colunas: %, tempo
-  restante e camada; barra na cor do filamento, temperaturas do bico e da
-  mesa, as 4 cores do AMS com a atual em destaque).
-  Imprimindo, aparece sozinho a cada 5 minutos por 15 s; tocar fixa, tocar de
-  novo sai. Do cartão de consumo, um toque leva ao painel;
+- um **painel** (modelo e estado, umidade e temperatura do AMS, 3 colunas:
+  %, tempo restante e camada; barra na cor do filamento, temperaturas do bico
+  e da mesa, as 4 cores do AMS com a atual em destaque). Imprimindo, aparece
+  sozinho a cada 5 minutos por 15 s. No cartão de consumo e no painel há
+  botões embaixo: **Tokens** | **Impressora** | **Manter** (a tela fica
+  ligada; o botão vira **Dormir**, que volta ao rosto). Bom para usar o
+  Claudinho como monitor portátil da impressora. O nome da impressão não
+  aparece: pela rede local só vem "projeto + placa" ou o perfil do MakerWorld;
 - **alertas** que **ficam na tela até um toque** (o toque quer dizer "li"):
   começou, pausou (com o motivo: acabou o filamento, bico entupido, erro na
   1ª camada...), retomou, faltam 5 min, trocou o filamento, terminou (com a

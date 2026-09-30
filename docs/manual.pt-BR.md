@@ -55,7 +55,16 @@ codando` (`terminal`, `lendo`, `agente`).
 
 - **Tocando na tela** aparece o cartão de consumo: janelas de 5 horas e de 7
   dias, quando cada uma renova, quantos terminais estão abertos e o IP da
-  placa. Depois de 15 segundos ele volta ao rosto (ou toque de novo).
+  placa. Depois de 15 segundos ele volta ao rosto (ou toque fora dos botões).
+- **Os botões de baixo** (no cartão de consumo e no painel da impressora):
+  - **Tokens** e **Impressora** alternam entre as duas telas; uma moldura
+    dourada fina marca a atual. Sem impressora configurada, só aparece
+    Tokens.
+  - **Manter**: a tela fica ligada, atualizando ao vivo, e não volta mais
+    para o rosto dormindo. O botão passa a dizer **Dormir**: tocando nele,
+    o Claudinho volta a dormir. Bom para levar para outro cômodo como
+    monitor portátil da impressora. Os alertas da impressora continuam
+    aparecendo e, depois do seu toque, ele volta para a tela mantida.
 - **Ele também mostra sozinho**, por alguns segundos, quando o Claude termina
   de responder e o uso subiu bastante, ou quando o uso passa de 50 %, 75 % ou
   90 %. Acima de 90 % o número pisca em vermelho. Qualquer evento novo volta
@@ -66,7 +75,7 @@ codando` (`terminal`, `lendo`, `agente`).
 
 | Toque | O que faz |
 |---|---|
-| Toque curto | alterna entre o rosto e o cartão de consumo |
+| Toque curto | no rosto: abre o cartão de consumo; nos cartões: os botões (fora deles, volta ao rosto) |
 | Toque longo (1,5 s) | alterna o brilho entre 100 % e 15 % |
 | Toque quando pede "O PC quer me atualizar" | autoriza a atualização |
 
@@ -130,14 +139,17 @@ de acesso** da impressora (configurações > Rede). O código é um segredo, com
 a senha do Wi-Fi: você digita escondido, no seu terminal, e ele fica gravado
 só na placa.
 
-**O painel.** O modelo da impressora e o estado (imprimindo, pausada...), o
-nome do arquivo, três colunas (quanto já imprimiu, tempo que falta, camada
-atual), barra de progresso na cor do filamento que está imprimindo,
-temperatura do bico e da mesa, e as 4 cores do AMS com a atual em destaque.
-(O nome que você deu à impressora no app fica só na nuvem da Bambu, por isso
-o painel mostra o modelo.) Imprimindo, ele aparece
-sozinho a cada 5 minutos por 15 segundos. **Toque para fixar**; toque de novo
-para voltar ao rosto. Do cartão de consumo, um toque também leva ao painel.
+**O painel.** O modelo da impressora e o estado (imprimindo, pausada...), a
+umidade e a temperatura do AMS (medidas dentro dele, onde ficam os
+carretéis), três colunas (quanto já imprimiu, tempo que falta, camada atual),
+barra de progresso na cor do filamento que está imprimindo, temperatura do
+bico e da mesa, e as 4 cores do AMS com a atual em destaque. (O nome que você
+deu à impressora no app fica só na nuvem da Bambu, por isso o painel mostra o
+modelo. O nome da impressão também não aparece: pela rede local a impressora
+só manda o "projeto + placa" do Bambu Studio ou o nome do perfil do
+MakerWorld, que não dizem qual é a peça.) Imprimindo, ele aparece sozinho a
+cada 5 minutos por 15 segundos. Abra quando quiser pelo botão **Impressora**
+do cartão de consumo, e use **Manter** para deixar na tela.
 
 **Os alertas** mostram "IMPRESSORA 3D" e o modelo no alto, um título grande na
 cor do alerta, o nome da peça, o detalhe e um Claudinho pequeno embaixo:

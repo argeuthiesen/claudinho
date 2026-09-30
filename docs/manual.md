@@ -54,7 +54,17 @@ face. Tap to see the usage card. To try one: `claudinho.sh cena codando`
 
 - **Tap the screen** to see the usage card: 5-hour and 7-day windows, when
   each one resets, how many terminals are open and the board's IP. After 15
-  seconds it goes back to the face (or tap again).
+  seconds it goes back to the face (or tap outside the buttons).
+- **The buttons at the bottom** (on the usage card and on the printer
+  panel), labels in Portuguese:
+  - **Tokens** and **Impressora** (printer) switch between the two screens;
+    a thin gold frame marks the one you're on. Without a printer set up,
+    only Tokens shows.
+  - **Manter** (keep): the screen stays on, updating live, and never goes
+    back to the sleeping face. The button then reads **Dormir** (sleep):
+    tap it and Claudinho goes back to sleep. Handy to take it to another
+    room as a portable printer monitor. Printer alerts still show up, and
+    after your tap it returns to the kept screen.
 - **It also shows it on its own** for a few seconds when Claude finishes a
   response and usage grew noticeably, or when usage crosses 50%, 75% or 90%.
   Above 90% the number blinks red. Any new event goes straight back to the
@@ -65,7 +75,7 @@ face. Tap to see the usage card. To try one: `claudinho.sh cena codando`
 
 | Touch | What it does |
 |---|---|
-| Short tap | switches between the face and the usage card |
+| Short tap | on the face: opens the usage card; on the cards: the buttons (outside them, back to the face) |
 | Long press (1.5 s) | toggles brightness between 100% and 15% |
 | Tap when it asks to allow an update | authorizes the update |
 
@@ -132,13 +142,16 @@ settings > Network). The access code is a secret like your Wi-Fi password: you
 type it hidden, in your own terminal, and it's stored only on the board.
 
 **The panel.** The printer model and its state (printing, paused...), the
-file name, three columns (percent printed, time left, current layer), a
-progress bar in the color of the filament being printed, nozzle and bed
-temperatures, and the 4 AMS colors with the current one framed. (The name you
-gave the printer in the app lives only in Bambu's cloud, so the panel shows
-the model.) While printing, it shows up on its
-own every 5 minutes for 15 seconds. **Tap to pin it**; tap again to go back to
-the face. From the usage card, a tap also takes you to the panel.
+AMS humidity and temperature (measured inside the AMS, where the spools are),
+three columns (percent printed, time left, current layer), a progress bar in
+the color of the filament being printed, nozzle and bed temperatures, and the
+4 AMS colors with the current one framed. (The name you gave the printer in
+the app lives only in Bambu's cloud, so the panel shows the model. The print
+job name isn't shown either: over the local network the printer only sends
+Bambu Studio's "project + plate" or the MakerWorld profile name, which don't
+say what the part is.) While printing, it shows up on its own every 5 minutes
+for 15 seconds. Open it anytime with the **Impressora** button on the usage
+card, and use **Manter** to keep it on screen.
 
 **The alerts** show "IMPRESSORA 3D" (3D printer) and the model at the top, a
 big title in the alert's color, the part name, the detail, and a little

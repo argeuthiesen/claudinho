@@ -264,6 +264,30 @@ fonte e o USB do computador ao mesmo tempo.
 A tela é montada girada 270°: a área útil do Nextion não fica no centro da
 placa, e só nessa posição ela fica centralizada na caixa.
 
+### Em breve: versão de placa única
+
+Está vindo da China uma placa nova: a **E32R28T**, um ESP32 com tela de 2,8"
+sensível ao toque já embutida (320×240, a mesma resolução do Nextion). Assim
+que ela chegar, o Claudinho ganha uma versão para ela, e isso simplifica
+bastante:
+
+- **Uma placa em vez de duas.** ESP32 e tela vêm juntos: sem fios para soldar
+  entre eles, sem alimentação separada para a tela.
+- **Sem Nextion Editor e sem `.tft`.** O próprio ESP32 desenha a tela, com as
+  fontes dentro do firmware. Atualizar vira um passo só (só o firmware, sem o
+  "grave a tela também"), e a configuração perde uma etapa.
+- **Conector de bateria com carregador na placa.** Encaixe uma LiPo pequena e
+  o Claudinho fica portátil (o monitor da impressora em outro cômodo), sem os
+  módulos extras de carga e elevação de tensão.
+- **Conector de alto-falante.** Som: bipes no Genius, um aviso quando o Claude
+  precisa de você, os alertas da impressora.
+- **Desenho mais rápido**, então cenas e animações mais suaves.
+
+A caixa cresce um pouco (de uns 80 × 52 mm para 90 × 58 mm) e vai ganhar
+modelo próprio no MakerWorld. A versão atual, com o Nextion, continua
+suportada. Nada disso está testado ainda: esta seção muda quando a placa
+estiver na mesa.
+
 ## Instalação
 
 1. Crie uma pasta para o projeto e abra o Claude Code nela:

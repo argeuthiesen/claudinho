@@ -102,6 +102,7 @@ struct { Cara cara = C_NEUTRO; unsigned long ate = 0; } evento;   // cara vinda 
 
 int  pagina = 0;
 bool forcaCena = false;      // evento de teste: troca a cena sem esperar o minimo
+bool manter = false; int paginaManter = 1;   // botao Manter: tokens ou impressora ficam na tela (nao volta a dormir)
 int  miniP = 4;              // tamanho do pixel do mini Clawd (4 nas cenas, 6 nos alertas)
 unsigned long paginaDesde = 0;
 unsigned long paginaDur = VOLTA_PAGINA_MS;    // quanto a tela de numeros fica antes de voltar ao rosto
@@ -171,9 +172,9 @@ struct Barra {
 };
 
 // ---------------------------------------------------------------- layout
-Campo cTitulo  = {12,  6, 200, 20, FONTE_P, 0, COR_FUNDO};
-Campo cRelogio = {240, 6,  68, 20, FONTE_P, 2, COR_FUNDO};
-Campo cRodape  = {0, 222, LARG, 18, FONTE_P, 1, COR_FUNDO};
+Campo cTitulo  = {12,  3, 200, 20, FONTE_P, 0, COR_FUNDO};
+Campo cRelogio = {240, 3,  68, 20, FONTE_P, 2, COR_FUNDO};
+Campo cRodape  = {0, 168, LARG, 17, FONTE_P, 1, COR_FUNDO};
 
 // Tela 0: grade de celulas de 8 px (40 x 30 celulas). Centros dos olhos.
 static const int CEL = 8;
@@ -185,14 +186,14 @@ struct BlocoJanela {
   Campo rotulo, pct, reseta, resta;
   Barra barra;
   BlocoJanela(int y0) : y(y0),
-    rotulo {12,  y0 + 4,  220, 18, FONTE_P, 0, COR_BLOCO},
-    pct    {12,  y0 + 24, 112, 50, FONTE_G, 0, COR_BLOCO},
-    reseta {132, y0 + 28, 176, 18, FONTE_P, 0, COR_BLOCO},
-    resta  {132, y0 + 50, 176, 18, FONTE_P, 0, COR_BLOCO},
-    barra  {12,  y0 + 80, 296, 8} {}
+    rotulo {12,  y0 + 2,  220, 18, FONTE_P, 0, COR_BLOCO},
+    pct    {12,  y0 + 14, 112, 50, FONTE_G, 0, COR_BLOCO},
+    reseta {132, y0 + 20, 176, 18, FONTE_P, 0, COR_BLOCO},
+    resta  {132, y0 + 40, 176, 18, FONTE_P, 0, COR_BLOCO},
+    barra  {12,  y0 + 64, 296, 6} {}
   void limpa() { rotulo.limpa(); pct.limpa(); reseta.limpa(); resta.limpa(); barra.limpa(); }
 };
-BlocoJanela b5h(34), b7d(130);
+BlocoJanela b5h(22), b7d(96);
 
 // ---------------------------------------------------------------- nextion
 // O Nextion tem buffer de 1 KB e desenha mais devagar do que 115200 baud
@@ -514,8 +515,8 @@ void poeCara(Cara c, unsigned long dur) { evento.cara = c; evento.ate = millis()
 void trataEvento(const char* tipo, const char* humor) {
   static int ferramentasSeguidas = 0;
   if (strcmp(tipo, "ferramenta") != 0 && strcmp(tipo, "erro") != 0) ferramentasSeguidas = 0;
-  if (consumo.naTela && pagina != 0) mudaPagina(0);    // qualquer evento volta ao rosto na hora
-  if (pagina == 9 && !strcmp(tipo, "atencao")) mudaPagina(0);
+  if (consumo.naTela && pagina != 0 && !manter) mudaPagina(0);    // qualquer evento volta ao rosto na hora (mantida: fica)
+  if (pagina == 9 && !manter && !strcmp(tipo, "atencao")) mudaPagina(0);
   if (pagina == 10 && strcmp(tipo, "ferramenta")) mudaPagina(0);   // qualquer outro evento: sai da cena e mostra a cara   // o Claude precisa de voce: vale mais que o painel
   if (pagina == 6 && !strcmp(tipo, "atencao")) avisoVelha();   // no jogo: so avisa no canto
   if      (!strcmp(tipo, "inicio"))     { poeCara(C_FELIZ, 5000); pedeConsumo(20000, false, false); }
@@ -610,9 +611,10 @@ void desenhaMoldura() {
     escreve(0, 196, 320, 20, FONTE_P,  COR_APAGADO, COR_FUNDO, 1, "(ou aperte BOOT na placa)");
   } else {
     limpaTela(COR_FUNDO);
-    preenche(6, b5h.y, 308, 92, COR_BLOCO);
-    preenche(6, b7d.y, 308, 92, COR_BLOCO);
+    preenche(6, b5h.y, 308, 72, COR_BLOCO);
+    preenche(6, b7d.y, 308, 72, COR_BLOCO);
     b5h.limpa(); b7d.limpa();
+    desenhaBotoes();
   }
 }
 
@@ -820,7 +822,7 @@ void desenhaPaleta() {
 
 void abrePaleta() { corAntesPaleta = corRostoAtual; registra("cor: paleta aberta"); irPaleta(3); }
 void cancelaPaleta(const char* porque) {
-  corRostoAtual = corAntesPaleta; registra("cor: cancelada (%s)", porque); mudaPagina(0);
+  corRostoAtual = corAntesPaleta; registra("cor: cancelada (%s)", porque); voltaRepouso();
 }
 void gravaCor(uint16_t cor) {
   corRostoAtual = cor;
@@ -837,7 +839,7 @@ void toquePaleta(int tx, int ty) {
     else { corRostoAtual = corTom(paletaTom); irPaleta(5); }                         // centro: confirma
   }
   else if (ty >= 192) {
-    if (tx < 107)      { gravaCor(corRostoAtual); mudaPagina(0); }
+    if (tx < 107)      { gravaCor(corRostoAtual); voltaRepouso(); }
     else if (tx < 213) irPaleta(4);
     else               cancelaPaleta("botao");
   }
@@ -941,7 +943,7 @@ void abreVelha() {
   mudaPagina(6); paginaDur = VELHA_ESPERA_MS; vNovaPartida();
 }
 void avisoVelha() { if (!vAviso) { vAviso = true; if (!vResultado) vDesenhaAviso(); } }
-void saiVelha(const char* porque) { registra("velha: saiu (%s)", porque); vJogaEm = 0; mudaPagina(0); }
+void saiVelha(const char* porque) { registra("velha: saiu (%s)", porque); vJogaEm = 0; voltaRepouso(); }
 
 void toqueVelha(int tx, int ty) {
   paginaDesde = millis();                                          // renova o tempo de inatividade
@@ -1009,7 +1011,7 @@ void gNovaRodada() {
 }
 void gNovoJogo() { gLen = 0; gAcesoJ = -1; gDesenhaTudo(); gNovaRodada(); registra("genius: novo jogo"); }
 void abreGenius() { gUltQ = -1; gToques = 0; mudaPagina(7); paginaDur = VELHA_ESPERA_MS; gNovoJogo(); }
-void saiGenius(const char* porque) { registra("genius: saiu (%s)", porque); mudaPagina(0); }
+void saiGenius(const char* porque) { registra("genius: saiu (%s)", porque); voltaRepouso(); }
 void gPlacar() {
   int pontos = gLen - 1;
   gFase = 2; gFimEm = millis();
@@ -1068,7 +1070,7 @@ static const unsigned long B_AUTO_MS = 300000, B_AUTO_DUR_MS = 15000, B_FIXO = 0
 static const uint32_t B_MAX_MSG = 24576;
 String bIp, bCod, bSerial;
 WiFiClientSecure bCli;
-bool bConectado = false, painelFixo = false;
+bool bConectado = false;
 unsigned long bProxTentativa = 0, bUltDado = 0, bUltPing = 0, bUltAuto = 0;
 int bFase = 0; uint8_t bCab = 0; uint32_t bRestante = 0, bMult = 1, bLidos = 0; uint8_t* bBuf = nullptr; bool bDescarta = false;
 struct {
@@ -1076,7 +1078,7 @@ struct {
   int pct = -1, restante = -1, camada = -1, camadas = -1, erro = 0, stg = -1, trayNow = 255;
   float bico = 0, bicoAlvo = 0, mesa = 0, mesaAlvo = 0;
   uint32_t cor[4] = {0, 0, 0, 0}; char tipo[4][8] = {"", "", "", ""}; bool temAms = false;
-  int umid = -1; char modelo[24] = ""; long inicio = 0;   // inicio: hora em que a impressao comecou (da impressora)
+  int umid = -1; float amsTemp = -100; char modelo[24] = ""; long inicio = 0;   // inicio: hora em que a impressao comecou (da impressora)
 } bi;
 
 // ---- alertas (pagina 8)
@@ -1098,8 +1100,7 @@ void novoAlerta(uint8_t tipo, uint16_t cor, const char* titulo, const char* l1, 
   }
   a->tipo = tipo; a->cor = cor; a->amostra = amostra; a->fixo = true;
   strlcpy(a->titulo, titulo, sizeof a->titulo); strlcpy(a->l2, l2, sizeof a->l2); a->codigo[0] = 0;
-  if (l1 == bi.nome && l1[0]) snprintf(a->l1, sizeof a->l1, "pe\xe7" "a: %s", l1);   // o nome da peca, com rotulo
-  else strlcpy(a->l1, l1, sizeof a->l1);
+  strlcpy(a->l1, l1 == bi.nome ? "" : l1, sizeof a->l1);   // o nome da impressao esta errado (projeto + placa): fica de fora
   a->hora[0] = 0; if (relogioValido()) horaStr(time(nullptr), a->hora, sizeof a->hora);
   registra("bambu: alerta %s (%s)", titulo, l2);
   if (pagina == 8 && (a == &aFila[0] || cabecaMudou)) abreAlerta();   // o que esta na tela mudou
@@ -1137,11 +1138,11 @@ void desenhaAlerta() {
 }
 void toqueAlerta() {
   if (aN) { registra("bambu: alerta lido (%s)", aFila[0].titulo); memmove(aFila, aFila + 1, sizeof(Alerta) * (A_MAX - 1)); aN--; }
-  if (aN) abreAlerta(); else mudaPagina(0);
+  if (aN) abreAlerta(); else voltaRepouso();
 }
 // Mostra o proximo alerta quando a tela esta no rosto, no painel ou no consumo automatico.
 void cuidaAlertas() {
-  if (aN && (pagina == 0 || pagina == 9 || pagina == 10 || (pagina == 1 && consumo.naTela))) abreAlerta();
+  if (aN && (pagina == 0 || pagina == 9 || pagina == 10 || (pagina == 1 && (consumo.naTela || manter)))) abreAlerta();
 }
 
 const char* motivoPausa(int stg) {
@@ -1325,6 +1326,7 @@ void bProcessa(const uint8_t* js, size_t n) {
     filtro["print"]["ams"]["ams"][0]["tray"][0]["tray_color"] = true;
     filtro["print"]["ams"]["ams"][0]["tray"][0]["tray_type"] = true;
     filtro["print"]["ams"]["ams"][0]["humidity_raw"] = true;
+    filtro["print"]["ams"]["ams"][0]["temp"] = true;
     filtro["print"]["hms"] = true;
     filtro["print"]["gcode_start_time"] = true;
     filtro["info"]["module"][0]["name"] = true;
@@ -1364,6 +1366,7 @@ void bProcessa(const uint8_t* js, size_t n) {
       if (t["tray_type"].is<const char*>()) strlcpy(bi.tipo[id], t["tray_type"], sizeof bi.tipo[id]);
     }
     if (!un[0]["humidity_raw"].isNull()) bi.umid = un[0]["humidity_raw"].as<String>().toInt();
+    if (!un[0]["temp"].isNull()) bi.amsTemp = un[0]["temp"].as<String>().toFloat();
     bi.temAms = true;
   }
   bDetecta(antes, restAntes);
@@ -1448,17 +1451,17 @@ void cuidaBambu() {
   if (bConectado && millis() - bUltPing > B_PING_MS) { bEnvia(0xC0, nullptr, 0); bUltPing = millis(); }
   if (millis() - bUltDado > B_SILENCIO_MS) { registra("bambu: sem resposta, reconectando"); bCli.stop(); }
   if (bConectado && bImprimindo() && pagina == 0 && millis() - bUltAuto > B_AUTO_MS) {   // painel a cada 5 min
-    bUltAuto = millis(); abrePainel(false);
+    bUltAuto = millis(); abrePainel();
   }
 }
 
 // ---- painel (pagina 9)
 // modelo + estado; arquivo; 3 colunas (impresso, faltam, camada); barra; temperaturas; AMS
-Campo pModelo = {12, 8, 184, 30, FONTE_M, 0, COR_FUNDO}, pEstado = {196, 12, 112, 20, FONTE_P, 2, COR_FUNDO};
-Campo pNome = {12, 40, 296, 20, FONTE_P, 0, COR_FUNDO};
-Campo pRot[3] = {{4, 64, 104, 20, FONTE_P, 1, COR_FUNDO}, {108, 64, 104, 20, FONTE_P, 1, COR_FUNDO}, {212, 64, 104, 20, FONTE_P, 1, COR_FUNDO}};
-Campo pVal[3] = {{4, 84, 104, 38, FONTE_32, 1, COR_FUNDO}, {108, 84, 104, 38, FONTE_32, 1, COR_FUNDO}, {212, 84, 104, 38, FONTE_32, 1, COR_FUNDO}};
-Campo pBico = {12, 148, 148, 20, FONTE_P, 0, COR_FUNDO}, pMesa = {164, 148, 144, 20, FONTE_P, 2, COR_FUNDO};
+Campo pModelo = {12, 2, 184, 30, FONTE_M, 0, COR_FUNDO}, pEstado = {196, 6, 112, 20, FONTE_P, 2, COR_FUNDO};
+Campo pNome = {12, 30, 296, 20, FONTE_P, 0, COR_FUNDO};
+Campo pRot[3] = {{4, 48, 104, 18, FONTE_P, 1, COR_FUNDO}, {108, 48, 104, 18, FONTE_P, 1, COR_FUNDO}, {212, 48, 104, 18, FONTE_P, 1, COR_FUNDO}};
+Campo pVal[3] = {{4, 64, 104, 36, FONTE_32, 1, COR_FUNDO}, {108, 64, 104, 36, FONTE_32, 1, COR_FUNDO}, {212, 64, 104, 36, FONTE_32, 1, COR_FUNDO}};
+Campo pBico = {12, 113, 148, 20, FONTE_P, 0, COR_FUNDO}, pMesa = {164, 113, 144, 20, FONTE_P, 2, COR_FUNDO};
 int pBarraPct = -2; uint16_t pBarraCor = 0; uint32_t pAmsCor[4]; int pAmsNow = -2; char pAmsTipo[4][8];
 
 uint16_t cor565(uint32_t rgba) { return RGB565((rgba >> 24) & 0xFF, (rgba >> 16) & 0xFF, (rgba >> 8) & 0xFF); }
@@ -1467,6 +1470,7 @@ bool corClara(uint32_t rgba) { int r = (rgba >> 24) & 0xFF, g = (rgba >> 16) & 0
 void painel(bool tudo) {
   if (tudo) {
     limpaTela(COR_FUNDO);
+    desenhaBotoes();
     pModelo.limpa(); pEstado.limpa(); pNome.limpa(); pBico.limpa(); pMesa.limpa();
     for (int i = 0; i < 3; i++) { pRot[i].limpa(); pVal[i].limpa(); }
     pBarraPct = -2; pAmsNow = -2; for (int i = 0; i < 4; i++) { pAmsCor[i] = 0xFFFFFFFF; pAmsTipo[i][0] = 1; pAmsTipo[i][1] = 0; }
@@ -1482,7 +1486,10 @@ void painel(bool tudo) {
   else if (!strcmp(e, "IDLE"))    { rot = "Ociosa"; }
   pModelo.mostra(bi.modelo[0] ? bi.modelo : "Impressora", COR_TEXTO);
   pEstado.mostra(rot, ce);
-  pNome.mostra(bi.nome, COR_APAGADO);
+  // (o nome da impressao saiu: o Bambu Studio manda "projeto + placa", que nao diz qual e a peca)
+  if (bi.umid >= 0 && bi.amsTemp > -100) snprintf(t, sizeof t, "AMS: umidade %d%%  \xb7  %d\xb0" "C", bi.umid, (int)lroundf(bi.amsTemp));
+  else if (bi.umid >= 0) snprintf(t, sizeof t, "AMS: umidade %d%%", bi.umid); else t[0] = 0;
+  pNome.mostra(t, bi.umid >= 50 ? COR_AZUL : COR_APAGADO);
   bool imp = bImprimindo();
   pRot[0].mostra("impresso", COR_APAGADO);
   if (bi.pct >= 0) snprintf(t, sizeof t, "%d%%", bi.pct); else strcpy(t, "--");
@@ -1501,8 +1508,8 @@ void painel(bool tudo) {
   int pc = max(0, bi.pct);
   if (pc != pBarraPct || cb != pBarraCor) {
     pBarraPct = pc; pBarraCor = cb;
-    preenche(12, 126, 296, 14, COR_TRILHO);
-    if (pc > 0) preenche(12, 126, 296 * min(pc, 100) / 100, 14, cb);
+    preenche(12, 101, 296, 9, COR_TRILHO);
+    if (pc > 0) preenche(12, 101, 296 * min(pc, 100) / 100, 9, cb);
   }
   snprintf(t, sizeof t, "Bico %d/%d\xb0", (int)lroundf(bi.bico), (int)lroundf(bi.bicoAlvo)); pBico.mostra(t, COR_TEXTO);
   snprintf(t, sizeof t, "Mesa %d/%d\xb0", (int)lroundf(bi.mesa), (int)lroundf(bi.mesaAlvo)); pMesa.mostra(t, COR_TEXTO);
@@ -1512,21 +1519,58 @@ void painel(bool tudo) {
     bool atual = bi.trayNow == i;
     bool mudou = pAmsCor[i] != bi.cor[i] || strcmp(pAmsTipo[i], bi.tipo[i]) || (pAmsNow == i) != atual;
     if (!mudou) continue;
-    int x = 12 + i * 76, y = 180;
-    preenche(x - 3, y - 3, 70, 56, atual ? COR_BRANCO : COR_FUNDO);
+    int x = 12 + i * 76, y = 140;
+    preenche(x - 3, y - 3, 70, 44, atual ? COR_BRANCO : COR_FUNDO);
     uint16_t cs = bi.tipo[i][0] ? cor565(bi.cor[i]) : COR_BLOCO;
-    preenche(x, y, 64, 50, cs);
-    escreve(x, y + 16, 64, 18, FONTE_P, corClara(bi.cor[i]) && bi.tipo[i][0] ? COR_OLHO : COR_BRANCO, cs, 1, bi.tipo[i][0] ? bi.tipo[i] : "vazio");
+    preenche(x, y, 64, 38, cs);
+    escreve(x, y + 10, 64, 18, FONTE_P, corClara(bi.cor[i]) && bi.tipo[i][0] ? COR_OLHO : COR_BRANCO, cs, 1, bi.tipo[i][0] ? bi.tipo[i] : "vazio");
     pAmsCor[i] = bi.cor[i]; strlcpy(pAmsTipo[i], bi.tipo[i], 8);
   }
   pAmsNow = bi.trayNow;
 }
-void abrePainel(bool fixo) {
-  painelFixo = fixo; mudaPagina(9); paginaDur = fixo ? B_FIXO : B_AUTO_DUR_MS;
+// ---- rodape: Tokens | Impressora | Manter/Dormir (o texto e a acao do toque)
+// A moldura dourada fina marca a tela atual. Sem impressora: Tokens | Manter.
+static const int BT_Y = 186, BT_H = 50;   // alto: da para acertar com o dedo
+int nBotoes() { return bambuLigado() ? 3 : 2; }
+int botaoLarg() { return (308 - (nBotoes() - 1) * 6) / nBotoes(); }
+void desenhaBotoes() {
+  int n = nBotoes(), w = botaoLarg();
+  for (int i = 0; i < n; i++) {
+    int x = 6 + i * (w + 6);
+    bool tela = i < n - 1;
+    const char* nome = !tela ? (manter ? "Dormir" : "Manter") : i == 0 ? "Tokens" : "Impressora";
+    bool atual = tela && (i == 0 ? pagina == 1 : pagina == 9);
+    preenche(x, BT_Y, w, BT_H, atual ? COR_OURO : COR_BLOCO);
+    preenche(x + 1, BT_Y + 1, w - 2, BT_H - 2, COR_BLOCO);
+    escreve(x + 1, BT_Y + 16, w - 2, 18, FONTE_P, COR_TEXTO, COR_BLOCO, 1, nome);
+  }
 }
-void toquePainel() {
-  if (!painelFixo) { painelFixo = true; paginaDesde = millis(); paginaDur = B_FIXO; }   // fixa
-  else mudaPagina(0);
+// Abre tokens (1) ou impressora (9); com Manter, fica ate tocar em Dormir.
+void abreTela(int p) {
+  mudaPagina(p);
+  paginaDur = manter ? B_FIXO : VOLTA_PAGINA_MS;
+  if (manter) paginaManter = p;
+}
+// Depois de um alerta (ou quando algo pede para voltar): a tela mantida, ou o rosto.
+void voltaRepouso() { if (manter) abreTela(paginaManter); else mudaPagina(0); }
+int botaoEm(int tx, int ty) {                         // -1: fora dos botoes
+  if (ty < BT_Y - 2 || ty > BT_Y + BT_H + 2) return -1;
+  int w = botaoLarg();
+  for (int i = 0; i < nBotoes(); i++) { int x = 6 + i * (w + 6); if (tx >= x - 2 && tx < x + w + 2) return i; }
+  return -1;
+}
+void toqueTela(int tx, int ty) {
+  int i = botaoEm(tx, ty);
+  if (i < 0) { if (!manter) mudaPagina(0); return; }    // fora dos botoes: volta a dormir (mantida, nada)
+  if (i == nBotoes() - 1) {
+    manter = !manter; registra("tela: %s", manter ? "mantida" : "dorme");
+    if (!manter) { mudaPagina(0); return; }
+    consumo.naTela = false; consumo.telaIntensa = false;   // o cartao automatico vira escolha da pessoa
+    paginaManter = pagina; paginaDesde = millis(); paginaDur = B_FIXO; desenhaBotoes();
+  } else abreTela(i == 0 ? 1 : 9);
+}
+void abrePainel() {                                   // o automatico, a cada 5 min
+  mudaPagina(9); paginaDur = B_AUTO_DUR_MS;
 }
 
 // ---------------------------------------------------------------- cenas (pagina 10)
@@ -1915,7 +1959,7 @@ void liberaManutencao(const char* como) {
 void cuidaManutencao() {
   if (!manutPedidaEm) return;
   if (digitalRead(BOTAO_BOOT) == LOW) { liberaManutencao("botao"); return; }
-  if (millis() - manutPedidaEm > MANUT_PEDIDO_MS) { manutPedidaEm = 0; registra("manutencao: ninguem tocou; cancelada"); mudaPagina(0); }
+  if (millis() - manutPedidaEm > MANUT_PEDIDO_MS) { manutPedidaEm = 0; registra("manutencao: ninguem tocou; cancelada"); voltaRepouso(); }
 }
 
 // ---------------------------------------------------------------- toque
@@ -1934,11 +1978,10 @@ void leToque() {
     if (manutPedidaEm) { liberaManutencao("toque"); continue; }
     if (pagina == 6) { toqueVelha(tx, ty); continue; }
     if (pagina == 7) { toqueGenius(tx, ty); continue; }
-    if (pagina == 9) { toquePainel(); continue; }
     if (pagina == 8) { toqueAlerta(); continue; }
     if (pagina >= 3 && pagina <= 5) { toquePaleta(tx, ty); continue; }
     if (millis() - pressaoEm >= TOQUE_LONGO_MS) { brilhoAlto = !brilhoAlto; registra("brilho %s", brilhoAlto ? "alto" : "baixo"); }
-    else if (pagina == 1 && bambuLigado()) abrePainel(true);          // rosto > consumo > impressora > rosto
+    else if (pagina == 1 || pagina == 9) toqueTela(tx, ty);            // botoes do rodape
     else { mudaPagina(pagina == 0 || pagina == 10 ? 1 : 0); Serial.printf("-> pagina %d\n", pagina); }
   }
 }
@@ -2102,9 +2145,12 @@ void webCmd() {
     }
     prefs.end();
     bCli.stop(); bConectado = false; bSolta(); bProxTentativa = 0; memset(&bi, 0, sizeof bi); bi.trayNow = 255;
+    if (!bambuLigado() && paginaManter == 9) paginaManter = 1;       // sem impressora, mantem os tokens
+    if (pagina == 9 && !bambuLigado()) voltaRepouso();
+    else if (pagina == 1 || pagina == 9) desenhaBotoes();            // mudou o numero de botoes
   }
   // {"painel":true}: mostra o painel da impressora (fixo)
-  if ((doc["painel"] | false) && bambuLigado()) abrePainel(true);
+  if ((doc["painel"] | false) && bambuLigado()) abreTela(9);
   // {"genius":true}: abre o Genius
   if (doc["genius"] | false) abreGenius();
   // {"velha":true}: abre o jogo da velha
@@ -2114,7 +2160,7 @@ void webCmd() {
   // {"alerta":"bom"|"ruim"|"filamento"}: alerta de exemplo da impressora (para ver a tela)
   if (doc["alerta"].is<const char*>()) {
     const char* k = doc["alerta"];
-    const char* pc = "pe\xe7" "a: Montagem + Montagem";
+    const char* pc = "";
     if (!strcmp(k, "ruim")) novoAlerta(A_GERAL, COR_CRITICO, "Pausada", pc, "acabou o filamento", 0);
     else if (!strcmp(k, "filamento")) novoAlerta(A_FILAMENTO, COR_AZUL, "Trocou o filamento", pc, "slot 1 > slot 2  PLA", 0x898989FF);
     else if (!strcmp(k, "hms")) { JsonDocument h; JsonArray a = h.to<JsonArray>(); bHmsBase = true; bHmsN = 0;
@@ -2154,7 +2200,7 @@ void webOtaFim() {
   web.send(ok ? 200 : 500, "text/plain", ok ? "ok, reiniciando\n" : "falhou\n");
   registra(ok ? "ota local: ok" : "ota local: falhou");
   delay(500);
-  if (ok) ESP.restart(); else mudaPagina(0);
+  if (ok) ESP.restart(); else voltaRepouso();
 }
 void webOtaDados() {
   HTTPUpload& u = web.upload();
@@ -2176,7 +2222,7 @@ void webOtaDados() {
     otaIniciado = false;
     Update.abort();
     registra("ota local: envio interrompido; repita");
-    mudaPagina(0);
+    voltaRepouso();
   }
 }
 
@@ -2400,13 +2446,13 @@ void loop() {
     servidor = SRV_SEM_WIFI;
   } else if (servidor == SRV_SEM_WIFI) servidor = SRV_INICIANDO;
   cuidaManutencao();
-  if (pagina != 0 && millis() - paginaDesde > paginaDur) {
+  if (pagina != 0 && !(manter && pagina == paginaManter) && millis() - paginaDesde > paginaDur) {
     if (pagina == 2) manutPedidaEm = 0;
     if (pagina == 6) saiVelha("sem toque");
     else if (pagina == 7) saiGenius("sem toque");
     else if (pagina >= 3 && pagina <= 5) cancelaPaleta("sem toque");
     else if (pagina == 8) { if (aN && aFila[0].fixo) abreAlerta(); else toqueAlerta(); }   // so o informativo sai sozinho
-    else mudaPagina(0);
+    else voltaRepouso();
   }
 
   static unsigned long ultimoTick = 0;
