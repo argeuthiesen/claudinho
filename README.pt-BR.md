@@ -372,6 +372,7 @@ scripts/claudinho.sh genius               # Genius: repita a sequência de cores
 scripts/claudinho.sh bambu IP_IMPRESSORA  # liga uma impressora Bambu (pede o código de acesso, escondido)
 scripts/claudinho.sh bambu desligar       # desliga e apaga o código da placa
 scripts/claudinho.sh painel               # mostra o painel da impressora
+scripts/claudinho.sh idioma [código]      # idioma da tela: en, pt-BR... (sem código: o atual e os disponíveis)
 scripts/claudinho.sh alerta [tipo]        # alerta de exemplo da impressora: bom, ruim, filamento, hms
 scripts/claudinho.sh cena <tipo>          # mostra uma cena: codando, terminal, lendo, agente
 scripts/claudinho.sh atualizar [arquivo.bin]
@@ -477,11 +478,16 @@ desde que ligou.
   `firmware/compilar.sh` gera os `.bin` de C3 e S3 em `firmware/bin/`.
 - `nextion/`: a tela compilada para o NX3224F024, mais o projeto `.HMI`.
   Fontes: 0-3 DM Sans, 4 Silkscreen, 5 JetBrains Mono (as cenas), todas OFL.
-- `firmware/hms/`: os avisos HMS da impressora em português. O `hms_pt.json`
-  é a tradução (uma frase curta, categoria e nível por texto da Bambu); o
+- `idiomas/`: todo texto da tela, um arquivo por idioma (`en.txt`,
+  `pt-BR.txt`...), inclusive os avisos HMS da impressora. **Traduções são
+  bem-vindas:** veja [idiomas/TRANSLATING.pt-BR.md](idiomas/TRANSLATING.pt-BR.md).
+  O `python3 idiomas/gerar.py` confere (os `%...`, os caracteres e se cada
+  texto cabe na tela, medido com a fonte de verdade) e gera o
+  `firmware/claudinho/textos.h`.
+- `firmware/hms/`: a tabela de códigos HMS. O `hms.json` liga cada texto da
+  Bambu a uma mensagem curta, categoria e nível; o
   `python3 firmware/hms/gerar.py` baixa a lista oficial da Bambu e gera de
-  novo o `firmware/claudinho/hms_pt.h`. Códigos novos que a Bambu criar
-  aparecem como "sem traducao" na saída dele.
+  novo o `firmware/claudinho/hms_codigos.h`.
 - `scripts/`: gravação, serial, hooks, status line e o `claudinho.sh`.
 - `skills/configurar/`: a skill que conduz a configuração.
 - `hooks/hooks.json`: os eventos do Claude Code que o Claudinho escuta.

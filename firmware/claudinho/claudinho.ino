@@ -24,7 +24,8 @@
 
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
-#include "hms_pt.h"      // avisos HMS da Bambu em portugues (gerado por firmware/hms/gerar.py)
+#include "textos.h"        // textos da tela por idioma (gerado de idiomas/*.txt)
+#include "hms_codigos.h"   // codigos HMS da Bambu (gerado por firmware/hms/gerar.py)      // avisos HMS da Bambu em portugues (gerado por firmware/hms/gerar.py)
 #include <esp_wifi.h>
 #include <WebServer.h>
 #include <Preferences.h>
@@ -186,10 +187,10 @@ struct BlocoJanela {
   Campo rotulo, pct, reseta, resta;
   Barra barra;
   BlocoJanela(int y0) : y(y0),
-    rotulo {12,  y0 + 2,  220, 18, FONTE_P, 0, COR_BLOCO},
-    pct    {12,  y0 + 14, 112, 50, FONTE_G, 0, COR_BLOCO},
-    reseta {132, y0 + 20, 176, 18, FONTE_P, 0, COR_BLOCO},
-    resta  {132, y0 + 40, 176, 18, FONTE_P, 0, COR_BLOCO},
+    rotulo {12,  y0 + 2,  220, 18, FONTE_P, 0, COR_BLOCO},   // as caixas nao se sobrepoem: o fundo do numero
+    pct    {12,  y0 + 24, 112, 36, FONTE_32, 0, COR_BLOCO},  // apagava a parte de baixo do rotulo
+    reseta {132, y0 + 22, 176, 18, FONTE_P, 0, COR_BLOCO},
+    resta  {132, y0 + 42, 176, 18, FONTE_P, 0, COR_BLOCO},
     barra  {12,  y0 + 64, 296, 6} {}
   void limpa() { rotulo.limpa(); pct.limpa(); reseta.limpa(); resta.limpa(); barra.limpa(); }
 };
@@ -249,20 +250,19 @@ void horaStr(time_t t, char* out, size_t n) {
   snprintf(out, n, "%02d:%02d", tm.tm_hour, tm.tm_min);
 }
 void diaHoraStr(time_t t, char* out, size_t n) {
-  static const char* DIAS[] = {"dom", "seg", "ter", "qua", "qui", "sex", "sab"};
   struct tm tm, hoje; time_t agora = time(nullptr);
   localtime_r(&t, &tm); localtime_r(&agora, &hoje);
   if (tm.tm_yday == hoje.tm_yday && tm.tm_year == hoje.tm_year)
-    snprintf(out, n, "hoje %02d:%02d", tm.tm_hour, tm.tm_min);
+    snprintf(out, n, tx(T_TEMPO_HOJE), tm.tm_hour, tm.tm_min);
   else
-    snprintf(out, n, "%s %02d:%02d", DIAS[tm.tm_wday], tm.tm_hour, tm.tm_min);
+    snprintf(out, n, tx(T_TEMPO_DIA), tx((Txt)(T_DIA_0 + tm.tm_wday)), tm.tm_hour, tm.tm_min);
 }
 void restanteStr(long ate, char* out, size_t n) {
   long s = ate - (long)time(nullptr); if (s < 0) s = 0;
   long d = s / 86400, h = (s % 86400) / 3600, m = (s % 3600) / 60;
-  if (d > 0)      snprintf(out, n, "em %ld d %ld h", d, h);
-  else if (h > 0) snprintf(out, n, "em %ld h %02ld min", h, m);
-  else            snprintf(out, n, "em %ld min", m);
+  if (d > 0)      snprintf(out, n, tx(T_TEMPO_EM_D), d, h);
+  else if (h > 0) snprintf(out, n, tx(T_TEMPO_EM_H), h, m);
+  else            snprintf(out, n, tx(T_TEMPO_EM_MIN), m);
 }
 bool relogioValido() { return time(nullptr) > 1600000000L; }
 void ajustaRelogio(long agora) {
@@ -605,10 +605,10 @@ void desenhaMoldura() {
     desenhaPaleta();
   } else if (pagina == 2) {
     limpaTela(COR_FUNDO);
-    escreve(0,  40, 320, 30, FONTE_M,  COR_OURO,    COR_FUNDO, 1, "O PC quer me atualizar");
-    escreve(0,  90, 320, 38, FONTE_32, COR_TEXTO,   COR_FUNDO, 1, "Toque na tela");
-    escreve(0, 130, 320, 38, FONTE_32, COR_TEXTO,   COR_FUNDO, 1, "para permitir");
-    escreve(0, 196, 320, 20, FONTE_P,  COR_APAGADO, COR_FUNDO, 1, "(ou aperte BOOT na placa)");
+    escreve(0,  40, 320, 30, FONTE_M,  COR_OURO,    COR_FUNDO, 1, tx(T_MANUT_PC_QUER));
+    escreve(0,  90, 320, 38, FONTE_32, COR_TEXTO,   COR_FUNDO, 1, tx(T_MANUT_TOQUE));
+    escreve(0, 130, 320, 38, FONTE_32, COR_TEXTO,   COR_FUNDO, 1, tx(T_MANUT_PERMITIR));
+    escreve(0, 196, 320, 20, FONTE_P,  COR_APAGADO, COR_FUNDO, 1, tx(T_MANUT_OU_BOOT));
   } else {
     limpaTela(COR_FUNDO);
     preenche(6, b5h.y, 308, 72, COR_BLOCO);
@@ -628,18 +628,18 @@ void desenhaCabecalho() {
 
 void desenhaRodape() {
   char t[48], h[16];
-  if (servidor == SRV_SEM_WIFI)       { cRodape.mostra("sem wifi", COR_CRITICO); return; }
-  if (servidor == SRV_INICIANDO)      { cRodape.mostra("conectando...", COR_APAGADO); return; }
+  if (servidor == SRV_SEM_WIFI)       { cRodape.mostra(tx(T_USO_SEM_WIFI), COR_CRITICO); return; }
+  if (servidor == SRV_INICIANDO)      { cRodape.mostra(tx(T_USO_CONECTANDO), COR_APAGADO); return; }
   if (!dados.ok || dados.at == 0) {
-    snprintf(t, sizeof t, "aguardando o PC - %s", WiFi.localIP().toString().c_str());
+    snprintf(t, sizeof t, tx(T_USO_AGUARDANDO_PC), WiFi.localIP().toString().c_str());
     cRodape.mostra(t, COR_APAGADO); return;
   }
   if (congelado()) {
     diaHoraStr(dados.at, h, sizeof h);
-    snprintf(t, sizeof t, "dormindo desde %s", h);
+    snprintf(t, sizeof t, tx(T_USO_DORMINDO_DESDE), h);
     cRodape.mostra(t, COR_APAGADO);
   } else {
-    snprintf(t, sizeof t, "%d terminal%s - %s", dados.n, dados.n == 1 ? "" : "is", WiFi.localIP().toString().c_str());
+    snprintf(t, sizeof t, tx(dados.n == 1 ? T_USO_TERMINAL : T_USO_TERMINAIS), dados.n, WiFi.localIP().toString().c_str());
     cRodape.mostra(t, COR_OK);
   }
 }
@@ -649,7 +649,7 @@ void desenhaJanela(BlocoJanela& b, const char* nome, int pct, long reseta, bool 
   b.rotulo.mostra(nome, COR_APAGADO);
   bool vencida = reseta > 0 && relogioValido() && (long)time(nullptr) >= reseta;
   if (dados.ok && vencida) {             // numero velho de uma janela que ja renovou
-    b.pct.mostra("0%", COR_TEXTO); b.reseta.mostra("renovou!", COR_OK); b.resta.mostra("", COR_TEXTO);
+    b.pct.mostra("0%", COR_TEXTO); b.reseta.mostra(tx(T_USO_RENOVOU), COR_OK); b.resta.mostra("", COR_TEXTO);
     b.barra.mostra(0, COR_OURO); return;
   }
   if (dados.ok) {
@@ -662,18 +662,18 @@ void desenhaJanela(BlocoJanela& b, const char* nome, int pct, long reseta, bool 
     if (reseta > 0 && relogioValido()) {
       char h[20];
       if (semana) diaHoraStr(reseta, h, sizeof h); else horaStr(reseta, h, sizeof h);
-      snprintf(t, sizeof t, "reseta %s", h); b.reseta.mostra(t, COR_APAGADO);
+      snprintf(t, sizeof t, tx(T_USO_RESETA), h); b.reseta.mostra(t, COR_APAGADO);
       restanteStr(reseta, t, sizeof t);      b.resta.mostra(t, COR_TEXTO);
-    } else { b.reseta.mostra(pct == 0 ? "janela livre" : "", COR_APAGADO); b.resta.mostra("", COR_TEXTO); }
-  } else { b.pct.mostra("--", COR_APAGADO); b.reseta.mostra("aguardando", COR_APAGADO); b.resta.mostra("", COR_TEXTO); }
+    } else { b.reseta.mostra(pct == 0 ? tx(T_USO_JANELA_LIVRE) : "", COR_APAGADO); b.resta.mostra("", COR_TEXTO); }
+  } else { b.pct.mostra("--", COR_APAGADO); b.reseta.mostra(tx(T_USO_AGUARDANDO), COR_APAGADO); b.resta.mostra("", COR_TEXTO); }
   b.barra.mostra(dados.ok ? pct : 0, corPct(pct));
 }
 
 void desenha() {
   if (pagina == 0 || pagina >= 2) return;   // olhos, manutencao ou paleta: nada a atualizar
   desenhaCabecalho();
-  desenhaJanela(b5h, "SESSAO  5 HORAS", dados.h5, dados.h5r, false);
-  desenhaJanela(b7d, "SEMANA  7 DIAS",  dados.d7, dados.d7r, true);
+  desenhaJanela(b5h, tx(T_USO_SESSAO_5H), dados.h5, dados.h5r, false);
+  desenhaJanela(b7d, tx(T_USO_SEMANA_7D), dados.d7, dados.d7r, true);
   desenhaRodape();
 }
 
@@ -796,7 +796,7 @@ uint16_t corTom(int k) { return k < 0 ? corBase(paletaBase) : corVariacao(paleta
 void desenhaCentroPaleta() {
   uint16_t c = corTom(paletaTom);
   preenche(CEL_W + 2, CEL_H + 2, 320 - 2 * CEL_W - 4, 240 - 2 * CEL_H - 4, c);
-  escreve(CEL_W + 2, 150, 320 - 2 * CEL_W - 4, 18, FONTE_P, COR_OLHO, c, 1, "toque para confirmar");
+  escreve(CEL_W + 2, 150, 320 - 2 * CEL_W - 4, 18, FONTE_P, COR_OLHO, c, 1, tx(T_PALETA_CONFIRMAR));
 }
 
 void irPaleta(int p) { mudaPagina(p); paginaDur = PALETA_ESPERA_MS; }
@@ -814,9 +814,9 @@ void desenhaPaleta() {
     ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
     formaEsq = Forma(); formaDir = Forma(); bocaNaTela = BP_NENHUMA; esqueceExtras();
     Expr x; expressao(C_NEUTRO, 0, x); desenhaExpr(x);
-    preenche(4,   200, 100, 36, COR_OK);      escreve(4,   208, 100, 20, FONTE_P, COR_BRANCO, COR_OK,      1, "Gravar");
-    preenche(110, 200, 100, 36, COR_FUNDO);   escreve(110, 208, 100, 20, FONTE_P, COR_BRANCO, COR_FUNDO,   1, "Voltar");
-    preenche(216, 200, 100, 36, COR_CRITICO); escreve(216, 208, 100, 20, FONTE_P, COR_BRANCO, COR_CRITICO, 1, "Cancelar");
+    preenche(4,   200, 100, 36, COR_OK);      escreve(4,   208, 100, 20, FONTE_P, COR_BRANCO, COR_OK,      1, tx(T_PALETA_GRAVAR));
+    preenche(110, 200, 100, 36, COR_FUNDO);   escreve(110, 208, 100, 20, FONTE_P, COR_BRANCO, COR_FUNDO,   1, tx(T_PALETA_VOLTAR));
+    preenche(216, 200, 100, 36, COR_CRITICO); escreve(216, 208, 100, 20, FONTE_P, COR_BRANCO, COR_CRITICO, 1, tx(T_PALETA_CANCELAR));
   }
 }
 
@@ -899,8 +899,8 @@ void vDesenhaPeca(int i) {
     nexCmdf("cir %d,%d,%d,%u", cx, cy, r - d, COR_BRANCO);
 }
 void vDesenhaAviso() {
-  if (vAviso) { escreve(0, 90, VX, 18, FONTE_P, COR_CRITICO, corRosto(), 1, "Claude");
-                escreve(0, 110, VX, 18, FONTE_P, COR_CRITICO, corRosto(), 1, "chama!"); }
+  if (vAviso) { escreve(0, 90, VX, 18, FONTE_P, COR_CRITICO, corRosto(), 1, tx(T_VELHA_CLAUDE));
+                escreve(0, 110, VX, 18, FONTE_P, COR_CRITICO, corRosto(), 1, tx(T_VELHA_CHAMA)); }
 }
 void vDesenhaTabuleiro() {
   limpaTela(corRosto());
@@ -931,7 +931,7 @@ void vFimDePartida(int r) {
 // Rosto reagindo ao resultado, na tela inteira, com uma palavra embaixo.
 void vDesenhaReacao() {
   Cara c = vResultado == 1 ? C_TRISTE : vResultado == 2 ? C_EMPOLGADO : C_DESCONFIADO;
-  const char* frase = vResultado == 1 ? "You win!" : vResultado == 2 ? "I win!" : "Draw!";
+  const char* frase = tx(vResultado == 1 ? T_VELHA_VOCE_GANHOU : vResultado == 2 ? T_VELHA_EU_GANHEI : T_VELHA_EMPATE);
   limpaTela(corRosto());
   ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
   formaEsq = Forma(); formaDir = Forma(); bocaNaTela = BP_NENHUMA; esqueceExtras();
@@ -1017,7 +1017,7 @@ void gPlacar() {
   gFase = 2; gFimEm = millis();
   registra("genius: errou, %d pontos", pontos);
   Cara c = pontos >= 8 ? C_EMPOLGADO : pontos >= 4 ? C_FELIZ : C_DESCONFIADO;
-  char t[20]; snprintf(t, sizeof t, "Score: %d", pontos);
+  char t[20]; snprintf(t, sizeof t, tx(T_GENIUS_PLACAR), pontos);
   limpaTela(corRosto());
   ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
   formaEsq = Forma(); formaDir = Forma(); bocaNaTela = BP_NENHUMA; esqueceExtras();
@@ -1111,7 +1111,7 @@ void desenhaAlerta() {
   const Alerta& a = aFila[0];
   char t[64];
   // cabecalho: de onde vem, e um traco na cor do alerta
-  escreve(12, 6, 180, 28, FONTE_M, COR_TEXTO, COR_FUNDO, 0, "IMPRESSORA 3D");
+  escreve(12, 6, 180, 28, FONTE_M, COR_TEXTO, COR_FUNDO, 0, tx(T_ALERTA_IMPRESSORA_3D));
   escreve(190, 10, 118, 20, FONTE_P, COR_APAGADO, COR_FUNDO, 2, bi.modelo[0] ? bi.modelo : "Bambu Lab");
   preenche(0, 38, 320, 3, a.cor);
   bool grande = strlen(a.titulo) <= 12;
@@ -1124,15 +1124,17 @@ void desenhaAlerta() {
   } else if (strlen(a.l2) <= 26) {
     escreve(8, 130, 304, 30, FONTE_M, COR_TEXTO, COR_FUNDO, 1, a.l2);
   } else {
-    int n = strlen(a.l2), q = 26; while (q > 0 && a.l2[q] != ' ') q--; if (q == 0) q = 26;
+    int n = strlen(a.l2), meio = n / 2, q = -1;              // quebra no espaco mais perto do meio
+    for (int i = 0; i < n; i++) if (a.l2[i] == ' ' && (q < 0 || abs(i - meio) < abs(q - meio))) q = i;
+    if (q < 0) q = meio;
     strlcpy(t, a.l2, min(q + 1, (int)sizeof t)); escreve(8, 122, 304, 26, FONTE_M, COR_TEXTO, COR_FUNDO, 1, t);
     escreve(8, 148, 304, 26, FONTE_M, COR_TEXTO, COR_FUNDO, 1, a.l2 + min(n, q + (a.l2[q] == ' ' ? 1 : 0)));
   }
   // embaixo: o Claudinho (pula ou abana os bracos), a hora, o "toque: li" e o codigo
   alertaMini(0);
-  if (a.hora[0]) { snprintf(t, sizeof t, "\xe0s %s", a.hora); escreve(110, 178, 200, 20, FONTE_P, COR_APAGADO, COR_FUNDO, 1, t); }
-  const char* acao = a.fixo ? "toque: li" : "sai sozinho";
-  if (aN > 1) snprintf(t, sizeof t, "%s  (mais %d)", acao, aN - 1); else strcpy(t, acao);
+  if (a.hora[0]) { snprintf(t, sizeof t, tx(T_ALERTA_AS), a.hora); escreve(110, 178, 200, 20, FONTE_P, COR_APAGADO, COR_FUNDO, 1, t); }
+  const char* acao = tx(a.fixo ? T_ALERTA_TOQUE_LI : T_ALERTA_SAI_SOZINHO);
+  if (aN > 1) snprintf(t, sizeof t, tx(T_ALERTA_MAIS), acao, aN - 1); else strlcpy(t, acao, sizeof t);
   escreve(110, 200, 200, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, t);
   if (a.codigo[0]) escreve(110, 222, 200, 18, FONTE_P, COR_TRILHO, COR_FUNDO, 1, a.codigo);
 }
@@ -1147,29 +1149,29 @@ void cuidaAlertas() {
 
 const char* motivoPausa(int stg) {
   switch (stg) {
-    case 5: case 30: return "pausa no G-code";
-    case 6:  return "acabou o filamento";
-    case 16: return "voc\xea pausou";
-    case 17: return "tampa frontal caiu";
-    case 20: return "temperatura do bico";
-    case 21: return "temperatura da mesa";
-    case 23: return "pulou passo";
-    case 26: return "perdeu o AMS";
-    case 27: return "ventoinha do bico lenta";
-    case 28: return "temperatura da c\xe2mara";
-    case 32: return "filamento enrolado no bico";
-    case 33: return "erro no cortador";
-    case 34: return "erro na 1\xaa camada";
-    case 35: return "bico entupido";
+    case 5: case 30: return tx(T_PAUSA_GCODE);
+    case 6:  return tx(T_PAUSA_FILAMENTO);
+    case 16: return tx(T_PAUSA_VOCE);
+    case 17: return tx(T_PAUSA_TAMPA);
+    case 20: return tx(T_PAUSA_TEMP_BICO);
+    case 21: return tx(T_PAUSA_TEMP_MESA);
+    case 23: return tx(T_PAUSA_PULOU_PASSO);
+    case 26: return tx(T_PAUSA_PERDEU_AMS);
+    case 27: return tx(T_PAUSA_VENTOINHA);
+    case 28: return tx(T_PAUSA_TEMP_CAMARA);
+    case 32: return tx(T_PAUSA_ENROLADO);
+    case 33: return tx(T_PAUSA_CORTADOR);
+    case 34: return tx(T_PAUSA_PRIMEIRA_CAMADA);
+    case 35: return tx(T_PAUSA_ENTUPIDO);
   }
   return nullptr;
 }
 bool imprimindoEm(const char* e) { return !strcmp(e, "RUNNING") || !strcmp(e, "PAUSE") || !strcmp(e, "PREPARE"); }
 void duracao(unsigned long ms, char* t, size_t n) {
   unsigned long m = ms / 60000;
-  if (m >= 60) snprintf(t, n, "levou %luh%02lu", m / 60, m % 60); else snprintf(t, n, "levou %lu min", m);
+  if (m >= 60) snprintf(t, n, tx(T_ALERTA_LEVOU_H), m / 60, m % 60); else snprintf(t, n, tx(T_ALERTA_LEVOU_MIN), m);
 }
-void codigoErro(uint32_t e, char* t, size_t n) { snprintf(t, n, "erro %04X_%04X", (unsigned)(e >> 16), (unsigned)(e & 0xFFFF)); }
+void codigoErro(uint32_t e, char* t, size_t n) { snprintf(t, n, tx(T_ALERTA_ERRO), (unsigned)(e >> 16), (unsigned)(e & 0xFFFF)); }
 
 // Compara o que chegou com o que havia antes. Primeiro dado depois de ligar: so aprende.
 void bDetecta(const char* antes, int restAntes) {
@@ -1178,38 +1180,38 @@ void bDetecta(const char* antes, int restAntes) {
     bool era = imprimindoEm(antes), eh = imprimindoEm(e);
     if (!era && eh) {
       bInicioEm = millis(); b5min = false; bPausaPend = 0;
-      t[0] = 0; if (bi.restante > 0) snprintf(t, sizeof t, "previsto %dh%02d", bi.restante / 60, bi.restante % 60);
-      novoAlerta(A_GERAL, COR_OK, "Come\xe7ou", bi.nome, t, 0);
+      t[0] = 0; if (bi.restante > 0) snprintf(t, sizeof t, tx(T_ALERTA_PREVISTO), bi.restante / 60, bi.restante % 60);
+      novoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_COMECOU), bi.nome, t, 0);
     } else if (!strcmp(e, "PAUSE")) {
       bPausaPend = millis();                                    // o motivo chega junto ou logo depois
     } else if (!strcmp(antes, "PAUSE") && eh) {
       if (bPausaPend) bPausaPend = 0;                           // pausa rapida: nem avisou
-      else novoAlerta(A_GERAL, COR_OK, "Retomou", bi.nome, "imprimindo de novo", 0);
+      else novoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_RETOMOU), bi.nome, tx(T_ALERTA_IMPRIMINDO_DE_NOVO), 0);
     } else if (!strcmp(e, "FINISH") && era) {
       bPausaPend = 0; t[0] = 0;
       long agora = time(nullptr);                               // a hora da impressora vale mesmo depois de reiniciar
       if (bi.inicio > 1600000000L && relogioValido() && agora > bi.inicio) duracao((agora - bi.inicio) * 1000UL, t, sizeof t);
       else if (bInicioEm) duracao(millis() - bInicioEm, t, sizeof t);
-      novoAlerta(A_GERAL, COR_OK, "Terminou!", bi.nome, t, 0);
+      novoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_TERMINOU), bi.nome, t, 0);
     } else if (!strcmp(e, "FAILED") && era) {
       bPausaPend = 0;
-      if (bi.erro == 0x0300400C) novoAlerta(A_GERAL, COR_ALERTA, "Cancelada", bi.nome, "impress\xe3o cancelada", 0);
-      else { if (bi.erro) codigoErro(bi.erro, t, sizeof t); else strcpy(t, "sem c\xf3" "digo de erro"); novoAlerta(A_GERAL, COR_CRITICO, "Falhou", bi.nome, t, 0); }
+      if (bi.erro == 0x0300400C) novoAlerta(A_GERAL, COR_ALERTA, tx(T_ALERTA_CANCELADA), bi.nome, tx(T_ALERTA_IMPRESSAO_CANCELADA), 0);
+      else { if (bi.erro) codigoErro(bi.erro, t, sizeof t); else strlcpy(t, tx(T_ALERTA_SEM_CODIGO), sizeof t); novoAlerta(A_GERAL, COR_CRITICO, tx(T_ALERTA_FALHOU), bi.nome, t, 0); }
     }
   }
   if (!antes[0]) return;
   if (!strcmp(e, "RUNNING") && !b5min && bi.restante > 0 && bi.restante <= 5 && restAntes > 5) {
-    b5min = true; novoAlerta(A_GERAL, COR_OURO, "Faltam 5 min", bi.nome, "quase pronta", 0);
+    b5min = true; novoAlerta(A_GERAL, COR_OURO, tx(T_ALERTA_FALTAM_5), bi.nome, tx(T_ALERTA_QUASE_PRONTA), 0);
   }
   // troca de filamento (255 = descarregando no meio da troca: ignora)
   if (bi.trayNow != 255) {
     if (bUltTray >= 0 && bi.trayNow != bUltTray && imprimindoEm(e)) {
-      char a[8], b[8];
-      if (bUltTray == 254) strcpy(a, "externo"); else snprintf(a, sizeof a, "slot %d", bUltTray + 1);
-      if (bi.trayNow == 254) strcpy(b, "externo"); else snprintf(b, sizeof b, "slot %d", bi.trayNow + 1);
+      char a[16], b[16];
+      if (bUltTray == 254) strlcpy(a, tx(T_ALERTA_EXTERNO), sizeof a); else snprintf(a, sizeof a, tx(T_ALERTA_SLOT), bUltTray + 1);
+      if (bi.trayNow == 254) strlcpy(b, tx(T_ALERTA_EXTERNO), sizeof b); else snprintf(b, sizeof b, tx(T_ALERTA_SLOT), bi.trayNow + 1);
       bool noAms = bi.trayNow >= 0 && bi.trayNow < 4;
       snprintf(t, sizeof t, "%s > %s%s%s", a, b, noAms && bi.tipo[bi.trayNow][0] ? "  " : "", noAms ? bi.tipo[bi.trayNow] : "");
-      novoAlerta(A_FILAMENTO, COR_AZUL, "Trocou o filamento", bi.nome, t, noAms ? bi.cor[bi.trayNow] : 0);
+      novoAlerta(A_FILAMENTO, COR_AZUL, tx(T_ALERTA_TROCOU_FILAMENTO), bi.nome, t, noAms ? bi.cor[bi.trayNow] : 0);
     }
     bUltTray = bi.trayNow;
   }
@@ -1217,8 +1219,8 @@ void bDetecta(const char* antes, int restAntes) {
 void bConfereUmidade() {
   if (bi.umid < 0) return;
   if (bi.umid >= 50 && !bUmidAvisada) {
-    bUmidAvisada = true; char t[40]; snprintf(t, sizeof t, "umidade %d%%", bi.umid);
-    novoAlerta(A_GERAL, COR_AZUL, "AMS \xfamido", "hora de secar o filamento", t, 0);
+    bUmidAvisada = true; char t[40]; snprintf(t, sizeof t, tx(T_ALERTA_UMIDADE), bi.umid);
+    novoAlerta(A_GERAL, COR_AZUL, tx(T_ALERTA_AMS_UMIDO), tx(T_ALERTA_SECAR), t, 0);
   } else if (bi.umid < 40) bUmidAvisada = false;
 }
 // HMS: a tabela gerada (hms_pt.h) da categoria, o nivel e uma frase curta em
@@ -1226,13 +1228,13 @@ void bConfereUmidade() {
 // categoria pela familia do codigo.
 const char* hmsCatFamilia(uint32_t at) {
   switch (at >> 24) {
-    case 0x03: return "Impressora";
-    case 0x05: return "Sistema";
-    case 0x07: case 0x18: return "AMS";
-    case 0x0C: return "C\xe2mera / sensores";
-    case 0x29: return "C\xe2mara / filtro";
+    case 0x03: return tx(T_HMS_FAMILIA_IMPRESSORA);
+    case 0x05: return tx(T_HMS_FAMILIA_SISTEMA);
+    case 0x07: case 0x18: return tx(T_HMS_FAMILIA_AMS);
+    case 0x0C: return tx(T_HMS_FAMILIA_CAMERA);
+    case 0x29: return tx(T_HMS_FAMILIA_CAMARA);
   }
-  return "Aviso da impressora";
+  return tx(T_HMS_FAMILIA_OUTRO);
 }
 void bConfereHms(JsonArray h) {
   uint32_t novo[8][2]; int n = 0;
@@ -1254,7 +1256,7 @@ void bConfereHms(JsonArray h) {
     }
     const char* cat; const char* frase; char onde[32] = ""; uint16_t cor;
     if (e) {
-      cat = HMS_CAT[e->cat]; frase = HMS_TXT[e->txt];
+      cat = hmsCatTxt(e->cat); frase = hmsMsgTxt(e->msg);
       cor = e->nivel == 0 ? COR_AZUL : e->nivel == 1 ? COR_ALERTA : COR_CRITICO;
       if (e->unid) {
         if (e->slot) snprintf(onde, sizeof onde, "%s %c  \xb7  slot %d", e->ht ? "AMS-HT" : "AMS", e->unid, e->slot);
@@ -1262,7 +1264,7 @@ void bConfereHms(JsonArray h) {
       }
     } else {                                           // a Bambu inventou um codigo novo
       int sev = co >> 16;
-      cat = hmsCatFamilia(at); frase = "procure o c\xf3" "digo no wiki da Bambu";
+      cat = hmsCatFamilia(at); frase = tx(T_HMS_PROCURE_WIKI);
       cor = sev <= 2 ? COR_CRITICO : sev == 3 ? COR_ALERTA : COR_AZUL;
     }
     novoAlerta(A_GERAL, cor, cat, onde[0] ? onde : (bImprimindo() ? bi.nome : ""), frase, 0);
@@ -1441,7 +1443,7 @@ void cuidaBambu() {
       const char* m = motivoPausa(bi.stg); char t[40];
       if (!m && bi.erro) { codigoErro(bi.erro, t, sizeof t); m = t; }
       bool voce = bi.stg == 16 || bi.stg == 5 || bi.stg == 30;
-      novoAlerta(A_GERAL, voce ? COR_ALERTA : COR_CRITICO, "Pausada", bi.nome, m ? m : "motivo desconhecido", 0);
+      novoAlerta(A_GERAL, voce ? COR_ALERTA : COR_CRITICO, tx(T_ALERTA_PAUSADA), bi.nome, m ? m : tx(T_ALERTA_MOTIVO_DESCONHECIDO), 0);
     }
   }
   cuidaAlertas();
@@ -1480,30 +1482,30 @@ void painel(bool tudo) {
     pBarraPct = -2; pAmsNow = -2; for (int i = 0; i < 4; i++) { pAmsCor[i] = 0xFFFFFFFF; pAmsTipo[i][0] = 1; pAmsTipo[i][1] = 0; }
   }
   char t[48];
-  const char* e = bi.estado; uint16_t ce = COR_APAGADO; const char* rot = "Aguardando...";
-  if (!bConectado) { rot = "Sem conex\xe3o"; ce = COR_CRITICO; }
-  else if (!strcmp(e, "RUNNING")) { rot = "Imprimindo"; ce = COR_OK; }
-  else if (!strcmp(e, "PAUSE"))   { rot = "Pausada"; ce = COR_ALERTA; }
-  else if (!strcmp(e, "PREPARE")) { rot = "Preparando"; ce = COR_OURO; }
-  else if (!strcmp(e, "FINISH"))  { rot = "Terminou"; ce = COR_OK; }
-  else if (!strcmp(e, "FAILED"))  { rot = "Falhou"; ce = COR_CRITICO; }
-  else if (!strcmp(e, "IDLE"))    { rot = "Ociosa"; }
-  pModelo.mostra(bi.modelo[0] ? bi.modelo : "Impressora", COR_TEXTO);
+  const char* e = bi.estado; uint16_t ce = COR_APAGADO; const char* rot = tx(T_IMP_AGUARDANDO);
+  if (!bConectado) { rot = tx(T_IMP_SEM_CONEXAO); ce = COR_CRITICO; }
+  else if (!strcmp(e, "RUNNING")) { rot = tx(T_IMP_IMPRIMINDO); ce = COR_OK; }
+  else if (!strcmp(e, "PAUSE"))   { rot = tx(T_IMP_PAUSADA); ce = COR_ALERTA; }
+  else if (!strcmp(e, "PREPARE")) { rot = tx(T_IMP_PREPARANDO); ce = COR_OURO; }
+  else if (!strcmp(e, "FINISH"))  { rot = tx(T_IMP_TERMINOU); ce = COR_OK; }
+  else if (!strcmp(e, "FAILED"))  { rot = tx(T_IMP_FALHOU); ce = COR_CRITICO; }
+  else if (!strcmp(e, "IDLE"))    { rot = tx(T_IMP_OCIOSA); }
+  pModelo.mostra(bi.modelo[0] ? bi.modelo : tx(T_IMP_IMPRESSORA), COR_TEXTO);
   pEstado.mostra(rot, ce);
   // (o nome da impressao saiu: o Bambu Studio manda "projeto + placa", que nao diz qual e a peca)
-  if (bi.umid >= 0 && bi.amsTemp > -100) snprintf(t, sizeof t, "AMS: umidade %d%%  \xb7  %d\xb0" "C", bi.umid, (int)lroundf(bi.amsTemp));
-  else if (bi.umid >= 0) snprintf(t, sizeof t, "AMS: umidade %d%%", bi.umid); else t[0] = 0;
+  if (bi.umid >= 0 && bi.amsTemp > -100) snprintf(t, sizeof t, tx(T_IMP_AMS_UMID_TEMP), bi.umid, (int)lroundf(bi.amsTemp));
+  else if (bi.umid >= 0) snprintf(t, sizeof t, tx(T_IMP_AMS_UMID), bi.umid); else t[0] = 0;
   pNome.mostra(t, bi.umid >= 50 ? COR_AZUL : COR_APAGADO);
   bool imp = bImprimindo();
-  pRot[0].mostra("impresso", COR_APAGADO);
+  pRot[0].mostra(tx(T_IMP_IMPRESSO), COR_APAGADO);
   if (bi.pct >= 0) snprintf(t, sizeof t, "%d%%", bi.pct); else strcpy(t, "--");
   pVal[0].mostra(t, COR_TEXTO);
-  pRot[1].mostra("faltam", COR_APAGADO);
+  pRot[1].mostra(tx(T_IMP_FALTAM), COR_APAGADO);
   if (bi.restante > 0 && imp) {
     if (bi.restante >= 60) snprintf(t, sizeof t, "%dh%02d", bi.restante / 60, bi.restante % 60); else snprintf(t, sizeof t, "%d min", bi.restante);
   } else strcpy(t, "--");
   pVal[1].mostra(t, COR_TEXTO);
-  if (bi.camadas > 0) snprintf(t, sizeof t, "camada de %d", bi.camadas); else strcpy(t, "camada");
+  if (bi.camadas > 0) snprintf(t, sizeof t, tx(T_IMP_CAMADA_DE), bi.camadas); else strlcpy(t, tx(T_IMP_CAMADA), sizeof t);
   pRot[2].mostra(t, COR_APAGADO);
   if (bi.camadas > 0) snprintf(t, sizeof t, "%d", bi.camada); else strcpy(t, "--");
   pVal[2].mostra(t, COR_TEXTO);
@@ -1515,9 +1517,9 @@ void painel(bool tudo) {
     preenche(12, 101, 296, 9, COR_TRILHO);
     if (pc > 0) preenche(12, 101, 296 * min(pc, 100) / 100, 9, cb);
   }
-  snprintf(t, sizeof t, "Bico %d/%d\xb0", (int)lroundf(bi.bico), (int)lroundf(bi.bicoAlvo)); pBico.mostra(t, COR_TEXTO);
-  snprintf(t, sizeof t, "Mesa %d/%d\xb0", (int)lroundf(bi.mesa), (int)lroundf(bi.mesaAlvo)); pMesa.mostra(t, COR_TEXTO);
-  if (bi.camara >= 0) snprintf(t, sizeof t, "C\xe2mara %d\xb0", bi.camara); else t[0] = 0;
+  snprintf(t, sizeof t, tx(T_IMP_BICO), (int)lroundf(bi.bico), (int)lroundf(bi.bicoAlvo)); pBico.mostra(t, COR_TEXTO);
+  snprintf(t, sizeof t, tx(T_IMP_MESA), (int)lroundf(bi.mesa), (int)lroundf(bi.mesaAlvo)); pMesa.mostra(t, COR_TEXTO);
+  if (bi.camara >= 0) snprintf(t, sizeof t, tx(T_IMP_CAMARA), bi.camara); else t[0] = 0;
   pCamara.mostra(t, COR_TEXTO);
   // AMS: 4 slots; o que esta imprimindo ganha moldura branca
   if (!bi.temAms) return;
@@ -1529,7 +1531,7 @@ void painel(bool tudo) {
     preenche(x - 3, y - 3, 70, 44, atual ? COR_BRANCO : COR_FUNDO);
     uint16_t cs = bi.tipo[i][0] ? cor565(bi.cor[i]) : COR_BLOCO;
     preenche(x, y, 64, 38, cs);
-    escreve(x, y + 10, 64, 18, FONTE_P, corClara(bi.cor[i]) && bi.tipo[i][0] ? COR_OLHO : COR_BRANCO, cs, 1, bi.tipo[i][0] ? bi.tipo[i] : "vazio");
+    escreve(x, y + 10, 64, 18, FONTE_P, corClara(bi.cor[i]) && bi.tipo[i][0] ? COR_OLHO : COR_BRANCO, cs, 1, bi.tipo[i][0] ? bi.tipo[i] : tx(T_IMP_VAZIO));
     pAmsCor[i] = bi.cor[i]; strlcpy(pAmsTipo[i], bi.tipo[i], 8);
   }
   pAmsNow = bi.trayNow;
@@ -1544,7 +1546,7 @@ void desenhaBotoes() {
   for (int i = 0; i < n; i++) {
     int x = 6 + i * (w + 6);
     bool tela = i < n - 1;
-    const char* nome = !tela ? (manter ? "Dormir" : "Manter") : i == 0 ? "Tokens" : "Impressora";
+    const char* nome = tx(!tela ? (manter ? T_BOTAO_DORMIR : T_BOTAO_MANTER) : i == 0 ? T_BOTAO_TOKENS : T_BOTAO_IMPRESSORA);
     bool atual = tela && (i == 0 ? pagina == 1 : pagina == 9);
     preenche(x, BT_Y, w, BT_H, atual ? COR_OURO : COR_BLOCO);
     preenche(x + 1, BT_Y + 1, w - 2, BT_H - 2, COR_BLOCO);
@@ -1872,7 +1874,7 @@ void agCaixa(int i) {
   int cx = AG_CX[i];
   preenche(cx - 1, 98, 3, AG_Y - 98, COR_OURO);
   preenche(cx - 46, AG_Y, 92, 44, COR_OURO); preenche(cx - 44, AG_Y + 2, 88, 40, agCorBloco());
-  char t[16]; snprintf(t, sizeof t, "agente %d", agN > 3 && i == 2 ? agN : i + 1);
+  char t[16]; snprintf(t, sizeof t, tx(T_CENA_AGENTE), agN > 3 && i == 2 ? agN : i + 1);
   escreve(cx - 44, AG_Y + 6, 88, 16, FONTE_P, COR_TEXTO, agCorBloco(), 1, t);
 }
 void agMini(int dy) { preenche(132, 12, MINI_W, MINI_H + 8, COR_FUNDO); miniClawd(132, 16 + dy, COR_FUNDO); }
@@ -1887,7 +1889,7 @@ void agInicio() {
   agMini(0);
   escreve(0, 56, 320, 18, FONTE_P, COR_TEXTO, COR_FUNDO, 1, "Claude");
   preenche(159, 76, 3, 20, COR_OURO);
-  escreve(0, 204, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, "delegando");
+  escreve(0, 204, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, tx(T_CENA_DELEGANDO));
   agN = 0; agPuloAte = 0; novoAgente();
 }
 void agPasso() {
@@ -1959,8 +1961,8 @@ void liberaManutencao(const char* como) {
   manutPedidaEm = 0; manutAte = millis() + MANUT_JANELA_MS;
   registra("manutencao: liberada por %s (%lu s)", como, MANUT_JANELA_MS / 1000);
   limpaTela(COR_FUNDO);
-  escreve(0,  80, 320, 38, FONTE_32, COR_OK,    COR_FUNDO, 1, "Liberado!");
-  escreve(0, 130, 320, 30, FONTE_M,  COR_TEXTO, COR_FUNDO, 1, "recebendo...");
+  escreve(0,  80, 320, 38, FONTE_32, COR_OK,    COR_FUNDO, 1, tx(T_MANUT_LIBERADO));
+  escreve(0, 130, 320, 30, FONTE_M,  COR_TEXTO, COR_FUNDO, 1, tx(T_MANUT_RECEBENDO));
 }
 void cuidaManutencao() {
   if (!manutPedidaEm) return;
@@ -2115,11 +2117,12 @@ void webRaiz() {
 }
 void webMini() {
   if (!autorizado()) { web.send(401, "text/plain", "segredo invalido\n"); return; }
-  char buf[480];
-  snprintf(buf, sizeof buf, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,\"ctx\":%d,\"n\":%d,\"mod\":\"%s\",\"at\":%ld,\"now\":%ld,\"local\":%s,\"rssi\":%d,\"manut\":\"%s\",\"bambu\":%s,\"bcon\":%s,\"best\":\"%s\",\"bpct\":%d}\n",
+  char buf[560], lista[80] = "";
+  for (int i = 0; i < I_N; i++) { if (i) strlcat(lista, ",", sizeof lista); strlcat(lista, IDIOMA_COD[i], sizeof lista); }
+  snprintf(buf, sizeof buf, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,\"ctx\":%d,\"n\":%d,\"mod\":\"%s\",\"at\":%ld,\"now\":%ld,\"local\":%s,\"rssi\":%d,\"manut\":\"%s\",\"bambu\":%s,\"bcon\":%s,\"best\":\"%s\",\"bpct\":%d,\"idioma\":\"%s\",\"idiomas\":\"%s\"}\n",
            VERSAO, dados.h5, dados.h5r, dados.d7, dados.d7r, dados.ctx, dados.n, dados.mod, dados.at, (long)time(nullptr), localRecente() ? "true" : "false", (int)WiFi.RSSI(),
            manutPedidaEm ? "pedida" : manutLiberada() ? "liberada" : "",
-           bambuLigado() ? "true" : "false", bConectado ? "true" : "false", bi.estado, bi.pct);
+           bambuLigado() ? "true" : "false", bConectado ? "true" : "false", bi.estado, bi.pct, IDIOMA_COD[idioma], lista);
   web.send(200, "application/json", buf);
 }
 
@@ -2163,15 +2166,24 @@ void webCmd() {
   if (doc["velha"] | false) abreVelha();
   // {"paleta":true}: abre a escolha de cor do rosto na tela
   if (doc["paleta"] | false) abrePaleta();
+  // {"idioma":"pt-BR"}: idioma da tela (gravado na placa)
+  if (doc["idioma"].is<const char*>()) {
+    int i = idiomaPorCodigo(doc["idioma"]);
+    if (i < 0) { web.send(400, "text/plain", "idioma desconhecido\n"); return; }
+    idioma = i; prefs.begin("claudinho", false); prefs.putString("idioma", IDIOMA_COD[i]); prefs.end();
+    registra("idioma: %s", IDIOMA_COD[i]);
+    if (pagina == 1 || pagina == 9) { desenhaMoldura(); desenha(); }   // redesenha sem mexer nos tempos da tela
+    else if (pagina == 8) desenhaAlerta();                              // jogos e paleta: o idioma vale na proxima tela
+  }
   // {"alerta":"bom"|"ruim"|"filamento"}: alerta de exemplo da impressora (para ver a tela)
   if (doc["alerta"].is<const char*>()) {
     const char* k = doc["alerta"];
     const char* pc = "";
-    if (!strcmp(k, "ruim")) novoAlerta(A_GERAL, COR_CRITICO, "Pausada", pc, "acabou o filamento", 0);
-    else if (!strcmp(k, "filamento")) novoAlerta(A_FILAMENTO, COR_AZUL, "Trocou o filamento", pc, "slot 1 > slot 2  PLA", 0x898989FF);
+    if (!strcmp(k, "ruim")) novoAlerta(A_GERAL, COR_CRITICO, tx(T_ALERTA_PAUSADA), pc, tx(T_PAUSA_FILAMENTO), 0);
+    else if (!strcmp(k, "filamento")) novoAlerta(A_FILAMENTO, COR_AZUL, tx(T_ALERTA_TROCOU_FILAMENTO), pc, "slot 1 > slot 2  PLA", 0x898989FF);
     else if (!strcmp(k, "hms")) { JsonDocument h; JsonArray a = h.to<JsonArray>(); bHmsBase = true; bHmsN = 0;
       JsonObject o = a.add<JsonObject>(); o["attr"] = 0x05000200UL; o["code"] = 0x00020005UL; bConfereHms(a); }
-    else novoAlerta(A_GERAL, COR_OURO, "Faltam 5 min", pc, "quase pronta", 0);
+    else novoAlerta(A_GERAL, COR_OURO, tx(T_ALERTA_FALTAM_5), pc, tx(T_ALERTA_QUASE_PRONTA), 0);
   }
   // {"manutencao":true}: pede o toque que libera /ota e /tft
   if (doc["manutencao"] | false) {
@@ -2214,8 +2226,8 @@ void webOtaDados() {
     uploadNegado = !autorizado() || !manutLiberada(); otaIniciado = !uploadNegado;
     if (uploadNegado) return;
     limpaTela(COR_FUNDO);
-    escreve(0,  80, 320, 38, FONTE_32, COR_OURO,    COR_FUNDO, 1, "Atualizando...");
-    escreve(0, 130, 320, 30, FONTE_M,  COR_APAGADO, COR_FUNDO, 1, "n\xe3o desligue");
+    escreve(0,  80, 320, 38, FONTE_32, COR_OURO,    COR_FUNDO, 1, tx(T_MANUT_ATUALIZANDO));
+    escreve(0, 130, 320, 30, FONTE_M,  COR_APAGADO, COR_FUNDO, 1, tx(T_MANUT_NAO_DESLIGUE));
     Update.begin(UPDATE_SIZE_UNKNOWN);
   } else if (u.status == UPLOAD_FILE_WRITE) {
     if (!uploadNegado) Update.write(u.buf, u.currentSize);
@@ -2261,8 +2273,8 @@ void webTftDados() {
     tftIniciado = !uploadNegado;
     if (uploadNegado) return;
     limpaTela(COR_FUNDO);
-    escreve(0,  86, 320, 30, FONTE_M, COR_OURO,    COR_FUNDO, 1, "Gravando a tela...");
-    escreve(0, 130, 320, 30, FONTE_M, COR_APAGADO, COR_FUNDO, 1, "n\xe3o desligue");
+    escreve(0,  86, 320, 30, FONTE_M, COR_OURO,    COR_FUNDO, 1, tx(T_MANUT_GRAVANDO_TELA));
+    escreve(0, 130, 320, 30, FONTE_M, COR_APAGADO, COR_FUNDO, 1, tx(T_MANUT_NAO_DESLIGUE));
     delay(300);
     tftOk = tftHandshake(tftTam);
   } else if (u.status == UPLOAD_FILE_WRITE) {
@@ -2308,6 +2320,7 @@ void carregaConfig() {
   prefs.begin("claudinho", true);
   cfgSsid = prefs.getString("ssid", ""); cfgSenha = prefs.getString("senha", ""); cfgToken = prefs.getString("token", "");
   corRostoAtual = prefs.getUShort("cor", COR_ROSTO);
+  { int i = idiomaPorCodigo(prefs.getString("idioma", "en").c_str()); idioma = i < 0 ? 0 : i; }
   bIp = prefs.getString("bambu_ip", ""); bCod = prefs.getString("bambu_cod", ""); bSerial = prefs.getString("bambu_sn", "");
   prefs.end();
 }
@@ -2426,14 +2439,14 @@ void setup() {
   WiFi.mode(WIFI_STA);          // para o MAC e o SCAN funcionarem mesmo sem config
   if (cfgSsid.isEmpty()) {
     String mac = macTexto();
-    telaTexto("Ola! Sou o Claudinho.", "Configure pelo Claude Code:", mac.c_str());
+    telaTexto(tx(T_SETUP_OLA), tx(T_SETUP_CONFIGURE), mac.c_str());
     // espera a configuracao pela serial; avisa a cada 5 s que esta aqui
     unsigned long ultimo = 0;
     while (true) { leSerialConfig(); if (millis() - ultimo > 5000) { ultimo = millis(); imprimeInfo(); } delay(20); }
   }
   if (!conectaWifi()) {
-    char l2[48]; snprintf(l2, sizeof l2, "rede: %s", cfgSsid.c_str());
-    telaTexto("Nao consegui entrar no Wi-Fi", l2, "tentando de novo...");
+    char l2[48]; snprintf(l2, sizeof l2, tx(T_SETUP_REDE), cfgSsid.c_str());
+    telaTexto(tx(T_SETUP_SEM_WIFI), l2, tx(T_SETUP_TENTANDO));
     servidor = SRV_SEM_WIFI;
   }
   if (cfgToken.length() < 16) registra("aviso: sem token; o PC nao conseguira falar comigo");

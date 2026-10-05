@@ -56,12 +56,12 @@ face. Tap to see the usage card. To try one: `claudinho.sh cena codando`
   each one resets, how many terminals are open and the board's IP. After 15
   seconds it goes back to the face (or tap outside the buttons).
 - **The buttons at the bottom** (on the usage card and on the printer
-  panel), labels in Portuguese:
-  - **Tokens** and **Impressora** (printer) switch between the two screens;
+  panel):
+  - **Tokens** and **Printer** switch between the two screens;
     a thin gold frame marks the one you're on. Without a printer set up,
     only Tokens shows.
-  - **Manter** (keep): the screen stays on, updating live, and never goes
-    back to the sleeping face. The button then reads **Dormir** (sleep):
+  - **Keep**: the screen stays on, updating live, and never goes
+    back to the sleeping face. The button then reads **Sleep**:
     tap it and Claudinho goes back to sleep. Handy to take it to another
     room as a portable printer monitor. Printer alerts still show up, and
     after your tap it returns to the kept screen.
@@ -93,10 +93,10 @@ Handy for matching the face to your case's filament color.
    with the filament, side by side. (Outside the case, hold a piece of
    filament next to the middle.)
 4. Found it? **Tap the middle.** You get the face in that color with three
-   buttons (labels are in Portuguese):
-   - **Gravar** (save): keeps the color, even after a restart;
-   - **Voltar** (back): back to the 12 shades;
-   - **Cancelar** (cancel): back to the previous color.
+   buttons:
+   - **Save**: keeps the color, even after a restart;
+   - **Back**: back to the 12 shades;
+   - **Cancel**: back to the previous color.
 
 If nobody touches it for 1 minute, it cancels on its own. The eyes always
 stay black. If you know the exact color: `claudinho.sh cor R G B salvar`.
@@ -150,31 +150,30 @@ the app lives only in Bambu's cloud, so the panel shows the model. The print
 job name isn't shown either: over the local network the printer only sends
 Bambu Studio's "project + plate" or the MakerWorld profile name, which don't
 say what the part is.) While printing, it shows up on its own every 5 minutes
-for 15 seconds. Open it anytime with the **Impressora** button on the usage
-card, and use **Manter** to keep it on screen.
+for 15 seconds. Open it anytime with the **Printer** button on the usage
+card, and use **Keep** to keep it on screen.
 
-**The alerts** show "IMPRESSORA 3D" (3D printer) and the model at the top, a
+**The alerts** show "3D PRINTER" and the model at the top, a
 big title in the alert's color, the part name, the detail, and a little
 Claudinho at the bottom: jumping for good news, waving its arms when something
 needs you. They stay on screen **until you tap** (the tap means "got it"); if
-several pile up, they show one after the other (screen texts are in
-Portuguese):
+several pile up, they show one after the other:
 
 | Alert | When |
 |---|---|
-| Começou (started) | a print started, with the estimated time |
-| Pausada (paused) | with the reason: out of filament, you paused, clogged nozzle, first layer error, front cover, temperature... |
-| Retomou (resumed) | back to printing after a pause |
-| Faltam 5 min | 5 minutes left |
-| Trocou o filamento | filament change, with the new color (one alert, kept up to date) |
-| Terminou! (finished) | with how long it took |
-| Falhou / Cancelada | failed (with the error code) or cancelled |
+| Started | a print started, with the estimated time |
+| Paused | with the reason: out of filament, you paused, clogged nozzle, first layer error, front cover, temperature... |
+| Resumed | back to printing after a pause |
+| 5 min left | 5 minutes left |
+| Filament changed | filament change, with the new color (one alert, kept up to date) |
+| Finished! | with how long it took |
+| Failed / Cancelled | failed (with the error code) or cancelled |
 | HMS warnings | the printer's health warnings, in plain words (see below) |
-| AMS úmido | AMS humidity reached 50% |
+| AMS is humid | AMS humidity reached 50% |
 
 **HMS warnings, in plain words.** Bambu printers report problems as HMS codes
 (like `0500-0200-0002-0005`). Claudinho carries Bambu's whole list (about 2,000
-codes), rewritten as short Portuguese phrases: the title is the area (AMS,
+codes), rewritten as short phrases in your language: the title is the area (AMS,
 nozzle / extruder, heated bed, network / internet...), the detail says what
 happened, and the code stays small at the bottom, to look up in Bambu's wiki.
 The color follows how serious it is: blue is informative, yellow needs
@@ -209,6 +208,8 @@ No need to memorize commands. Inside Claude Code, just ask:
 - "show the usage on Claudinho"
 - "Claudinho stopped reacting" (the skill runs a diagnosis)
 - "I changed my Wi-Fi, reconfigure Claudinho"
+- "change Claudinho's language" (screen texts in English or Portuguese, and
+  [your language, if you translate it](../idiomas/TRANSLATING.md))
 - "I have a Bambu printer" / "show the printer panel"
 
 The full command list is in the [README](../README.md#commands), and the most

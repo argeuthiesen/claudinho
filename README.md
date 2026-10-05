@@ -375,6 +375,7 @@ scripts/claudinho.sh genius               # Genius (Simon): repeat the color seq
 scripts/claudinho.sh bambu PRINTER_IP     # connect a Bambu printer (asks the access code, hidden)
 scripts/claudinho.sh bambu desligar       # disconnect it and erase the code ("desligar" = turn off)
 scripts/claudinho.sh painel               # show the printer panel ("painel" = panel)
+scripts/claudinho.sh idioma [code]        # screen language: en, pt-BR... (no code: current and available)
 scripts/claudinho.sh alerta [type]        # sample printer alert: bom, ruim, filamento, hms
 scripts/claudinho.sh cena <type>          # try a scene: codando (editing), terminal, lendo (reading), agente
 scripts/claudinho.sh atualizar [file.bin] # update firmware
@@ -485,11 +486,16 @@ logged since it started.
   `firmware/compilar.sh` builds the C3 and S3 `.bin` files into `firmware/bin/`.
 - `nextion/`: the compiled screen for the NX3224F024, plus the `.HMI` project.
   Fonts: 0-3 DM Sans, 4 Silkscreen, 5 JetBrains Mono (the scenes), all OFL.
-- `firmware/hms/`: the printer's HMS warnings in Portuguese. `hms_pt.json` is
-  the translation (one short phrase, category and level per Bambu text);
-  `python3 firmware/hms/gerar.py` downloads Bambu's official list and
-  regenerates `firmware/claudinho/hms_pt.h`. New codes Bambu adds show up as
-  "untranslated" in its output.
+- `idiomas/`: every screen text, one file per language (`en.txt`,
+  `pt-BR.txt`...), including the printer's HMS warnings. **Translations are
+  welcome:** see [idiomas/TRANSLATING.md](idiomas/TRANSLATING.md).
+  `python3 idiomas/gerar.py` checks them (placeholders, characters and
+  whether each text fits on screen, measured with the real font) and
+  generates `firmware/claudinho/textos.h`.
+- `firmware/hms/`: the HMS code table. `hms.json` maps each Bambu text to a
+  short message, category and level; `python3 firmware/hms/gerar.py`
+  downloads Bambu's official list and regenerates
+  `firmware/claudinho/hms_codigos.h`.
 - `scripts/`: flashing, serial, hooks, status line and `claudinho.sh`.
 - `skills/configurar/`: the skill that runs the setup.
 - `hooks/hooks.json`: the Claude Code events Claudinho listens to.

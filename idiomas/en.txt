@@ -1,0 +1,782 @@
+# Claudinho screen texts: English (the reference language).
+# Format: key = text. Keep %d, %s, %02d... exactly as they are (numbers and
+# names go there). Keep it short: the screen is 320 x 240 pixels.
+# See TRANSLATING.md.
+
+idioma.nome = English
+
+setup.ola = Hi! I'm Claudinho.
+setup.configure = Set me up from Claude Code:
+setup.sem_wifi = Couldn't join the Wi-Fi
+setup.rede = network: %s
+setup.tentando = trying again...
+
+manut.pc_quer = The PC wants to update me
+manut.toque = Tap the screen
+manut.permitir = to allow it
+manut.ou_boot = (or press BOOT on the board)
+manut.liberado = Allowed!
+manut.recebendo = receiving...
+manut.atualizando = Updating...
+manut.nao_desligue = don't turn me off
+manut.gravando_tela = Writing the screen...
+
+tempo.hoje = today %02d:%02d
+tempo.dia = %s %02d:%02d
+tempo.em_d = in %ld d %ld h
+tempo.em_h = in %ld h %02ld min
+tempo.em_min = in %ld min
+dia.0 = sun
+dia.1 = mon
+dia.2 = tue
+dia.3 = wed
+dia.4 = thu
+dia.5 = fri
+dia.6 = sat
+
+uso.sem_wifi = no wifi
+uso.conectando = connecting...
+uso.aguardando_pc = waiting for the PC - %s
+uso.dormindo_desde = asleep since %s
+uso.terminal = %d terminal - %s
+uso.terminais = %d terminals - %s
+uso.renovou = renewed!
+uso.reseta = resets %s
+uso.janela_livre = window is free
+uso.aguardando = waiting
+uso.sessao_5h = SESSION  5 HOURS
+uso.semana_7d = WEEK  7 DAYS
+
+botao.tokens = Tokens
+botao.impressora = Printer
+botao.manter = Keep
+botao.dormir = Sleep
+
+paleta.confirmar = tap to confirm
+paleta.gravar = Save
+paleta.voltar = Back
+paleta.cancelar = Cancel
+
+velha.claude = Claude
+velha.chama = calls!
+velha.voce_ganhou = You win!
+velha.eu_ganhei = I win!
+velha.empate = Draw!
+genius.placar = Score: %d
+
+cena.agente = agent %d
+cena.delegando = delegating
+
+imp.aguardando = Waiting...
+imp.sem_conexao = Disconnected
+imp.imprimindo = Printing
+imp.pausada = Paused
+imp.preparando = Preparing
+imp.terminou = Finished
+imp.falhou = Failed
+imp.ociosa = Idle
+imp.impressora = Printer
+imp.ams_umid_temp = AMS: humidity %d%%  · %d°C
+imp.ams_umid = AMS: humidity %d%%
+imp.impresso = printed
+imp.faltam = left
+imp.camada_de = layer of %d
+imp.camada = layer
+imp.bico = Nozzle %d/%d°
+imp.mesa = Bed %d/%d°
+imp.camara = Chamber %d°
+imp.vazio = empty
+
+alerta.impressora_3d = 3D PRINTER
+alerta.toque_li = tap: got it
+alerta.sai_sozinho = closes by itself
+alerta.mais = %s  (%d more)
+alerta.as = at %s
+alerta.comecou = Started
+alerta.previsto = expected %dh%02d
+alerta.retomou = Resumed
+alerta.imprimindo_de_novo = printing again
+alerta.terminou = Finished!
+alerta.levou_h = took %luh%02lu
+alerta.levou_min = took %lu min
+alerta.cancelada = Cancelled
+alerta.impressao_cancelada = print cancelled
+alerta.falhou = Failed
+alerta.erro = error %04X_%04X
+alerta.sem_codigo = no error code
+alerta.faltam_5 = 5 min left
+alerta.quase_pronta = almost done
+alerta.trocou_filamento = Filament changed
+alerta.externo = external
+alerta.slot = slot %d
+alerta.ams_umido = AMS is humid
+alerta.secar = time to dry the filament
+alerta.umidade = humidity %d%%
+alerta.pausada = Paused
+alerta.motivo_desconhecido = unknown reason
+
+pausa.gcode = paused by the G-code
+pausa.filamento = out of filament
+pausa.voce = you paused it
+pausa.tampa = front cover fell off
+pausa.temp_bico = nozzle temperature
+pausa.temp_mesa = bed temperature
+pausa.pulou_passo = skipped steps
+pausa.perdeu_ams = lost the AMS
+pausa.ventoinha = slow nozzle fan
+pausa.temp_camara = chamber temperature
+pausa.enrolado = filament tangled on the nozzle
+pausa.cortador = cutter error
+pausa.primeira_camada = first layer error
+pausa.entupido = clogged nozzle
+
+hms.familia.impressora = Printer
+hms.familia.sistema = System
+hms.familia.ams = AMS
+hms.familia.camera = Camera / sensors
+hms.familia.camara = Chamber / filter
+hms.familia.outro = Printer warning
+hms.procure_wiki = look the code up in Bambu's wiki
+
+# ---- Printer health warnings (HMS). Max 50 characters each.
+
+hms.cat.00 = AMS
+hms.cat.01 = Heatbed
+hms.cat.02 = Files / storage
+hms.cat.03 = Nozzle / extruder
+hms.cat.04 = System
+hms.cat.05 = Filament
+hms.cat.06 = Cutter
+hms.cat.07 = Motion / axes
+hms.cat.08 = Chamber / filter
+hms.cat.09 = Network / internet
+hms.cat.10 = Camera / sensors
+hms.cat.11 = Calibration
+hms.cat.12 = Fans
+
+# Bambu: Abnormal number or type of connected AMS units detected. Please refer to the Wiki for supported AMS combinatio
+hms.000 = Unsupported AMS count or type; check connections
+# Bambu: AMS # slot # the tube inside the AMS is broken, or feed-out hall sensor is faulty and cannot detect the filame
+hms.001 = AMS tube broken or filament sensor faulty
+# Bambu: The RFID-tag on AMS # slot # cannot be identified.
+hms.002 = Spool RFID tag could not be read
+# Bambu: A heatbed temperature control issue has been detected and the heating module may be damaged. Please power off 
+hms.003 = Heatbed heating fault; power off immediately
+# Bambu: G-code data error detected. The system has automatically reloaded the G-code and resumed task.
+hms.004 = G-code error; reloaded and printing resumed
+# Bambu: Sliced file abnormality detected multiple times. Task canceled. Please check the sliced file.
+hms.005 = Sliced file faulty; print cancelled
+# Bambu: G-code verification error. The system has automatically reacquired the data and resumed task.
+hms.006 = G-code verification error; printing resumed
+# Bambu: Failed to extrude the filament. Possible cause: extruder or nozzle clog.
+hms.007 = Cannot extrude; nozzle or extruder may be clogged
+# Bambu: MC board certification failed. Possible communication error. Please restart the device.
+hms.008 = Board communication fault; restart printer
+# Bambu: AMS-HT # is undergoing dry cooling; please wait for it to cool down before operating.
+hms.009 = AMS-HT cooling after drying; please wait
+# Bambu: Failed to pull out the filament from the extruder. Possible causes: clogged extruder or broken filament.
+hms.010 = Cannot retract filament from extruder
+# Bambu: The AMS-HT # motor torque control is malfunctioning. The current sensor may be faulty.
+hms.011 = AMS motor torque control fault
+# Bambu: Encryption chip failure
+hms.012 = Encryption chip failure
+# Bambu: The AMS-HT # assist motor torque control is malfunctioning. The current sensor may be faulty.
+hms.013 = Assist motor torque control fault
+# Bambu: The current sensor of AMS-HT # exhaust valve 1 is abnormal; please get in touch with customer support to repla
+hms.014 = AMS valve 1 current sensor fault
+# Bambu: Temperature sensor on the AMS-HT # heater was malfunction, resulting in abnormal temperature readings.
+hms.015 = Heater temperature sensor fault
+# Bambu: AMS-HT # The operation of the exhaust valve 1 is abnormal, which may be due to excessive resistance.
+hms.016 = AMS valve 1 stuck or obstructed
+# Bambu: The AMS-HT # assist motor has slipped. The extrusion wheel may be worn down, or the filament may be too thin.
+hms.017 = Assist motor slipped; worn wheel or thin filament
+# Bambu: AMS-HT # assist motor is stalled，due to excessive resistance in the tube between the filament buffer and the t
+hms.018 = Motor stalled; buffer-to-toolhead tube blocked
+# Bambu: AMS-HT # Environmental temperature is too low, which will affect the drying capability.
+hms.019 = Room too cold for effective drying
+# Bambu: AMS-HT # chamber temperature is too high; auxiliary feeding or RFID reading is currently not allowed.
+hms.020 = AMS too hot; feeding and RFID paused
+# Bambu: AMS-HT # assist motor is stalled，due to excessive resistance in the tube near the toolhead.
+hms.021 = Motor stalled; tube near toolhead blocked
+# Bambu: AMS-HT # The assist motor phase winding has an open circuit. The assist motor may be faulty.
+hms.022 = Assist motor winding open circuit
+# Bambu: Failed to pull back the filament from the toolhead to AMS-HT. Possible cause: filament or spool stuck.
+hms.023 = Cannot retract filament into AMS
+# Bambu: AMS-HT # feed-out Hall sensor is disconnected. The connector may have poor contact.
+hms.024 = Filament outlet sensor disconnected
+# Bambu: AMS-HT # The exhaust valve 1 is not connected, which may be due to poor connector contact.
+hms.025 = Exhaust valve 1 disconnected
+# Bambu: AMS-HT # assist motor is stalled，due to excessive resistance in the tube near AMS.
+hms.026 = Motor stalled; tube near AMS blocked
+# Bambu: Failed to get AMS mapping table; please select "Resume" to retry.
+hms.027 = AMS mapping unavailable; select Resume to retry
+# Bambu: AMS-HT # heater temperature sensor is offline, which may be due to poor connector contact.
+hms.028 = Heater temperature sensor disconnected
+# Bambu: AMS-HT # filament has run out. Please insert a new filament.
+hms.029 = Filament ran out; load new filament
+# Bambu: AMS-HT # The power adapter voltage is too high, which may damage the heater circuit. Please replace the power 
+hms.030 = Power supply voltage too high; replace adapter
+# Bambu: AMS-HT # Filament speed and length error: The filament odometry may be faulty.
+hms.031 = Filament speed or length measurement fault
+# Bambu: AMS-HT # The heater is disconnected, which may be due to poor connector contact.
+hms.032 = Heater disconnected
+# Bambu: AMS-HT # filament may be broken.
+hms.033 = Filament may be broken
+# Bambu: AMS-HT # communication is abnormal; please check the connection cable.
+hms.034 = AMS communication fault; check cable
+# Bambu: AMS-HT # The coil resistance of exhaust valve 2 is abnormal, which may be due to abnormal wiring or damage.
+hms.035 = Exhaust valve 2 coil fault
+# Bambu: AMS-HT # feeder unit motor has no signal, which may be due to poor contact in the motor connector or a motor f
+hms.036 = Feeder motor has no signal
+# Bambu: AMS-HT # The current sensor of assist motor may be faulty.
+hms.037 = Motor current sensor fault
+# Bambu: The RFID-tag on AMS-HT # is damaged, or its content cannot be identified.
+hms.038 = RFID tag damaged or unreadable
+# Bambu: AMS-HT # filament is empty; please insert a new filament.
+hms.039 = No filament; load new filament
+# Bambu: AMS-HT # The operation of the exhaust valve 2 is abnormal, which may be due to excessive resistance.
+hms.040 = AMS valve 2 stuck or obstructed
+# Bambu: AMS-HT # The assist motor resistance is abnormal. The assist motor may be faulty.
+hms.041 = Assist motor resistance fault
+# Bambu: The AMS-HT # motor has slipped. The extrusion wheel may be malfunctioning, or the filament may be too thin.
+hms.042 = Motor slipped; faulty wheel or thin filament
+# Bambu: AMS-HT # heater cooling fan cannot start because the power adapter is not connected.
+hms.043 = Heater fan needs power adapter connected
+# Bambu: The AMS-HT # assist motor speed control is malfunctioning. The speed sensor may be faulty.
+hms.044 = Assist motor speed control fault
+# Bambu: AMS-HT # heater is short-circuited, which may be due to a wiring short or heater damage.
+hms.045 = Heater short circuit
+# Bambu: AMS-HT # The odometer has no signal. The odometer connector may have poor contact.
+hms.046 = Filament odometer has no signal
+# Bambu: AMS-HT # feed resistance is too high. Please reduce spool rotation resistance and avoid over-bent or over-long
+hms.047 = High feed resistance; check spool and tubes
+# Bambu: AMS-HT # Unable to start drying; please pull out the filament from filament hub and try again.
+hms.048 = Cannot dry; remove filament from hub and retry
+# Bambu: AMS-HT # pulls filament back to AMS timeout.
+hms.049 = AMS filament retraction timed out
+# Bambu: The current sensor of AMS-HT # exhaust valve 2 is abnormal; please get in touch with customer support to repla
+hms.050 = AMS valve 2 current sensor fault
+# Bambu: AMS-HT # heater cooling fan is blocked, which may be due to the fan being stuck.
+hms.051 = Heater cooling fan blocked
+# Bambu: AMS-HT # assist motor is stalled，due to excessive resistance in the tube between AMS and the printer.
+hms.052 = Motor stalled; AMS-to-printer tube blocked
+# Bambu: AMS-HT # The power adapter voltage is too low, which may result in insufficient drying temperature. Please rep
+hms.053 = Power supply voltage too low; replace adapter
+# Bambu: The temperature and humidity sensor has an error. The chip may be faulty.
+hms.054 = Temperature or humidity sensor fault
+# Bambu: AMS-HT # feeder unit motor is stalled, cannot rotate the spool.
+hms.055 = Feeder motor stalled; spool cannot rotate
+# Bambu: The AMS-HT # assist motor is overloaded. The filament may be tangled or stuck.
+hms.056 = Motor overloaded; filament tangled or stuck
+# Bambu: AMS-HT # assist motor has slipped. Please pull out the filament, cut off the worn part, and then try again.
+hms.057 = Motor slipped; remove filament, trim worn end
+# Bambu: AMS-HT # filament may be broken in the tool head.
+hms.058 = Filament may be broken in toolhead
+# Bambu: AMS-HT # The humidity sensor is disconnected, which may be due to poor connector contact.
+hms.059 = Humidity sensor disconnected
+# Bambu: AMS-HT # The assist motor encoder wires are not connected. The assist motor connector may have poor contact.
+hms.060 = Motor encoder wires disconnected
+# Bambu: AMS-HT # Filament buffer position signal lost: the cable or position sensor may be malfunctioning.
+hms.061 = Filament buffer position signal lost
+# Bambu: AMS-HT # feed-in Hall sensor is disconnected, which may be due to poor connector contact.
+hms.062 = Filament inlet sensor disconnected
+# Bambu: External filament is missing; please load a new filament.
+hms.063 = No external filament; load new filament
+# Bambu: AMS-HT # filament status is abnormal, which may be due to a filament breakage inside the AMS.
+hms.064 = Filament may be broken inside AMS
+# Bambu: AMS-HT # The coil resistance of exhaust valve 1 is abnormal, which may be due to abnormal wiring or damage.
+hms.065 = Exhaust valve 1 coil fault
+# Bambu: AMS-HT # assist motor is stalled，due to excessive resistance in the tube near the filament buffer。
+hms.066 = Motor stalled; tube near buffer blocked
+# Bambu: AMS-HT # The drying process may experience thermal runaway. Please turn off the AMS power supply.
+hms.067 = Drying thermal runaway; power off AMS
+# Bambu: The filament cutter's cutting distance is too large. The XY motor may lose steps.
+hms.068 = Cutter overtravel; XY motor may have lost steps
+# Bambu: AMS-HT # brushed motor has no signal, which may be due to poor contact in the motor connector or a motor fault
+hms.069 = AMS motor has no signal
+# Bambu: Failed to feed the filament outside the AMS-HT. Please clip the end of the filament flat and check to see if t
+hms.070 = Feed failed; trim filament end and check spool
+# Bambu: AMS-HT # The heater cooling fan speed is too low, which could be due to excessive fan resistance.
+hms.071 = Heater cooling fan too slow
+# Bambu: RFID cannot be read because of a hardware or structural error.
+hms.072 = RFID hardware or structural fault
+# Bambu: Timeout purging old filament. Possible cause: filament stuck or the extruder/nozzle clog.
+hms.073 = Purging timed out; check for clogged extruder
+# Bambu: Failed to read filament information from AMS-HT #. The RFID tag may be damaged, or the filament is positioned 
+hms.074 = RFID read failed; trim 5 cm of filament and retry
+# Bambu: AMS-HT # The assist motor has unbalanced tree-phase resistaance. The assist motor may be faulty.
+hms.075 = Assist motor phase resistance imbalance
+# Bambu: AMS-HT # The motor assist parameter is lost. Please pull out the filament from the filament hub and then resta
+hms.076 = Motor settings lost; remove filament, restart AMS
+# Bambu: AMS-HT # The assist motor three-phase wires are not connected. The assist motor connector may have poor contac
+hms.077 = Assist motor phase wires disconnected
+# Bambu: The AMS-HT # RFID 2 board has an error.
+hms.078 = RFID board 2 fault
+# Bambu: AMS-HT # uses printer power for drying during loading/printing. For better drying performance, please connect 
+hms.079 = Drying on printer power; connect power adapter
+# Bambu: AMS-HT # The heater is heating abnormally.
+hms.080 = Heater heating abnormally
+# Bambu: AMS-HT # filament has run out. Please wait while old filament is purged.
+hms.081 = Filament ran out; purging old filament
+# Bambu: AMS-HT filament ran out. Please put a new filament into the same slot in AMS and resume.
+hms.082 = Filament empty; refill same AMS slot and resume
+# Bambu: AMS-HT # filament has run out and automatically switched to the slot with the same filament.
+hms.083 = Filament empty; switched to matching AMS slot
+# Bambu: AMS-HT # The temperature control error is too large, which may be due to the lid being open or an abnormality 
+hms.084 = AMS temperature fault; check lid and heater
+# Bambu: AMS-HT # assist motor is stalled，due to excessive resistance in the tube between AMS and the filament buffer.
+hms.085 = Motor stalled; AMS-to-buffer tube blocked
+# Bambu: AMS-HT # heater malfunction or the current sensor is abnormal.
+hms.086 = Heater or heater current sensor fault
+# Bambu: AMS-HT # The assist motor calibration parameter error. Please pull the filament out of the feed inlet and rest
+hms.087 = Motor calibration lost; unload and restart AMS
+# Bambu: AMS-HT # has detected a breakage of the PTFE tube during filament loading. Please check whether the PTFE tubes
+hms.088 = PTFE tube broken or detached; check tubing
+# Bambu: The AMS-HT # RFID 1 board has an error.
+hms.089 = RFID board 1 fault
+# Bambu: Failed to feed the filament into the toolhead. Possible cause: filament or spool stuck.
+hms.090 = Cannot feed filament to toolhead; check spool
+# Bambu: AMS-HT # filament has run out, and purging the old filament went abnormally; please check whether the filament
+hms.091 = Empty filament purge failed; check toolhead
+# Bambu: Failed to extrude AMS-HT # filament; the extruder may be clogged or the filament may be too thin, causing the 
+hms.092 = Cannot extrude; clogged extruder or thin filament
+# Bambu: AMS-HT # The exhaust valve 2 is not connected, which may be due to poor connector contact.
+hms.093 = Exhaust valve 2 disconnected
+# Bambu: AMS-HT # failed to rotate the filament spool when pulling filament back to AMS.
+hms.094 = Spool could not rotate during filament retraction
+# Bambu: AMS-HT # feeds filament out of AMS timeout.
+hms.095 = Feeding filament out of AMS timed out
+# Bambu: External spool may be tangled or jammed.
+hms.096 = External spool tangled or jammed
+# Bambu: The AMS is disabled; please load filament from the spool holder.
+hms.097 = AMS disabled; load from external spool holder
+# Bambu: The filament buffer signal is abnormal; the spring may be stuck, or the filament may be tangled.
+hms.098 = Buffer signal abnormal; check spring and filament
+# Bambu: Please pull the external filament from the extruder.
+hms.099 = Remove external filament from extruder
+# Bambu: The filament cutter sensor is malfunctioning; please check whether the connector is properly plugged in.
+hms.100 = Cutter sensor fault; check connector
+# Bambu: External filament has run out; please load a new filament.
+hms.101 = External filament ran out; load new filament
+# Bambu: The filament cutter handle has not been released. The handle or blade may be jammed, or there could be an issu
+hms.102 = Cutter handle stuck; check blade and sensor
+# Bambu: Studio / Suite is not compatible with this device. Please download the latest version from bambulab.com. Keep 
+hms.103 = Bambu Studio incompatible; update software
+# Bambu: Multiple motion step losses are detected. Please first check if there is any foreign object obstruction or abn
+hms.104 = Repeated lost steps; check toolhead obstruction
+# Bambu: Failed to read the filament information from AMS-HT #. The AMS main board may be malfunctioning.
+hms.105 = Cannot read spool; AMS mainboard may be faulty
+# Bambu: Failed to read the filament information from AMS-HT #. A third party RFID tag was detected.
+hms.106 = Third-party RFID tag detected on spool
+# Bambu: Failed to read the filament information from AMS-HT #. The RFID tag may be damaged.
+hms.107 = Spool RFID tag may be damaged
+# Bambu: Failed to read  filament information from AMS-HT #. The RFID tag cannot rotate due to a jam during filament lo
+hms.108 = RFID jammed; remove filament and retry
+# Bambu: Filter life is low. Please replace the filter promptly.
+hms.109 = Filter life low; replace filter
+# Bambu: High PM2.5 concentration detected. Please check if the filter is installed or has failed.
+hms.110 = High airborne PM2.5; check filter
+# Bambu: Authorized slicing feature detected. Ensure all required authorizations are obtained before use. Bambu Lab can
+hms.111 = Slicing feature requires authorization; see Wiki
+# Bambu: Failed to read the filament information from AMS-HT #. RFID tag verification failed. You can try to use Bambu 
+hms.112 = RFID verification failed; try Bambu filament
+# Bambu: Wireless hardware error: Please turn Wi-Fi off and back on, or restart your device.
+hms.113 = Wi-Fi hardware fault; toggle Wi-Fi or restart
+# Bambu: The AMS # slot # is overloaded. The filament may be tangled or the filament buffer may be stuck.
+hms.114 = AMS slot overloaded; filament or buffer stuck
+# Bambu: Micro Lidar is offline. Please check the hardware connection.
+hms.115 = Micro Lidar disconnected; check wiring
+# Bambu: AMS # The heater 1 is short-circuited, which may be due to a wiring short or heater damage.
+hms.116 = Heater 1 short circuit
+# Bambu: Chamber failed to reach the desired temperature. The machine will stop waiting for the chamber temperature.
+hms.117 = Chamber below target; temperature wait ended
+# Bambu: AMS # The brushed motor 2 has no signal, which may be due to poor contact in the motor connector or a motor fa
+hms.118 = AMS motor 2 has no signal
+# Bambu: The horizontal laser line is too wide. Please check if the heatbed is dirty.
+hms.119 = Laser line too wide; check dirty heatbed
+# Bambu: The firmware of AMS-HT # does not match the printer. Please upgrade it on the "Firmware" page.
+hms.120 = AMS firmware incompatible; update firmware
+# Bambu: The build plate is not placed properly. Please adjust it.
+hms.121 = Build plate misplaced; adjust plate
+# Bambu: An external disturbance was detected on force sensor 1. The heatbed plate may have touched something outside t
+hms.122 = Force sensor 1 disturbed; check bed obstruction
+# Bambu: Y axis homing abnormal: the timing belt may be loose.
+hms.123 = Y homing fault; check loose belt
+# Bambu: Chamber temperature is abnormal. The chamber heater's temperature sensor at the air outlet may have a short ci
+hms.124 = Chamber temperature sensor may be shorted
+# Bambu: AMS # The cooling fan of heater 1 is blocked, which may be due to the fan being stuck.
+hms.125 = Heater 1 cooling fan blocked
+# Bambu: Failed to read the filament information from AMS # slot #. The RFID tag may be damaged or positioned at the ed
+hms.126 = RFID read failed; trim 5 cm and retry
+# Bambu: External disturbance was detected on the heatbed acceleeration sensor. The sensor signal wire may not be affix
+hms.127 = Bed acceleration sensor disturbed; check wiring
+# Bambu: Unformatted MicroSD Card: please format it.
+hms.128 = MicroSD card not formatted; format card
+# Bambu: AMS # slot # is empty; please insert a new filament.
+hms.129 = AMS slot empty; load new filament
+# Bambu: The resonance frequency of the X-axis differs significantly from the last calibration. Please clean the carbon
+hms.130 = X resonance changed; clean rod and calibrate
+# Bambu: The signal of heatbed force sensor 2 is weak. The force sensor may be broken or have poor electric connection.
+hms.131 = Heatbed force sensor 2 weak; check connection
+# Bambu: AMS # The heater 1 is heating abnormally.
+hms.132 = Heater 1 heating abnormally
+# Bambu: Not enough space on MicroSD Card. Video recording and timelapse recording cannot be performed. Please clear so
+hms.133 = MicroSD full; recording unavailable, free space
+# Bambu: AMS # The temperature sensor of heater 1 is offline, which may be due to poor connector contact.
+hms.134 = Heater 1 temperature sensor disconnected
+# Bambu: System state is abnormal; please restore to factory settings.
+hms.135 = System state abnormal; restore factory settings
+# Bambu: Failed to download task; please check your network connection.
+hms.136 = Task download failed; check network
+# Bambu: The device is in the engineering state; please pay attention to information security related matters.
+hms.137 = Engineering mode active; check data security
+# Bambu: Failed to connect to the internet; please check the network connection.
+hms.138 = Internet connection failed; check network
+# Bambu: A new Micro Lidar was detected. Please calibrate it on the Calibration page before use.
+hms.139 = New Micro Lidar detected; calibrate before use
+# Bambu: AMS-HT # front cover is open. This may affect the drying performance or cause the filament to absorb moisture.
+hms.140 = AMS front cover open; drying may be affected
+# Bambu: Motor-B has a short-circuit. It may have failed.
+hms.141 = Motor B short circuit
+# Bambu: The hotend cooling fan is running slowly. It may be obstructed. Please check for debris and clean if necessary
+hms.142 = Hotend fan too slow; check debris
+# Bambu: Micro Lidar parameter is abnormal. Please contact customer support.
+hms.143 = Micro Lidar parameter fault; contact support
+# Bambu: The Filament Buffer module is malfunctioning. Please restart the device.
+hms.144 = Filament buffer malfunction; restart printer
+# Bambu: The AMS # slot # motor torque control is malfunctioning. The current sensor may be faulty.
+hms.145 = AMS slot motor torque control fault
+# Bambu: Motor-A has an open-circuit. There may be a loose connection, or the motor may have failed.
+hms.146 = Motor A open circuit; check connection
+# Bambu: Data transmission over the serial port is abnormal; the software system may be faulty.
+hms.147 = Serial data fault; software may be faulty
+# Bambu: Liveview service login failed; please check your network connection.
+hms.148 = Liveview login failed; check network
+# Bambu: The vertical laser is not lit. Please check if it's covered or hardware connection has a problem.
+hms.149 = Vertical laser off; check cover and connection
+# Bambu: The signal of heatbed force sensor 2 is too weak. The sensor wiring may be broken.
+hms.150 = Force sensor 2 signal too weak; check wiring
+# Bambu: The front cover of the toolhead fell off.
+hms.151 = Toolhead front cover fell off
+# Bambu: MQTT Command verification failed. Please update Studio/Suite (including the network plugin) or Handy to the la
+hms.152 = MQTT verification failed; update Studio or Handy
+# Bambu: AMS # is undergoing dry cooling; please wait for it to cool down before operating.
+hms.153 = AMS cooling after drying; please wait
+# Bambu: Chamber temperature is abnormal. The chamber heater's temperature sensor may have an open circuit.
+hms.154 = Chamber temperature sensor open circuit
+# Bambu: The extrusion motor driver is abnormal. The MOSFET may have a short circuit.
+hms.155 = Extruder motor driver fault; possible short
+# Bambu: The signal of heatbed force sensor 1 is too weak. The sensor wiring may be broken.
+hms.156 = Force sensor 1 signal too weak; check wiring
+# Bambu: Live View camera is not connected. Please check the hardware and cable connections.
+hms.157 = Liveview camera disconnected; check cable
+# Bambu: The AMS # assist motor torque control is malfunctioning. The current sensor may be faulty.
+hms.158 = Assist motor torque control fault
+# Bambu: AMS # The cooling fan speed of heater 2 is too low, which could be due to excessive fan resistance.
+hms.159 = Heater 2 cooling fan too slow
+# Bambu: The nozzle is clogged with filament.
+hms.160 = Nozzle clogged with filament
+# Bambu: The build plate may not be properly placed. If this message appears repeatedly, please check the Wiki for more
+hms.161 = Build plate may be misplaced; check plate
+# Bambu: An abnormality occurs during the heating process of the heatbed; the heating modules may be broken.
+hms.162 = Heatbed heating fault; heater may be damaged
+# Bambu: Chamber heating failed. The power supply temperature may be too high.
+hms.163 = Chamber heating failed; power supply too hot
+# Bambu: The heatbed temperature is abnormal; the sensor may have a short circuit.
+hms.164 = Heatbed temperature sensor short circuit
+# Bambu: AMS # The heater 2 is disconnected, which may be due to poor connector contact.
+hms.165 = Heater 2 disconnected
+# Bambu: Chamber heating failed. The heater may not be blowing hot air.
+hms.166 = Chamber heating failed; heater has no hot airflow
+# Bambu: AMS # The brushed motor 1 has no signal, which may be due to poor contact in the motor connector or a motor fa
+hms.167 = AMS motor 1 has no signal
+# Bambu: Heatbed force sensor 1 is too sensitive. It may be stuck between the strain arm and heatbed support, or the ad
+hms.168 = Force sensor 1 too sensitive; check screw or jam
+# Bambu: The resonance frequency of the X axis is low. The timing belt may be loose.
+hms.169 = X resonance low; check loose belt
+# Bambu: Parts skipped before first layer inspection; the inspection is not supported for the current print.
+hms.170 = Parts skipped; first-layer inspection unavailable
+# Bambu: The heatbed temperature is abnormal; the sensor may have an open circuit.
+hms.171 = Heatbed temperature sensor open circuit
+# Bambu: The nozzle temperature is abnormal; the heater may have a short circuit.
+hms.172 = Nozzle heater short circuit
+# Bambu: Unauthorized user: please check your account information.
+hms.173 = Unauthorized user; check account
+# Bambu: Filament buffer position signal error: the position sensor may be malfunctioning.
+hms.174 = Filament buffer position sensor fault
+# Bambu: The screen is malfunctioning; please restart the device.
+hms.175 = Printer screen malfunction; restart printer
+# Bambu: An external disturbance was detected on force sensor 3. The heatbed plate may have touched something outside t
+hms.176 = Force sensor 3 disturbed; check bed obstruction
+# Bambu: AMS # Heater 1, heater malfunction or abnormal current sensor detected.
+hms.177 = Heater 1 or heater current sensor fault
+# Bambu: Motor-Z has an open-circuit. The connection may be loose, or the motor may have failed.
+hms.178 = Motor Z open circuit; check connection
+# Bambu: AMS # The cooling fan speed of heater 1 is too low, which could be due to excessive fan resistance.
+hms.179 = Heater 1 cooling fan too slow
+# Bambu: The signal of heatbed force sensor 1 is weak. The force sensor may be broken or have poor electric connection.
+hms.180 = Heatbed force sensor 1 weak; check connection
+# Bambu: AMS # The temperature sensor of heater 2 is offline, which may be due to poor connector contact.
+hms.181 = Heater 2 temperature sensor disconnected
+# Bambu: AMS # The cooling fan of heater 2 is blocked, which may be due to the fan being stuck.
+hms.182 = Heater 2 cooling fan blocked
+# Bambu: AMS # Heater 2, heater malfunction or abnormal current sensor detected.
+hms.183 = Heater 2 or heater current sensor fault
+# Bambu: Filament exposure metering failed because laser reflection is too weak on this material. First layer inspectio
+hms.184 = Weak laser reflection; layer inspection uncertain
+# Bambu: The heatbed acceleration sensor detected unexpected continuous force. The sensor may be stuck, or the analog f
+hms.185 = Continuous force on bed sensor; check jam
+# Bambu: The first layer inspection module rebooted abnormally. The inspection result may be inaccurate.
+hms.186 = Layer inspector restarted; result may be wrong
+# Bambu: An abnormality occured in heating modules of heatbed previously. To continue using your printer, please refer 
+hms.187 = Previous heatbed heating fault; troubleshoot Wiki
+# Bambu: An external disturbance was detected on force sensor 2. The heatbed plate may have touched something outside t
+hms.188 = Force sensor 2 disturbed; check bed obstruction
+# Bambu: The temperature of the heated bed exceeds the limit and automatically adjusts to the limit temperature.
+hms.189 = Heatbed above limit; temperature adjusted
+# Bambu: Heatbed force sensor 3 is too sensitive. It may be stuck between the strain arm and heatbed support, or the ad
+hms.190 = Force sensor 3 too sensitive; check screw or jam
+# Bambu: The signal of heatbed force sensor 3 is too weak. The sensor wiring may be broken.
+hms.191 = Force sensor 3 signal too weak; check wiring
+# Bambu: Force sensor 3 on the heatbed is abnormal. This may be caused by heatbed lifting jamming or circuit damage.
+hms.192 = Force sensor 3 abnormal; check bed jam or circuit
+# Bambu: Failed to report task state; please check your network connection.
+hms.193 = Task status upload failed; check network
+# Bambu: First layer inspection timed out abnormally, and the current results may be inaccurate.
+hms.194 = First-layer inspection timed out; result uncertain
+# Bambu: The speed of the part cooling fan is too slow or stopped. It may be stuck, or the connector may not be plugged
+hms.195 = Part cooling fan slow or stopped; check connection
+# Bambu: The nozzle temperature is abnormal; the sensor may have a short circuit. Please check whether the connector is
+hms.196 = Nozzle sensor short circuit; check connector
+# Bambu: The build plate localization marker was not detected. Please check if the build plate is aligned correctly.
+hms.197 = Build plate marker missing; align build plate
+# Bambu: The heatbed temperature is abnormal; the heater is over temperature.
+hms.198 = Heatbed heater overtemperature
+# Bambu: Micro Lidar camera is malfunctioning. Please refer to the Wiki for troubleshooting.
+hms.199 = Micro Lidar camera fault; troubleshoot Wiki
+# Bambu: Time synchronization failed
+hms.200 = Time synchronization failed
+# Bambu: Micro Lidar laser parameters have drifted. Please re-calibrate your printer.
+hms.201 = Micro Lidar laser drift; recalibrate printer
+# Bambu: AMS-HT # door detection is abnormal, the Hall sensor connection may be loose or disconnected.
+hms.202 = AMS-HT door sensor disconnected; check wiring
+# Bambu: AMS # The brushed motor 4 has no signal, which may be due to poor contact in the motor connector or a motor fa
+hms.203 = AMS motor 4 has no signal
+# Bambu: The toolhead is malfunctioning. Please restart the device.
+hms.204 = Toolhead malfunction; restart printer
+# Bambu: Chamber cooling may be too slow. You can open the front door or top cover to help cooling if the air in the ch
+hms.205 = Chamber cooling slow; see Wiki before opening
+# Bambu: Motor-B has an open-circuit. The connection may be loose, or the motor may have failed.
+hms.206 = Motor B open circuit; check connection
+# Bambu: The signal of heatbed force sensor 3 is weak. The force sensor may be broken or have poor electric connection.
+hms.207 = Heatbed force sensor 3 weak; check connection
+# Bambu: X-axis homing abnormal: please check if the toolhead is stuck or the carbon rod resistance is too high.
+hms.208 = X homing fault; check toolhead jam or rod friction
+# Bambu: First layer inspection terminated due to abnormal Lidar data.
+hms.209 = First-layer inspection stopped; Lidar data fault
+# Bambu: Please check if the filament is coming out of the nozzle. If not, gently push the material and try to extrude 
+hms.210 = No nozzle flow; gently push filament, retry
+# Bambu: The AMS Hub communication is abnormal; the cable may be not well connected.
+hms.211 = AMS Hub communication fault; check cable
+# Bambu: The motor driver is overheating. Its radiator may be loose, or its cooling fan may be damaged.
+hms.212 = Motor driver overheating; check heatsink and fan
+# Bambu: A system panic occurred. Please restart the device.
+hms.213 = System panic; restart printer
+# Bambu: The nozzle temperature is abnormal; the sensor may have an open circuit.
+hms.214 = Nozzle temperature sensor open circuit
+# Bambu: The communication of chamber temperature controller is abnormal.
+hms.215 = Chamber controller communication fault
+# Bambu: The resonance frequency of the Y-axis differs greatly from the last calibration. Please clean the Y-axis liner
+hms.216 = Y resonance changed; clean rod and calibrate
+# Bambu: The heatbed has worked at full load for a long time. The temperature control system may be abnormal.
+hms.217 = Heatbed at full load too long; control fault
+# Bambu: The accessory firmware does not match the device. Please upgrade it on the "Firmware" page.
+hms.218 = Accessory firmware incompatible; update firmware
+# Bambu: Device login failed; please check your account information.
+hms.219 = Printer login failed; check account
+# Bambu: Nozzle height seems to be too low. Please check if the nozzle is worn or tilted. Re-calibrate Lidar if the noz
+hms.220 = Nozzle too low; check wear and recalibrate Lidar
+# Bambu: Chamber heating failed. The thermal resistance is too high.
+hms.221 = Chamber heating failed; high thermal resistance
+# Bambu: Purged filament may have piled up in the waste chute. Please check and clean the chute.
+hms.222 = Waste chute may be blocked; check and clean
+# Bambu: AMS # The heater 2 is heating abnormally.
+hms.223 = Heater 2 heating abnormally
+# Bambu: AMS # The heater 2 is short-circuited, which may be due to a wiring short or heater damage.
+hms.224 = Heater 2 short circuit
+# Bambu: Nozzle temperature control is abnormal. The hot end may not be installed. To heat the heating assembly without
+hms.225 = Nozzle temperature control fault; check hotend
+# Bambu: The MC module is malfunctioning; please restart the device or check device cable connection.
+hms.226 = Motion board fault; check cable or restart
+# Bambu: The heatbed temperature is abnormal; the heater may have a short circuit.
+hms.227 = Heatbed heater short circuit
+# Bambu: First layer inspection is not supported for the current print job.
+hms.228 = First-layer inspection unavailable for this print
+# Bambu: Chamber heating failed. Possible causes: the chamber is not fully enclosed, ambient temperature is too low, or
+hms.229 = Chamber heating failed; check enclosure and vents
+# Bambu: AMS # The brushed motor 3 has no signal, which may be due to poor contact in the motor connector or a motor fa
+hms.230 = AMS motor 3 has no signal
+# Bambu: The heatbed leveling data is abnormal. Please check whether there are any foreign objects on the heatbed and Z
+hms.231 = Bed leveling abnormal; remove debris, retry
+# Bambu: The Chamber Temperature Controller module is malfunctioning. Please restart the device.
+hms.232 = Chamber controller malfunction; restart printer
+# Bambu: Internal service is malfunctioning. Please restart the device.
+hms.233 = Internal service malfunction; restart printer
+# Bambu: The resistance of Motor-B is abnormal; the motor may have failed.
+hms.234 = Motor B resistance fault
+# Bambu: Possible first layer defects have been detected. Please check the first layer quality and decide if the job sh
+hms.235 = Possible first-layer defects; inspect print
+# Bambu: The vertical laser is not bright enough at homing position. Please clean or replace the heatbed if this messag
+hms.236 = Vertical laser too weak; clean heatbed
+# Bambu: The heatbed temperature control is abnormal; the AC board may be broken.
+hms.237 = Heatbed temperature control fault; AC board fault
+# Bambu: The current sensor of Motor-B is abnormal. This may be caused by a failure of the hardware sampling circuit.
+hms.238 = Motor B current sensor fault
+# Bambu: Inspecting the first layer: please wait a moment.
+hms.239 = Inspecting first layer; please wait
+# Bambu: The current sensor of Motor-A is abnormal. This may be caused by a failure of the hardware sampling circuit.
+hms.240 = Motor A current sensor fault
+# Bambu: X axis homing abnormal: the timing belt may be loose.
+hms.241 = X homing fault; check loose belt
+# Bambu: The horizontal laser is not lit. Please check if it's covered or hardware connection has a problem.
+hms.242 = Horizontal laser off; check cover and connection
+# Bambu: The resistance of the extruder servo motor is abnormal; the motor may have failed.
+hms.243 = Extruder motor resistance fault
+# Bambu: Abnormal accelerometer data detected. Please try restarting the device.
+hms.244 = Accelerometer data abnormal; restart printer
+# Bambu: The horizontal laser is not bright enough at homing position. Please clean or replace the heatbed if this mess
+hms.245 = Horizontal laser too weak; clean heatbed
+# Bambu: The extruder servo motor has an open circuit. The connection may be loose, or the motor may have failed.
+hms.246 = Extruder motor open circuit; check connection
+# Bambu: The SD Card controller is malfunctioning.
+hms.247 = SD card controller malfunction
+# Bambu: The task file is unauthorized.
+hms.248 = Print task file unauthorized
+# Bambu: Chamber temperature setting value exceed the limit, the boundary value will be set.
+hms.249 = Chamber setting above limit; temperature adjusted
+# Bambu: AMS # The heater 1 is disconnected, which may be due to poor connector contact.
+hms.250 = Heater 1 disconnected
+# Bambu: The current firmware version is abnormal and job cannot start. Please ensure the device is connected to the ne
+hms.251 = Firmware abnormal; connect network and update
+# Bambu: Failed to calibrate Micro Lidar. Please make sure the calibration chart is clean and not obscured. Then, run m
+hms.252 = Lidar calibration failed; clean chart and retry
+# Bambu: The media pipeline is malfunctioning. Please restart the device. If multiple attempts fail, please contact cus
+hms.253 = Video pipeline fault; restart or contact support
+# Bambu: The Z axis motor seems to be stuck when moving. Please check if there is any foreign matter on the Z sliders o
+hms.254 = Z motor stuck; check sliders and belt pulleys
+# Bambu: The AMS # heater 1 cooling fan cannot start because the power adapter is not connected.
+hms.255 = Heater 1 fan needs power adapter connected
+# Bambu: The AMS # heater 2 cooling fan cannot start because the power adapter is not connected.
+hms.256 = Heater 2 fan needs power adapter connected
+# Bambu: The device malfunctioned; please restart.
+hms.257 = Printer malfunction; restart printer
+# Bambu: The Vision Encoder Plate is either not placed or incorrectly placed. Please ensure it is correctly positioned 
+hms.258 = Vision Encoder Plate absent or misplaced
+# Bambu: AMS-HT # certification failed. Please reconnect the cable or restart the printer.
+hms.259 = AMS authentication failed; reconnect or restart
+# Bambu: Some external modules are incompatible with the device's firmware version, which may affect normal operation. 
+hms.260 = External modules incompatible; update firmware
+# Bambu: The front door Hall sensor is abnormal; please check whether the connection wire is loose.
+hms.261 = Front door Hall sensor fault; check wire
+# Bambu: User information has expired; please log in again.
+hms.262 = Login expired; sign in again
+# Bambu: Carbon rods need cleaning now.
+hms.263 = Carbon rods need cleaning
+# Bambu: Threaded rods need lubrication now.
+hms.264 = Threaded rods need lubrication
+# Bambu: Time-lapse kit communication error. Please reconnect the cable or restart the printer.
+hms.265 = Timelapse kit fault; reconnect cable or restart
+# Bambu: Temperature sensor 1 on the AMS # heater has malfunctioned, resulting in abnormal temperature readings.
+hms.266 = Heater temperature sensor 1 fault
+# Bambu: Temperature sensor 2 on the AMS # heater has malfunctioned, resulting in abnormal temperature readings.
+hms.267 = Heater temperature sensor 2 fault
+# Bambu: The task has been completed. Automatic air purification is in progress.
+hms.268 = Print complete; purifying chamber air
+# Bambu: High chamber temperature detected. If the hotend is overheating or emitting smoke, immediately power off the p
+hms.269 = Chamber hot; overheating or smoke: power off now
+# Bambu: Abnormal nozzle temperature control detected; the heating module may be damaged. Please disconnect the power i
+hms.270 = Nozzle heating fault; disconnect power, stop use
+# Bambu: No MicroSD card detected. The liveview camera cannot record a time-lapse.
+hms.271 = No MicroSD card; timelapse unavailable
+# Bambu: Micro SD Card capacity is insufficient to cache print files.
+hms.272 = MicroSD space insufficient for print files
+# Bambu: Force sensor 2 on the heatbed is abnormal. This may be caused by heatbed lifting jamming or circuit damage.
+hms.273 = Force sensor 2 abnormal; check bed jam or circuit
+# Bambu: Nozzle height seems to be too high. Please check if there is residual filament attached to the nozzle.
+hms.274 = Nozzle too high; check attached filament
+# Bambu: The hotend cooling fan speed is too slow or stopped. It may be stuck or the connector may not be plugged in pr
+hms.275 = Hotend fan slow or stopped; check connector
+# Bambu: Heatbed homing failed. The environmental vibration is too great.
+hms.276 = Heatbed homing failed; excessive vibration
+# Bambu: MicroSD Card performance degradation has been detected. It may affect print jobs, logs, and video records. Ple
+hms.277 = MicroSD too slow; format or replace card
+# Bambu: The signal of the heatbed acceleration sensor is weak. The sensor may have fallen off or been damaged.
+hms.278 = Bed acceleration signal weak; check loose sensor
+# Bambu: The nozzle temperature is abnormal; the heater is over temperature.
+hms.279 = Nozzle heater overtemperature
+# Bambu: The Micro SD card is in Read-Only mode. Video recording and Timelapse recording cannot be performed. Please re
+hms.280 = MicroSD read-only; video recording unavailable
+# Bambu: The factory data of the AP board is abnormal; please replace the AP board with a new one.
+hms.281 = AP board factory data faulty; replace AP board
+# Bambu: The resonance frequency of the Y axis is low. The timing belt may be loose.
+hms.282 = Y resonance low; check loose belt
+# Bambu: The current sensor of Motor-Z is abnormal. This may be caused by a failure of the hardware sampling circuit.
+hms.283 = Motor Z current sensor fault
+# Bambu: Y-axis homing abnormal: please check if the toolhead is stuck or the Y carriage has too much resistance.
+hms.284 = Y homing fault; check toolhead or carriage jam
+# Bambu: Heatbed force sensor 2 is too sensitive. It may be stuck between the strain arm and heatbed support, or the ad
+hms.285 = Force sensor 2 too sensitive; check screw or jam
+# Bambu: The system voltage is unstable. Triggering the power failure protection function.
+hms.286 = Unstable voltage; power failure protection active
+# Bambu: Hardware incompatible; please check the Micro Lidar.
+hms.287 = Hardware incompatible; check Micro Lidar
+# Bambu: Chamber heating failed. The speed of the heating fan is too low.
+hms.288 = Chamber heating failed; heating fan too slow
+# Bambu: Force sensor 1 on the heatbed is abnormal. This may be caused by heatbed lifting jamming or circuit damage.
+hms.289 = Force sensor 1 abnormal; check bed jam or circuit
+# Bambu: The extruder servo motor's current sensor is abnormal. A failure of the hardware sampling circuit may cause th
+hms.290 = Extruder motor current sensor fault
+# Bambu: The bed temperature exceeds filament's vitrification temperature, which may cause nozzle clog. Please keep the
+hms.291 = Bed too hot for filament; keep front door open
+# Bambu: Synchronization between the Micro Lidar and MC is abnormal. Please restart your printer.
+hms.292 = Micro Lidar synchronization fault; restart printer
+# Bambu: Heatbed homing abnormal: there may be a bulge on the heatbed or the nozzle tip may not be clean.
+hms.293 = Bed homing fault; check bed bulge or dirty nozzle
+# Bambu: The nozzle temperature is abnormal; the heater may have an open circuit.
+hms.294 = Nozzle heater open circuit
+# Bambu: The Micro Lidar LED may be broken.
+hms.295 = Micro Lidar LED may be broken
+# Bambu: A possible spaghetti failure has been detected. Please check the print quality and decide whether to stop the 
+hms.296 = Possible spaghetti failure; inspect print quality
+# Bambu: The resistance of Motor-A is abnormal; the motor may have failed.
+hms.297 = Motor A resistance fault
+# Bambu: Motor-A has a short-circuit. It may have failed.
+hms.298 = Motor A short circuit
+# Bambu: The door seems to be open.
+hms.299 = Printer door appears open
+# Bambu: The resistance of Motor-Z is abnormal; the motor may have failed.
+hms.300 = Motor Z resistance fault
+# Bambu: Streaming function error. Please check the network and try again. You can restart or update the printer if the
+hms.301 = Live video fault; check network or restart
+# Bambu: Motor-Z has a short-circuit. It may have failed.
+hms.302 = Motor Z short circuit
+# Bambu: A system hang occurred. It has been recovered by automatic restart.
+hms.303 = System hang recovered by automatic restart
+# Bambu: The AMS module is malfunctioning. Please restart the device.
+hms.304 = AMS malfunction; restart printer
+# Bambu: The nozzle is covered with filament, or the build plate is crooked.
+hms.305 = Nozzle covered in filament or build plate crooked
+# Bambu: Failed to resume previous print.
+hms.306 = Could not resume previous print
+# Bambu: The heatbed temperature is abnormal; the heater may have an open circuit, or the thermal switch may be open.
+hms.307 = Heatbed heater or thermal switch open circuit
+# Bambu: Micro Lidar lens seems to be dirty. Please clean the lens.
+hms.308 = Micro Lidar lens dirty; clean lens
+# Bambu: Failed to get image from Live View Camera. Spaghetti and waste chute pileup detection is not available at this
+hms.309 = Camera unavailable; spaghetti detection disabled
+# Bambu: The hotend cooling fan speed is slow. It may be stuck and need cleaning.
+hms.310 = Hotend cooling fan slow; check and clean
+# Bambu: The content of task file is unreadable; please resend the task.
+hms.311 = Print file unreadable; resend task
+# Bambu: The extruder servo motor has a short-circuit. It may have failed.
+hms.312 = Extruder motor short circuit

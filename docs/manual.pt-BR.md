@@ -206,6 +206,8 @@ Não precisa decorar comando. Dentro do Claude Code, é só pedir:
 - "mostra o consumo no Claudinho"
 - "o Claudinho parou de reagir" (a skill faz o diagnóstico)
 - "troquei o Wi-Fi, reconfigura o Claudinho"
+- "muda o idioma do Claudinho" (textos da tela em português ou inglês, e
+  [no seu idioma, se você traduzir](../idiomas/TRANSLATING.pt-BR.md))
 - "tenho uma impressora Bambu" / "mostra o painel da impressora"
 
 A lista completa de comandos está no [README](../README.pt-BR.md#comandos), e

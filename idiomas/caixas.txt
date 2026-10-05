@@ -1,0 +1,136 @@
+# Where each text appears on the screen: font and the box width in pixels.
+# The generator measures every translation with the real font and refuses
+# the ones that don't fit. Fonts: p16 = DM Sans 16, m24 = DM Sans Bold 24,
+# r32 = DM Sans 32, g48 = DM Sans Bold 48. "%s=..." is a sample of what goes
+# into %s (to measure the worst case). Keys not listed here: p16, 300 px.
+#
+# Onde cada texto aparece na tela: fonte e largura da caixa em pixels. O
+# gerador mede cada tradução com a fonte de verdade e recusa a que não cabe.
+
+setup.ola               p16 320
+setup.configure         p16 320
+setup.sem_wifi          p16 320
+setup.rede              p16 320  %s=MinhaRedeWiFi-Casa-5G
+setup.tentando          p16 320
+
+manut.pc_quer           m24 320
+manut.toque             r32 320
+manut.permitir          r32 320
+manut.ou_boot           p16 320
+manut.liberado          r32 320
+manut.recebendo         m24 320
+manut.atualizando       r32 320
+manut.nao_desligue      m24 320
+manut.gravando_tela     m24 320
+
+tempo.hoje              p16 176
+tempo.dia               p16 176  %s=www
+tempo.em_d              p16 176
+tempo.em_h              p16 176
+tempo.em_min            p16 176
+uso.sem_wifi            p16 320
+uso.conectando          p16 320
+uso.aguardando_pc       p16 320  %s=192.168.100.200
+uso.dormindo_desde      p16 320  %s=www 88:88
+uso.terminal            p16 320  %s=192.168.100.200
+uso.terminais           p16 320  %s=192.168.100.200
+uso.renovou             p16 176
+uso.reseta              p16 176  %s=www 88:88
+uso.janela_livre        p16 176
+uso.aguardando          p16 176
+uso.sessao_5h           p16 220
+uso.semana_7d           p16 220
+
+botao.tokens            p16 94
+botao.impressora        p16 94
+botao.manter            p16 94
+botao.dormir            p16 94
+
+paleta.confirmar        p16 156
+paleta.gravar           p16 100
+paleta.voltar           p16 100
+paleta.cancelar         p16 100
+
+velha.claude            p16 55
+velha.chama             p16 55
+velha.voce_ganhou       m24 320
+velha.eu_ganhei         m24 320
+velha.empate            m24 320
+genius.placar           m24 320
+
+cena.agente             p16 88
+cena.delegando          p16 320
+
+imp.aguardando          p16 112
+imp.sem_conexao         p16 112
+imp.imprimindo          p16 112
+imp.pausada             p16 112
+imp.preparando          p16 112
+imp.terminou            p16 112
+imp.falhou              p16 112
+imp.ociosa              p16 112
+imp.impressora          m24 184
+imp.ams_umid_temp       p16 296
+imp.ams_umid            p16 296
+imp.impresso            p16 104
+imp.faltam              p16 104
+imp.camada_de           p16 104
+imp.camada              p16 104
+imp.bico                p16 104
+imp.mesa                p16 92
+imp.camara              p16 100
+imp.vazio               p16 64
+
+alerta.impressora_3d    m24 180
+alerta.toque_li         p16 200
+alerta.sai_sozinho      p16 200
+alerta.mais             p16 200  %s=closes by itself
+alerta.as               p16 200  %s=88:88
+alerta.comecou          g48 320
+alerta.retomou          g48 320
+alerta.terminou         g48 320
+alerta.cancelada        g48 320
+alerta.falhou           g48 320
+alerta.faltam_5         r32 320
+alerta.trocou_filamento r32 320
+alerta.ams_umido        r32 320
+alerta.pausada          g48 320
+alerta.previsto         m24 304
+alerta.imprimindo_de_novo m24 304
+alerta.levou_h          m24 304
+alerta.levou_min        m24 304
+alerta.impressao_cancelada m24 304
+alerta.erro             m24 304
+alerta.sem_codigo       m24 304
+alerta.quase_pronta     m24 304
+alerta.secar            p16 304
+alerta.umidade          m24 304
+alerta.motivo_desconhecido m24 304
+alerta.externo          m24 100
+alerta.slot             m24 100
+
+pausa.gcode             m24 608
+pausa.filamento         m24 608
+pausa.voce              m24 608
+pausa.tampa             m24 608
+pausa.temp_bico         m24 608
+pausa.temp_mesa         m24 608
+pausa.pulou_passo       m24 608
+pausa.perdeu_ams        m24 608
+pausa.ventoinha         m24 608
+pausa.temp_camara       m24 608
+pausa.enrolado          m24 608
+pausa.cortador          m24 608
+pausa.primeira_camada   m24 608
+pausa.entupido          m24 608
+
+hms.familia.impressora  r32 320
+hms.familia.sistema     r32 320
+hms.familia.ams         r32 320
+hms.familia.camera      r32 320
+hms.familia.camara      r32 320
+hms.familia.outro       r32 320
+hms.procure_wiki        m24 608
+# HMS: category = alert title (r32, 320); message = detail, up to 2 lines (m24, 2 x 304)
+hms.cat.*               r32 320
+hms.*                   m24 608

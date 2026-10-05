@@ -180,6 +180,27 @@ então rode você mesmo, passando a senha pela entrada padrão:
 **Diga à pessoa o MAC e o IP** e recomende reservar esse IP no roteador (DHCP
 estático); se o IP mudar, o Claudinho para de reagir até rodar esta skill de novo.
 
+## Idioma da tela (logo depois do Wi-Fi)
+
+Os textos da tela do Claudinho existem em vários idiomas (inglês é o padrão
+de fábrica). **Não pergunte do zero:** você já sabe o idioma em que a pessoa
+está conversando. Veja os disponíveis com
+`bash "$R/scripts/claudinho.sh" idioma` (mostra o atual e a lista, como
+`en,pt-BR`) e proponha o da conversa, por exemplo: "Vi que você está falando
+português; deixo a tela do Claudinho em português?". Com o sim (ou se a
+pessoa pedir outro da lista), grave:
+
+```bash
+bash "$R/scripts/claudinho.sh" idioma pt-BR
+```
+
+Se o idioma da pessoa ainda não existir, deixe em inglês e convide para
+traduzir: é só copiar `idiomas/en.txt` para o código do idioma e traduzir;
+o guia está em `idiomas/TRANSLATING.md` (em português:
+`idiomas/TRANSLATING.pt-BR.md`). O mesmo comando serve depois, quando a
+pessoa pedir "muda o idioma do Claudinho". As palavras que dão humor ao
+prompt (português e inglês) não dependem disso.
+
 ## 5. Tela do Nextion (~40 s, pela rede)
 
 O plugin traz a tela pronta para o NX3224F024 (Discovery 2,4"). A imagem
@@ -324,7 +345,7 @@ também da tela nova (`claudinho.sh tela`, pede um toque).
 
 ## Referência rápida
 
-`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
+`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | idioma [código] | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
 
 `atualizar` e `tela` pedem um toque na tela do Claudinho (avise a pessoa antes).
 Tipos de cara: inicio, prompt, ferramenta, erro, parou, atencao, compact, fim, dormir.
