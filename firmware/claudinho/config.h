@@ -1,10 +1,18 @@
 // Configuracao de compilacao do Claudinho. Nada pessoal aqui: Wi-Fi e segredo
 // sao gravados na placa na primeira vez (ver o cabecalho do claudinho.ino).
 
-#define VERSAO "1.10.0"
+#define VERSAO "1.11.0"
 
-// Serial do Nextion. A placa e detectada na compilacao.
-#if CONFIG_IDF_TARGET_ESP32C3
+// Placa. A E32R28T (ESP32 com tela embutida) e escolhida na compilacao com
+// -DPLACA_E32R28T (o compilar.sh faz isso); as outras usam o Nextion.
+#if defined(PLACA_E32R28T)
+  // E32R28T: tela ST7789 + toque no proprio ESP32 (tela_e32.h), sem Nextion
+  #define PLACA_NOME  "e32r28t"
+  #define NEXTION_TX  -1
+  #define NEXTION_RX  -1
+  #define WIFI_POTENCIA_REDUZIDA 0
+  #define BOTAO_BOOT  0
+#elif CONFIG_IDF_TARGET_ESP32C3
   // ESP32-C3 Super Mini: pinos marcados TX e RX na placa. 5V vem do pino "5V".
   #define PLACA_NOME  "esp32c3"
   #define NEXTION_TX  21   // C3 TX -> fio RX (amarelo) do Nextion

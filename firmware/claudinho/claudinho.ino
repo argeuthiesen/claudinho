@@ -24,6 +24,9 @@
 
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
+#ifdef PLACA_E32R28T
+#include "tela_e32.h"        // a E32R28T desenha direto (sem Nextion)
+#endif
 #include "textos.h"        // textos da tela por idioma (gerado de idiomas/*.txt)
 #include "hms_codigos.h"   // codigos HMS da Bambu (gerado por firmware/hms/gerar.py)      // avisos HMS da Bambu em portugues (gerado por firmware/hms/gerar.py)
 #include <esp_wifi.h>
@@ -203,6 +206,9 @@ BlocoJanela b5h(22), b7d(96);
 // buffer e ele descarta pedacos: sobra lixo na tela. Cada comando espera o
 // anterior render; "cls" (tela inteira) ganha folga maior.
 void nexCmd(const char* cmd) {
+#ifdef PLACA_E32R28T
+  e32Cmd(cmd); return;                 // E32R28T: desenha direto, sem serial
+#endif
   nex.print(cmd);
   nex.write(0xFF); nex.write(0xFF); nex.write(0xFF);
   nex.flush();
@@ -2125,6 +2131,11 @@ void cuidaManutencao() {
 // ---------------------------------------------------------------- toque
 void leToque() {
   static uint8_t buf[9]; static int n = 0; static unsigned long pressaoEm = 0;
+#ifdef PLACA_E32R28T
+  bool apertou; int ex, ey;
+  while (e32Toque(apertou, ex, ey)) {  // o toque da E32R28T vira o mesmo pacote do Nextion
+    buf[1] = ex >> 8; buf[2] = ex & 0xFF; buf[3] = ey >> 8; buf[4] = ey & 0xFF; buf[5] = apertou ? 1 : 0; (void)n;
+#else
   while (nex.available()) {
     uint8_t b = nex.read();
     if (n == 0 && b != 0x67) { static int outros = 0; if (outros++ < 20) registra("serial: byte 0x%02X", b); continue; }
@@ -2132,6 +2143,7 @@ void leToque() {
     if (n < 9) continue;
     n = 0;
     if (buf[6] != 0xFF || buf[7] != 0xFF || buf[8] != 0xFF) continue;
+#endif
     int tx = (buf[1] << 8) | buf[2], ty = (buf[3] << 8) | buf[4];
     registra("toque %s em %d,%d (pagina %d)", buf[5] == 1 ? "press" : "solta", tx, ty, pagina);
     if (buf[5] == 1) { pressaoEm = millis(); continue; }
@@ -2170,6 +2182,9 @@ long tftEsperaRetorno(uint32_t timeout) {
 }
 
 bool tftHandshake(long tamanho) {
+#ifdef PLACA_E32R28T
+  registra("tft: esta placa nao tem Nextion"); return false;
+#endif
   char cmd[48]; snprintf(cmd, sizeof cmd, "whmi-wris %ld,%d,1", tamanho, NEXTION_BAUD_RAPIDO);
   // 1) o Nextion normalmente esta em 115200 (pedimos no boot)
   nexCmd(""); nexCmd("sleep=0"); nexCmd("connect"); delay(300);
@@ -2573,6 +2588,9 @@ void setup() {
   // Nextion acorda a 9600; pede a serial rapida e troca. Quando os dois ligam
   // juntos (ou depois de gravar um .tft) o Nextion leva ~1,5 s para ouvir:
   // espera, e manda o pedido duas vezes por garantia.
+#ifdef PLACA_E32R28T
+  e32Inicia();
+#else
   nex.begin(NEXTION_BAUD, SERIAL_8N1, NEXTION_RX, NEXTION_TX);
   delay(1800);
   nexCmd("");
@@ -2589,6 +2607,7 @@ void setup() {
   // A troca de baud acima gera respostas de erro do Nextion (0x1A, 0x00 +
   // FF FF FF) antes do bkcmd=0 valer; descarta para nao virar ruido no log.
   delay(50); while (nex.available()) nex.read();
+#endif
   mudaPagina(0);
 
   carregaConfig();

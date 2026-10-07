@@ -101,7 +101,18 @@ do passo 1.
 
 ## 1. Hardware
 
-Confirme com a pessoa (mostre a tabela se ela ainda não montou):
+**Existem duas versões.** Pergunte qual a pessoa tem:
+
+- **E32R28T** (placa única: ESP32 com tela de 2,8" embutida, da LCDWiki).
+  Não tem fios para ligar: é só plugar no USB. **Pule para o passo 2.** Nessa
+  placa não existe o passo 5 (tela do Nextion). O conversor USB dela é um
+  CH340: no Windows, se a porta não aparecer, instale o driver do CH340.
+  Abrir a porta USB reinicia a placa (é assim que ela grava sem botão): é
+  normal a tela piscar.
+- **Nextion + ESP32-C3 Super Mini (ou S3)**: a versão clássica, com fios.
+
+Para a versão clássica, confirme as ligações (mostre a tabela se ela ainda
+não montou):
 
 | Fio do Nextion | ESP32-C3 Super Mini | ESP32-S3 DevKitC-1 |
 |---|---|---|
@@ -142,7 +153,8 @@ Se sair `PRECISA_BOOT`, é o caso mais comum com placa que já tinha outro
 programa (visto em teste real): peça para **segurar BOOT, tirar e pôr o USB,
 soltar BOOT**, e rode de novo. A porta pode mudar de número; rode o passo 2 de novo.
 
-Espere ver `Hash of data verified`. Isso apaga qualquer configuração anterior da
+Espere ver `Hash of data verified`. O script reconhece sozinho a placa
+(C3, S3 ou E32R28T) e grava o firmware certo. Isso apaga qualquer configuração anterior da
 placa. O display vai mostrar "Olá! Sou o Claudinho." (ou lixo, se o Nextion ainda
 tiver a tela de fábrica — normal, o passo 5 resolve).
 
@@ -202,6 +214,9 @@ pessoa pedir "muda o idioma do Claudinho". As palavras que dão humor ao
 prompt (português e inglês) não dependem disso.
 
 ## 5. Tela do Nextion (~40 s, pela rede)
+
+**Só na versão clássica.** Na E32R28T não existe esse passo (o próprio ESP32
+desenha a tela, com as fontes dentro do firmware): pule para o 6.
 
 O plugin traz a tela pronta para o NX3224F024 (Discovery 2,4"). A imagem
 é feita para a tela girada 270, que é a única montagem possível: a área útil

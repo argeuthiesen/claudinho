@@ -265,28 +265,25 @@ connect the power supply and the computer's USB at the same time.
 The screen is mounted rotated 270°: the Nextion's visible area isn't centered
 on its board, and only in this position does it end up centered in the case.
 
-### Coming soon: a single-board version
+### New: the single-board version (in testing)
 
-A new board is on its way from China: the **E32R28T**, an ESP32 with a 2.8"
-touch screen built in (320×240, the same resolution as the Nextion). As soon as
-it arrives, Claudinho gets a version for it, and it simplifies a lot:
+Claudinho now also runs on the **E32R28T** (LCDWiki "2.8inch ESP32-32E
+Display"): an ESP32 with a 2.8" touch screen built in, 320×240 like the
+Nextion. It simplifies a lot:
 
-- **One board instead of two.** ESP32 and screen come together: no wires to
-  solder between them, no separate power for the display.
+- **One board instead of two.** No wires to solder, no separate power for the
+  display: plug in the USB and that's it.
 - **No Nextion Editor and no `.tft`.** The ESP32 draws the screen itself, with
-  the fonts built into the firmware. Updating becomes one step (just the
-  firmware, no more "update the screen too"), and setup loses a step.
-- **Battery connector with a charger on the board.** Plug in a small LiPo and
-  Claudinho becomes portable (the printer monitor in another room), without
-  the extra charger and step-up modules.
-- **Speaker connector.** Sound: beeps in Genius, a chime when Claude needs you,
-  the printer alerts.
-- **Faster drawing**, so smoother scenes and animations.
+  the fonts built into the firmware (smoother, anti-aliased text). Setup loses
+  a step and updating is just the firmware.
+- **Battery connector with a charger on the board**, for a truly portable
+  Claudinho, and a **speaker connector** for sounds (coming next).
 
-The case grows a little (from about 80 × 52 mm to 90 × 58 mm) and will get its
-own model on MakerWorld. The current version, with the Nextion, stays
-supported. Nothing here is tested yet: this section will change when the board
-is on the desk.
+Everything works on it (faces, usage, scenes, printer, games, demo mode,
+languages): the setup skill recognizes the board on its own. Two notes: the
+board's spec sheet says ILI9341, but the screen is an ST7789 (the firmware
+already knows); and its own case isn't on MakerWorld yet, so for now it's for
+people who don't mind a bare board. The Nextion version stays supported.
 
 ## Installation
 
@@ -423,7 +420,8 @@ your Anthropic account.
 ## Tested environments
 
 **Tested end to end:** WSL2 on Windows 11, ESP32-C3 Super Mini, Nextion
-NX3224F024_011. Printer module: Bambu Lab P2S with AMS.
+NX3224F024_011. Printer module: Bambu Lab P2S with AMS. Single-board: E32R28T
+(ST7789 screen).
 
 **Written to work, not yet tested on real hardware:** native Linux, macOS,
 Windows with Git Bash, ESP32-S3 DevKitC-1, other Bambu printers with local
@@ -487,6 +485,9 @@ logged since it started.
 
 - `firmware/claudinho/`: the firmware (Arduino, ESP32 core 3.x, ArduinoJson 7).
   `firmware/compilar.sh` builds the C3 and S3 `.bin` files into `firmware/bin/`.
+- `firmware/claudinho/tela_e32.h`: the E32R28T screen and touch (LovyanGFX).
+  The rest of the firmware is the same for both boards. Fonts for it:
+  `python3 firmware/fontes/gerar_vlw.py` (DM Sans and JetBrains Mono, OFL).
 - `nextion/`: the compiled screen for the NX3224F024, plus the `.HMI` project.
   Fonts: 0-3 DM Sans, 4 Silkscreen, 5 JetBrains Mono (the scenes), all OFL.
 - `idiomas/`: every screen text, one file per language (`en.txt`,

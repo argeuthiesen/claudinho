@@ -266,29 +266,26 @@ fonte e o USB do computador ao mesmo tempo.
 A tela é montada girada 270°: a área útil do Nextion não fica no centro da
 placa, e só nessa posição ela fica centralizada na caixa.
 
-### Em breve: versão de placa única
+### Novidade: a versão de placa única (em teste)
 
-Está vindo da China uma placa nova: a **E32R28T**, um ESP32 com tela de 2,8"
-sensível ao toque já embutida (320×240, a mesma resolução do Nextion). Assim
-que ela chegar, o Claudinho ganha uma versão para ela, e isso simplifica
-bastante:
+O Claudinho agora também roda na **E32R28T** ("2.8inch ESP32-32E Display", da
+LCDWiki): um ESP32 com tela de toque de 2,8" embutida, 320×240 como o
+Nextion. Simplifica bastante:
 
-- **Uma placa em vez de duas.** ESP32 e tela vêm juntos: sem fios para soldar
-  entre eles, sem alimentação separada para a tela.
+- **Uma placa em vez de duas.** Sem fios para soldar, sem alimentação
+  separada para a tela: plugou o USB, pronto.
 - **Sem Nextion Editor e sem `.tft`.** O próprio ESP32 desenha a tela, com as
-  fontes dentro do firmware. Atualizar vira um passo só (só o firmware, sem o
-  "grave a tela também"), e a configuração perde uma etapa.
-- **Conector de bateria com carregador na placa.** Encaixe uma LiPo pequena e
-  o Claudinho fica portátil (o monitor da impressora em outro cômodo), sem os
-  módulos extras de carga e elevação de tensão.
-- **Conector de alto-falante.** Som: bipes no Genius, um aviso quando o Claude
-  precisa de você, os alertas da impressora.
-- **Desenho mais rápido**, então cenas e animações mais suaves.
+  fontes dentro do firmware (texto mais suave, sem serrilhado). A
+  configuração perde uma etapa e atualizar é só o firmware.
+- **Conector de bateria com carregador na placa**, para um Claudinho portátil
+  de verdade, e **conector de alto-falante** para sons (vem a seguir).
 
-A caixa cresce um pouco (de uns 80 × 52 mm para 90 × 58 mm) e vai ganhar
-modelo próprio no MakerWorld. A versão atual, com o Nextion, continua
-suportada. Nada disso está testado ainda: esta seção muda quando a placa
-estiver na mesa.
+Tudo funciona nela (caras, consumo, cenas, impressora, jogos, modo
+demonstração, idiomas): a skill de configuração reconhece a placa sozinha.
+Dois avisos: a ficha da placa diz ILI9341, mas a tela é uma ST7789 (o firmware
+já sabe disso); e a caixa dela ainda não está no MakerWorld, então por
+enquanto é para quem não se importa com a placa sem caixa. A versão com
+Nextion continua suportada.
 
 ## Instalação
 
@@ -417,7 +414,8 @@ conta da Anthropic.
 ## Ambientes testados
 
 **Testado de ponta a ponta:** WSL2 no Windows 11, ESP32-C3 Super Mini,
-Nextion NX3224F024_011. Módulo da impressora: Bambu Lab P2S com AMS.
+Nextion NX3224F024_011. Módulo da impressora: Bambu Lab P2S com AMS. Placa
+única: E32R28T (tela ST7789).
 
 **Escrito para funcionar, ainda sem teste real:** Linux nativo, macOS,
 Windows com Git Bash, ESP32-S3 DevKitC-1, outras impressoras Bambu com acesso
@@ -479,6 +477,9 @@ desde que ligou.
 
 - `firmware/claudinho/`: o firmware (Arduino, core ESP32 3.x, ArduinoJson 7).
   `firmware/compilar.sh` gera os `.bin` de C3 e S3 em `firmware/bin/`.
+- `firmware/claudinho/tela_e32.h`: tela e toque da E32R28T (LovyanGFX). O
+  resto do firmware é o mesmo para as duas placas. As fontes dela:
+  `python3 firmware/fontes/gerar_vlw.py` (DM Sans e JetBrains Mono, OFL).
 - `nextion/`: a tela compilada para o NX3224F024, mais o projeto `.HMI`.
   Fontes: 0-3 DM Sans, 4 Silkscreen, 5 JetBrains Mono (as cenas), todas OFL.
 - `idiomas/`: todo texto da tela, um arquivo por idioma (`en.txt`,
