@@ -187,6 +187,22 @@ voltar ao rosto. Para ver como ficam: `claudinho.sh alerta bom` (notícia
 boa), `ruim` (uma pausa), `filamento` ou `hms`. Para desligar: `claudinho.sh bambu desligar` (apaga o código
 da placa).
 
+## Modo demonstração
+
+Quer filmar o Claudinho ou mostrar para alguém? Rode `claudinho.sh demo` (ou
+peça ao Claude "roda a demo do Claudinho"). Em uns 2 minutos ele passa por
+tudo sozinho: dorme e acorda, as caras, o consumo do plano, as cenas de
+trabalho, o painel e os alertas da impressora, a calibragem de cor, uma
+partida de jogo da velha e uma de Genius com toques "fantasma", e volta a
+dormir.
+
+É tudo de mentira: seus números de verdade, a impressora, a cor do rosto e os
+alertas pendentes voltam exatamente como estavam. Durante a demo, os eventos
+do computador e da impressora são ignorados, para nada interromper. **Toque
+na tela para parar** (ou `claudinho.sh demo parar`). Ela usa o idioma da tela
+que você escolheu. A parte da impressora só aparece se houver impressora
+configurada.
+
 ## Atualizar
 
 Peça ao Claude "atualiza o Claudinho". A tela vai mostrar "O PC quer me

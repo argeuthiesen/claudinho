@@ -14,6 +14,7 @@
 #   claudinho.sh bambu IP | desligar  liga a impressora Bambu (pede o codigo de acesso escondido; ou pela entrada padrao)
 #   claudinho.sh painel               mostra o painel da impressora
 #   claudinho.sh idioma [codigo]      idioma da tela (sem codigo: mostra o atual e os disponiveis)
+#   claudinho.sh demo [parar]         modo demonstracao: trailer de ~2 min para filmar (um toque interrompe)
 #   claudinho.sh cena <tipo>          testa uma cena: codando, terminal, lendo, agente
 #   claudinho.sh alerta [bom|ruim|filamento|hms]  alerta de exemplo da impressora
 # O segredo nunca vai na linha de comando (ver curl_claudinho no comum.sh).
@@ -21,7 +22,7 @@ source "$(dirname "$0")/comum.sh"
 IP=$(le_config CLAUDINHO_IP)
 [ -n "$IP" ] || { echo "Claudinho ainda nao configurado (rode a skill /claudinho:configurar)" >&2; exit 1; }
 J=(-H 'Content-Type: application/json')
-uso() { sed -n '2,18p' "$0"; exit 1; }
+uso() { sed -n '2,19p' "$0"; exit 1; }
 num() { case "$1" in ''|*[!0-9]*) return 1 ;; esac; }
 palavra() { case "$1" in *[!a-z]*) return 1 ;; esac; }      # so letras minusculas (ou vazio)
 cmd() { curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/cmd" -d "$1"; }
@@ -57,6 +58,7 @@ case "${1:-}" in
   velha) cmd '{"velha":true}'; echo "jogo aberto na tela do Claudinho" ;;
   genius) cmd '{"genius":true}'; echo "Genius aberto na tela do Claudinho" ;;
   painel) cmd '{"painel":true}' ;;
+  demo) case "${2:-}" in parar) cmd '{"demo":false}' ;; "") cmd '{"demo":true}'; echo "demonstracao comecou (~2 min); um toque na tela interrompe" ;; *) uso ;; esac ;;
   idioma)
     if [ -z "${2:-}" ]; then mini | python3 -c 'import json,sys; d=json.load(sys.stdin); print("idioma:", d.get("idioma","?"), "| disponiveis:", d.get("idiomas","?"))'; exit; fi
     case "$2" in *[!A-Za-z-]*) uso ;; esac

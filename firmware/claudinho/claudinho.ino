@@ -102,6 +102,7 @@ bool caraDesenhada = false;
 struct { Cara cara = C_NEUTRO; unsigned long ate = 0; } evento;   // cara vinda de evento, com validade
 
 int  pagina = 0;
+bool demo = false;           // modo demonstracao (claudinho.sh demo): ignora eventos de verdade
 bool forcaCena = false;      // evento de teste: troca a cena sem esperar o minimo
 bool manter = false; int paginaManter = 1;   // botao Manter: tokens ou impressora ficam na tela (nao volta a dormir)
 int  miniP = 4;              // tamanho do pixel do mini Clawd (4 nas cenas, 6 nos alertas)
@@ -721,6 +722,7 @@ void confereRenovacao() {
 
 // Atende o pedido pendente quando o Claudinho esta parado no rosto.
 void cuidaConsumo() {
+  if (demo) return;
   if (!consumo.pendente || pagina != 0) return;
   if (!dados.ok || dados.n == 0 || congelado()) { consumo.pendente = false; return; }
   if (evento.ate && (long)(millis() - evento.ate) < 0) return;      // ainda numa cara de evento
@@ -1144,6 +1146,7 @@ void toqueAlerta() {
 }
 // Mostra o proximo alerta quando a tela esta no rosto, no painel ou no consumo automatico.
 void cuidaAlertas() {
+  if (demo) return;
   if (aN && (pagina == 0 || pagina == 9 || pagina == 10 || (pagina == 1 && (consumo.naTela || manter)))) abreAlerta();
 }
 
@@ -1318,6 +1321,7 @@ void bConecta() {
 void bSolta() { if (bBuf) { free(bBuf); bBuf = nullptr; } bFase = 0; }
 
 void bProcessa(const uint8_t* js, size_t n) {
+  if (demo) return;                                        // a demonstracao usa uma impressora de mentira
   static JsonDocument filtro; static bool pronto = false;
   if (!pronto) {
     const char* ks[] = {"gcode_state", "mc_percent", "mc_remaining_time", "layer_num", "total_layer_num", "subtask_name",
@@ -1456,7 +1460,7 @@ void cuidaBambu() {
   bLe();
   if (bConectado && millis() - bUltPing > B_PING_MS) { bEnvia(0xC0, nullptr, 0); bUltPing = millis(); }
   if (millis() - bUltDado > B_SILENCIO_MS) { registra("bambu: sem resposta, reconectando"); bCli.stop(); }
-  if (bConectado && bImprimindo() && pagina == 0 && millis() - bUltAuto > B_AUTO_MS) {   // painel a cada 5 min
+  if (bConectado && !demo && bImprimindo() && pagina == 0 && millis() - bUltAuto > B_AUTO_MS) {   // painel a cada 5 min
     bUltAuto = millis(); abrePainel();
   }
 }
@@ -1955,6 +1959,154 @@ bool cenaPorFerramenta(bool forca) {   // forca: teste (claudinho.sh cena) troca
   return true;
 }
 
+// ---------------------------------------------------------------- modo demonstracao
+// claudinho.sh demo: um trailer de ~2 min, para filmar. Roda sozinho, na
+// placa: dorme, acorda, as caras, o consumo, as cenas, a impressora e os
+// alertas, a calibragem de cor, uma partida de velha e uma de Genius com
+// toques "fantasma", e volta a dormir. Tudo com dados de mentira: durante a
+// demo os eventos do PC, a status line e a impressora sao ignorados, e no fim
+// tudo volta como estava. Um toque na tela interrompe.
+int demoN = -1; unsigned long demoAte = 0, demoDesde = 0, demoTick = 0;
+int demoSub = 0;
+Dados demoDados; uint16_t demoCor = 0; bool demoBCon = false, demoManter = false;
+Alerta demoFila[A_MAX]; int demoAN = 0;
+char demoBi[sizeof(bi)];
+
+void demoFixa() { paginaDesde = millis(); paginaDur = B_FIXO; }
+void demoCara(Cara c) { poeCara(c, 600000); if (pagina != 0) mudaPagina(0); }
+void demoFantasma(int x, int y) {                      // onde o "dedo" tocou
+  nexCmdf("cir %d,%d,%d,%u", x, y, 16, COR_BRANCO); nexCmdf("cir %d,%d,%d,%u", x, y, 15, COR_BRANCO);
+}
+void demoUso(int h5, int d7) {
+  long agora = time(nullptr);
+  dados.ok = true; dados.h5 = h5; dados.d7 = d7; dados.n = 2; dados.at = agora;
+  dados.h5r = agora + 2 * 3600 + 17 * 60; dados.d7r = agora + 3 * 86400 + 5 * 3600;
+}
+void demoImpressora() {
+  memset(&bi, 0, sizeof bi);
+  strcpy(bi.estado, "RUNNING"); strcpy(bi.modelo, "Bambu Lab P2S");
+  bi.pct = 48; bi.restante = 72; bi.camada = 96; bi.camadas = 212; bi.erro = 0; bi.stg = 0;
+  bi.bico = 220; bi.bicoAlvo = 220; bi.mesa = 55; bi.mesaAlvo = 55; bi.camara = 35; bi.umid = 27; bi.amsTemp = 31.7f;
+  const uint32_t c[4] = {0xF98C36FF, 0x898989FF, 0xC1C1C1FF, 0x3F6FD9FF}; const char* t[4] = {"PLA", "PLA", "PETG", "PLA"};
+  for (int i = 0; i < 4; i++) { bi.cor[i] = c[i]; strcpy(bi.tipo[i], t[i]); }
+  bi.trayNow = 1; bi.temAms = true; bConectado = true;
+}
+void demoAlerta(uint8_t tipo, uint16_t cor, const char* titulo, const char* l2, uint32_t amostra) {
+  aN = 0; novoAlerta(tipo, cor, titulo, "", l2, amostra); abreAlerta(); demoFixa();
+}
+
+void demoInicia() {
+  if (demo) return;
+  demoDados = dados; demoCor = corRostoAtual; demoBCon = bConectado; demoManter = manter;
+  memcpy(demoFila, aFila, sizeof aFila); demoAN = aN; memcpy(demoBi, &bi, sizeof bi);
+  demo = true; demoN = -1; demoAte = 0; manter = false;
+  registra("demo: comecou");
+}
+void demoFim(const char* porque) {
+  if (!demo) return;
+  demo = false;
+  dados = demoDados; corRostoAtual = demoCor; bConectado = demoBCon; manter = demoManter;
+  memcpy(aFila, demoFila, sizeof aFila); aN = demoAN; memcpy(&bi, demoBi, sizeof bi);
+  vJogaEm = 0; evento.ate = 0; caraDesenhada = false;
+  registra("demo: fim (%s)", porque);
+  mudaPagina(0);
+}
+
+// Prepara o passo n e devolve quanto tempo ele fica (ms); < 0: acabou.
+long demoPasso(int n) {
+  static const Cara CARAS[] = {C_PENSANDO, C_EMPOLGADO, C_PREOCUPADO, C_SUSTO, C_TRABALHANDO,
+                               C_DESCONFIADO, C_BRAVO, C_ESPERANDO, C_ZONZO, C_TERMINOU};
+  static const int N_CARAS = sizeof CARAS / sizeof CARAS[0];
+  demoSub = 0; demoDesde = millis(); demoTick = 0;
+  int k = n;
+  if (k == 0) { demoCara(C_DORMINDO); return 4000; }
+  if (k == 1) { demoCara(C_FELIZ); return 2200; }
+  k -= 2;
+  if (k < N_CARAS) { demoCara(CARAS[k]); return 2000; }
+  k -= N_CARAS;
+  switch (k) {
+    case 0: demoUso(38, 61); abreTela(1); demoFixa(); return 2500;                       // consumo
+    case 1: demoUso(76, 61); demoCara(C_CANSADO); return 2000;                         // cansado
+    case 2: demoUso(92, 61); mudaPagina(1); demoFixa();                                 // limite: pisca
+            consumo.naTela = true; consumo.telaIntensa = true; return 2500;
+    case 3: demoCara(C_SUANDO); return 2000;
+    case 4: abreCena(S_CODANDO); demoFixa(); return 5000;                               // cenas
+    case 5: abreCena(S_TERMINAL); demoFixa(); return 5000;
+    case 6: abreCena(S_LENDO); demoFixa(); return 4000;
+    case 7: abreCena(S_AGENTE); demoFixa(); return 4500;
+  }
+  k -= 8;
+  if (bambuLigado()) {                                                                  // impressora
+    switch (k) {
+      case 0: demoUso(38, 61); demoImpressora(); abreTela(1); demoFixa(); return 1800;
+      case 1: { int w = botaoLarg(); demoFantasma(6 + w + 6 + w / 2, BT_Y + BT_H / 2); delay(250);
+                abreTela(9); demoFixa(); return 3000; }
+      case 2: { int w = botaoLarg(); demoFantasma(6 + 2 * (w + 6) + w / 2, BT_Y + BT_H / 2); delay(250);
+                manter = true; desenhaBotoes(); return 1800; }
+      case 3: { manter = false; char t[40]; snprintf(t, sizeof t, tx(T_ALERTA_PREVISTO), 2, 30);
+                demoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_COMECOU), t, 0); return 2200; }
+      case 4: demoAlerta(A_GERAL, COR_OURO, tx(T_ALERTA_FALTAM_5), tx(T_ALERTA_QUASE_PRONTA), 0); return 2000;
+      case 5: demoAlerta(A_FILAMENTO, COR_AZUL, tx(T_ALERTA_TROCOU_FILAMENTO), "slot 2 > slot 4  PLA", 0x3F6FD9FF); return 2200;
+      case 6: demoAlerta(A_GERAL, COR_CRITICO, tx(T_ALERTA_PAUSADA), tx(T_PAUSA_FILAMENTO), 0); return 2200;
+      case 7: { char t[40]; snprintf(t, sizeof t, tx(T_ALERTA_LEVOU_H), 2UL, 31UL);
+                demoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_TERMINOU), t, 0); return 2200; }
+      case 8: { const HmsCodigo* e = hmsBusca(0x03001A00, 0x00020002);                  // bico entupido
+                demoAlerta(A_GERAL, COR_CRITICO, e ? hmsCatTxt(e->cat) : "HMS", e ? hmsMsgTxt(e->msg) : "", 0);
+                strcpy(aFila[0].codigo, "HMS 0300-1A00-0002-0002"); abreAlerta(); demoFixa(); return 2500; }
+    }
+    k -= 9;
+  }
+  switch (k) {
+    case 0: aN = 0; corAntesPaleta = corRostoAtual; irPaleta(3); demoFixa(); return 2200;   // calibragem de cor
+    case 1: demoFantasma(53, 60); delay(250); toquePaleta(53, 60); demoFixa(); return 1800;
+    case 2: demoFantasma(40, 30); delay(250); toquePaleta(40, 30); demoFixa(); return 1500;
+    case 3: demoFantasma(160, 120); delay(250); toquePaleta(160, 120); demoFixa(); return 2200;
+    case 4: corRostoAtual = demoCor;                                                    // velha
+            vVoceComeca = true; vAviso = false; vUltCasa = -1; vToques = 0;
+            mudaPagina(6); demoFixa(); vNovaPartida(); vErro = 0; return 30000;
+    case 5: gUltQ = -1; gToques = 0; mudaPagina(7); demoFixa(); gNovoJogo(); return 30000;   // Genius
+    case 6: mudaPagina(2); demoFixa(); return 2500;                                     // atualizacao
+    case 7: demoCara(C_DORMINDO); return 3500;
+  }
+  return -1;
+}
+
+// Passos que se mexem sozinhos: os agentes chegando, a velha e o Genius jogando.
+void demoAnda() {
+  unsigned long t = millis() - demoDesde;
+  if (pagina == 10 && cenaAtual == S_AGENTE) {
+    if ((demoSub == 0 && t > 1500) || (demoSub == 1 && t > 3000)) { demoSub++; novoAgente(); }
+    return;
+  }
+  if (pagina == 6) {                                                 // velha: o "jogador" toca a melhor casa livre da lista
+    if (vResultado) { if (vReacaoNaTela && millis() - vFimEm > VELHA_RISCO_MS + 1800) demoAte = millis(); return; }
+    if (vJogaEm || millis() - demoTick < 900) return;
+    static const int ORDEM[9] = {4, 0, 8, 2, 6, 1, 3, 5, 7};
+    for (int i : ORDEM) if (!vTab[i]) {
+      int x, y; vCentro(i, x, y); demoFantasma(x, y); delay(200);
+      toqueVelha(x, y); demoTick = millis(); demoFixa(); break;
+    }
+    return;
+  }
+  if (pagina == 7) {                                                 // Genius: acerta 2 rodadas, erra a 3a
+    if (gFase == 2) { if (millis() - gFimEm > 2500) demoAte = millis(); return; }
+    if (gFase != 1 || millis() - demoTick < 450) return;
+    int q = gSeq[gIdx];
+    if (gLen >= 3) q = (q + 1) % 4;                                  // a errada
+    int x = (q % 2) * 162 + 79, y = (q / 2) * 122 + 59;
+    toqueGenius(x, y); demoTick = millis(); demoFixa();
+  }
+}
+
+void cuidaDemo() {
+  if (!demo) return;
+  demoAnda();
+  if ((long)(millis() - demoAte) < 0) return;
+  long dur = demoPasso(++demoN);
+  if (dur < 0) { demoFim("terminou"); return; }
+  demoAte = millis() + dur;
+}
+
 // ---------------------------------------------------------------- manutencao
 bool manutLiberada() { return manutAte && (long)(millis() - manutAte) < 0; }
 void liberaManutencao(const char* como) {
@@ -1983,6 +2135,7 @@ void leToque() {
     int tx = (buf[1] << 8) | buf[2], ty = (buf[3] << 8) | buf[4];
     registra("toque %s em %d,%d (pagina %d)", buf[5] == 1 ? "press" : "solta", tx, ty, pagina);
     if (buf[5] == 1) { pressaoEm = millis(); continue; }
+    if (demo) { demoFim("toque"); continue; }                      // um toque interrompe a demonstracao
     if (manutPedidaEm) { liberaManutencao("toque"); continue; }
     if (pagina == 6) { toqueVelha(tx, ty); continue; }
     if (pagina == 7) { toqueGenius(tx, ty); continue; }
@@ -2080,6 +2233,7 @@ void recebeuLocal() { ultimoLocal = millis(); servidor = SRV_OK; }
 
 void webEstado() {
   if (!autorizado()) { web.send(401, "text/plain", "segredo invalido\n"); return; }
+  if (demo) { web.send(200, "text/plain", "ok\n"); return; }
   JsonDocument doc;
   if (deserializeJson(doc, web.arg("plain"))) { web.send(400, "text/plain", "json invalido\n"); return; }
   if (!relogioValido()) ajustaRelogio(doc["enviado_em"].as<long>());
@@ -2099,6 +2253,7 @@ void webEstado() {
 
 void webEvento() {
   if (!autorizado()) { web.send(401, "text/plain", "segredo invalido\n"); return; }
+  if (demo) { web.send(200, "text/plain", "ok\n"); return; }      // demonstracao: nada atropela o roteiro
   JsonDocument doc;
   if (deserializeJson(doc, web.arg("plain"))) { web.send(400, "text/plain", "json invalido\n"); return; }
   const char* tipo = doc["tipo"] | ""; const char* humor = doc["humor"] | ""; const char* sessao = doc["sessao"] | "";
@@ -2166,6 +2321,8 @@ void webCmd() {
   if (doc["velha"] | false) abreVelha();
   // {"paleta":true}: abre a escolha de cor do rosto na tela
   if (doc["paleta"] | false) abrePaleta();
+  // {"demo":true}: modo demonstracao (trailer de ~2 min); {"demo":false} para
+  if (doc["demo"].is<bool>()) { if (doc["demo"]) demoInicia(); else demoFim("pedido"); }
   // {"idioma":"pt-BR"}: idioma da tela (gravado na placa)
   if (doc["idioma"].is<const char*>()) {
     int i = idiomaPorCodigo(doc["idioma"]);
@@ -2465,7 +2622,7 @@ void loop() {
     servidor = SRV_SEM_WIFI;
   } else if (servidor == SRV_SEM_WIFI) servidor = SRV_INICIANDO;
   cuidaManutencao();
-  if (pagina != 0 && !(manter && pagina == paginaManter) && millis() - paginaDesde > paginaDur) {
+  if (pagina != 0 && !demo && !(manter && pagina == paginaManter) && millis() - paginaDesde > paginaDur) {
     if (pagina == 2) manutPedidaEm = 0;
     if (pagina == 6) saiVelha("sem toque");
     else if (pagina == 7) saiGenius("sem toque");
@@ -2481,6 +2638,7 @@ void loop() {
   cuidaGenius();
   cuidaBambu();
   cuidaCena();
+  cuidaDemo();
   cuidaAlertaAnim();
 
   // Brilho: dormindo ha mais de 20 s -> 15 %; acordado -> 100 % (ou o que o

@@ -189,6 +189,21 @@ back on the face. To see what they look like: `claudinho.sh alerta bom` (good
 news), `ruim` (a pause), `filamento` or `hms`. To turn it off: `claudinho.sh bambu desligar` (erases the
 code from the board).
 
+## Demo mode
+
+Want to film Claudinho or show it to someone? Run `claudinho.sh demo` (or ask
+Claude "run Claudinho's demo"). In about 2 minutes it goes through
+everything on its own: sleeping and waking up, the faces, plan usage, the
+work scenes, the printer panel and alerts, the color calibration, a game of
+tic-tac-toe and one of Simon with "ghost" taps, and back to sleep.
+
+It's all make-believe: your real numbers, the printer, the face color and
+any pending alerts come back exactly as they were. During the demo, events
+from the computer and the printer are ignored, so nothing interrupts it.
+**Tap the screen to stop it** (or `claudinho.sh demo parar`). It uses the
+screen language you picked. The printer part only shows if a printer is set
+up.
+
 ## Updating
 
 Ask Claude "update Claudinho". The screen will ask to allow the update: **tap

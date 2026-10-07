@@ -4,11 +4,9 @@
 
 Claude Code's mascot, alive, on your desk.
 
-The 3D-printable case is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
-
-
 https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
 
+The 3D-printable case is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
 Already built one? The [user manual](docs/manual.md) covers faces, touch, colors, the two built-in games, the Bambu printer panel and updates.
 
@@ -380,6 +378,7 @@ scripts/claudinho.sh bambu PRINTER_IP     # connect a Bambu printer (asks the ac
 scripts/claudinho.sh bambu desligar       # disconnect it and erase the code ("desligar" = turn off)
 scripts/claudinho.sh painel               # show the printer panel ("painel" = panel)
 scripts/claudinho.sh idioma [code]        # screen language: en, pt-BR... (no code: current and available)
+scripts/claudinho.sh demo [parar]         # demo mode: a ~2 min tour of everything, for filming ("parar" = stop)
 scripts/claudinho.sh alerta [type]        # sample printer alert: bom, ruim, filamento, hms
 scripts/claudinho.sh cena <type>          # try a scene: codando (editing), terminal, lendo (reading), agente
 scripts/claudinho.sh atualizar [file.bin] # update firmware

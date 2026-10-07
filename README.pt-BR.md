@@ -375,6 +375,7 @@ scripts/claudinho.sh bambu IP_IMPRESSORA  # liga uma impressora Bambu (pede o c�
 scripts/claudinho.sh bambu desligar       # desliga e apaga o código da placa
 scripts/claudinho.sh painel               # mostra o painel da impressora
 scripts/claudinho.sh idioma [código]      # idioma da tela: en, pt-BR... (sem código: o atual e os disponíveis)
+scripts/claudinho.sh demo [parar]         # modo demonstração: um passeio de ~2 min por tudo, para filmar
 scripts/claudinho.sh alerta [tipo]        # alerta de exemplo da impressora: bom, ruim, filamento, hms
 scripts/claudinho.sh cena <tipo>          # mostra uma cena: codando, terminal, lendo, agente
 scripts/claudinho.sh atualizar [arquivo.bin]
