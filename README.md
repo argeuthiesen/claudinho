@@ -6,6 +6,13 @@ Claude Code's mascot, alive, on your desk.
 
 The 3D-printable case is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
+<p align="center">
+  <a href="https://www.youtube.com/shorts/uVUeqot9QTE">
+    <img src="https://youtube.com" alt="Assista ao Shorts" width="280">
+  </a>
+</p>
+
+
 Already built one? The [user manual](docs/manual.md) covers faces, touch, colors, the two built-in games, the Bambu printer panel and updates.
 
 Claudinho is a Claude Code plugin that gives Clawd a body: an ESP32 with a
