@@ -7,7 +7,7 @@ Claude Code's mascot, alive, on your desk.
 The 3D-printable case is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
 
-https://github.com/user-attachments/assets/30ac6821-fa00-4361-a6bd-872277323962
+https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
 
 
 Already built one? The [user manual](docs/manual.md) covers faces, touch, colors, the two built-in games, the Bambu printer panel and updates.
