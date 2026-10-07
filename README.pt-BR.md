@@ -4,6 +4,8 @@
 
 O mascote do Claude Code, vivo, na sua mesa.
 
+https://github.com/user-attachments/assets/efdd0e27-0e4b-4182-9e59-d393eee27717
+
 A caixa para imprimir em 3D está no MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
 
 Já montou o seu? O [manual de uso](docs/manual.pt-BR.md) explica as caras, os toques, as cores, os dois joguinhos, o painel da impressora Bambu e as atualizações.
