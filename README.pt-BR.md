@@ -6,7 +6,7 @@ O mascote do Claude Code, vivo, na sua mesa.
 
 https://github.com/user-attachments/assets/efdd0e27-0e4b-4182-9e59-d393eee27717
 
-A caixa para imprimir em 3D da versão clássica está no MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho) (a caixa da placa única está vindo).
+A caixa para imprimir em 3D da versão clássica está no MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho). A caixa da versão de placa única está sendo modelada agora e sai no MakerWorld em breve.
 
 Já montou o seu? O [manual de uso](docs/manual.pt-BR.md) explica as caras, os toques, as cores, os dois joguinhos, o painel da impressora Bambu e as atualizações.
 
@@ -288,7 +288,7 @@ Alguns avisos:
   botão. A tela pode piscar: é normal.
 - **ILI9341 ou ST7789?** A ficha da placa diz ILI9341, mas a tela é uma
   ST7789. O firmware já sabe disso.
-- **Caixa:** a caixa dela ainda não está no MakerWorld (está vindo). Por
+- **Caixa:** a caixa dela está sendo modelada agora e sai no MakerWorld em breve. Por
   enquanto, é para quem não se importa com a placa sem caixa.
 
 ### Versão clássica (Nextion)

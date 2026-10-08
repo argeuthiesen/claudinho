@@ -6,7 +6,7 @@ Claude Code's mascot, alive, on your desk.
 
 https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
 
-The 3D-printable case for the classic version is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho) (the single-board case is coming).
+The 3D-printable case for the classic version is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho). The case for the single-board version is being modeled right now and will be published on MakerWorld soon.
 
 Already built one? The [user manual](docs/manual.md) covers faces, touch, colors, the two built-in games, the Bambu printer panel and updates.
 
@@ -287,7 +287,7 @@ languages), and the setup skill recognizes the board on its own. A few notes:
   without pressing buttons. The screen may blink: that's normal.
 - **ILI9341 or ST7789?** The board's spec sheet says ILI9341, but the screen
   is an ST7789. The firmware already knows.
-- **Case:** its own case isn't on MakerWorld yet (it's coming). For now it's
+- **Case:** its own case is being modeled right now and will be on MakerWorld soon. For now it's
   for people who don't mind a bare board.
 
 ### Classic version (Nextion)
