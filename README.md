@@ -286,6 +286,15 @@ Nextion. It simplifies a lot:
   the intonation (happy when it wakes up, a question when Claude needs you,
   grumpy on an error, a quick "done!" when Claude finishes, sleepy at bedtime).
 
+What you need for it:
+
+| Part | Notes |
+|---|---|
+| [E32R28T board (ESP32 + 2.8" touch screen)](https://www.aliexpress.com/item/1005009659317465.html) | the resistive-touch version; listings may call it "ESP32-32E 2.8" |
+| [8 Ω speaker with a JST 1.25 plug](https://www.aliexpress.com/item/1005009194531045.html) | optional, for the voice; the small 2415 (24 × 15 mm) fits well |
+| 3.7 V LiPo battery with a JST 1.25 2-pin plug | optional; **check the polarity** before plugging it in (cheap batteries sometimes come reversed) |
+| USB-C data cable | to set it up and to charge |
+
 Everything works on it (faces, usage, scenes, printer, games, demo mode,
 languages): the setup skill recognizes the board on its own. Two notes: the
 board's spec sheet says ILI9341, but the screen is an ST7789 (the firmware

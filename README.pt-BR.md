@@ -287,6 +287,15 @@ Nextion. Simplifica bastante:
   ao acordar, uma pergunta quando o Claude precisa de você, bravo num erro, um
   "pronto!" rápido quando o Claude termina, sonolento na hora de dormir).
 
+O que você precisa:
+
+| Peça | Observações |
+|---|---|
+| [Placa E32R28T (ESP32 + tela de toque de 2,8")](https://www.aliexpress.com/item/1005009659317465.html) | a versão com toque resistivo; o anúncio pode chamar de "ESP32-32E 2.8" |
+| [Alto-falante de 8 Ω com plugue JST 1,25](https://www.aliexpress.com/item/1005009194531045.html) | opcional, para a voz; o pequeno 2415 (24 × 15 mm) encaixa bem |
+| Bateria LiPo de 3,7 V com plugue JST 1,25 de 2 pinos | opcional; **confira a polaridade** antes de ligar (bateria barata às vezes vem invertida) |
+| Cabo USB-C de dados | para configurar e carregar |
+
 Tudo funciona nela (caras, consumo, cenas, impressora, jogos, modo
 demonstração, idiomas): a skill de configuração reconhece a placa sozinha.
 Dois avisos: a ficha da placa diz ILI9341, mas a tela é uma ST7789 (o firmware
