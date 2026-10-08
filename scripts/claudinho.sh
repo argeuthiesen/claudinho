@@ -14,6 +14,7 @@
 #   claudinho.sh bambu IP | desligar  liga a impressora Bambu (pede o codigo de acesso escondido; ou pela entrada padrao)
 #   claudinho.sh painel               mostra o painel da impressora
 #   claudinho.sh idioma [codigo]      idioma da tela (sem codigo: mostra o atual e os disponiveis)
+#   claudinho.sh som [HUMOR|liga|desliga|volume N|lista|padrao|envia EVENTO arq.wav]  alto-falante (so a E32R28T)
 #   claudinho.sh demo [parar]         modo demonstracao: trailer de ~2 min para filmar (um toque interrompe)
 #   claudinho.sh cena <tipo>          testa uma cena: codando, terminal, lendo, agente
 #   claudinho.sh alerta [bom|ruim|filamento|hms]  alerta de exemplo da impressora
@@ -22,7 +23,7 @@ source "$(dirname "$0")/comum.sh"
 IP=$(le_config CLAUDINHO_IP)
 [ -n "$IP" ] || { echo "Claudinho ainda nao configurado (rode a skill /claudinho:configurar)" >&2; exit 1; }
 J=(-H 'Content-Type: application/json')
-uso() { sed -n '2,19p' "$0"; exit 1; }
+uso() { sed -n '2,20p' "$0"; exit 1; }
 num() { case "$1" in ''|*[!0-9]*) return 1 ;; esac; }
 palavra() { case "$1" in *[!a-z]*) return 1 ;; esac; }      # so letras minusculas (ou vazio)
 cmd() { curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/cmd" -d "$1"; }
@@ -58,6 +59,34 @@ case "${1:-}" in
   velha) cmd '{"velha":true}'; echo "jogo aberto na tela do Claudinho" ;;
   genius) cmd '{"genius":true}'; echo "Genius aberto na tela do Claudinho" ;;
   painel) cmd '{"painel":true}' ;;
+  desligar) cmd '{"desligar":true}' ;;
+  som)
+    case "${2:-teste}" in
+      teste|liga|desliga|padrao|acordar|dormir|lista|apaga-acordar|apaga-dormir|feliz|pergunta|sono|bravo|pronto|pensando|empolgado|preocupado|susto|trabalhando|desconfiado|zonzo|cansado|nervoso) cmd "{\"som\":\"${2:-teste}\"}" ;;
+      volume) num "${3:-x}" || uso; cmd "{\"som\":\"volume\",\"volume\":$3}" ;;
+      envia)
+        # som envia acordar|dormir arquivo.wav: converte para 8 bits mono 22050 Hz e manda
+        case "${3:-}" in acordar|dormir) ;; *) uso ;; esac
+        [ -f "${4:-}" ] || { echo "arquivo nao encontrado: ${4:-}" >&2; exit 1; }
+        T=$(mktemp --suffix=.wav)
+        python3 - "$4" "$T" <<'PY' || { rm -f "$T"; exit 1; }
+import sys, wave, struct
+e = wave.open(sys.argv[1]); c, l, r, n = e.getnchannels(), e.getsampwidth(), e.getframerate(), e.getnframes()
+bruto = e.readframes(n); fmt = {1: "B", 2: "h"}[l]
+v = struct.unpack("<%d%s" % (n * c, fmt), bruto)
+if l == 1: v = [x - 128 for x in v]
+m = [sum(v[i * c:(i + 1) * c]) / c / (128 if l == 1 else 32768) for i in range(n)]   # mono, -1..1
+pico = max(1e-6, max(abs(x) for x in m)); m = [x * 0.98 / pico for x in m]        # normaliza: o maximo sem distorcer
+alvo = 22050; out = bytearray()
+for k in range(int(n * alvo / r)):
+    out.append(max(0, min(255, int(128 + 127 * m[min(n - 1, int(k * r / alvo))]))))
+if len(out) > 119000: sys.exit("audio longo demais: ate ~5 s")
+s = wave.open(sys.argv[2], "wb"); s.setnchannels(1); s.setsampwidth(1); s.setframerate(alvo); s.writeframes(bytes(out)); s.close()
+print("convertido: %.1f s, %d bytes" % (len(out) / alvo, len(out) + 44))
+PY
+        curl_claudinho -s -m 30 -F "f=@$T" "http://$IP/som?evento=$3"; rm -f "$T" ;;
+      *) uso ;;
+    esac ;;
   demo) case "${2:-}" in parar) cmd '{"demo":false}' ;; "") cmd '{"demo":true}'; echo "demonstracao comecou (~2 min); um toque na tela interrompe" ;; *) uso ;; esac ;;
   idioma)
     if [ -z "${2:-}" ]; then mini | python3 -c 'import json,sys; d=json.load(sys.stdin); print("idioma:", d.get("idioma","?"), "| disponiveis:", d.get("idiomas","?"))'; exit; fi

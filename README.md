@@ -276,8 +276,15 @@ Nextion. It simplifies a lot:
 - **No Nextion Editor and no `.tft`.** The ESP32 draws the screen itself, with
   the fonts built into the firmware (smoother, anti-aliased text). Setup loses
   a step and updating is just the firmware.
-- **Battery connector with a charger on the board**, for a truly portable
-  Claudinho, and a **speaker connector** for sounds (coming next).
+- **Battery with a charger on the board**, for a truly portable Claudinho: a
+  battery icon on the usage card shows how much is left, and
+  `claudinho.sh desligar` puts it to deep sleep (press BOOT to wake it), so the
+  battery doesn't drain while it's put away.
+- **It talks.** With a small speaker on the board's connector, Claudinho
+  speaks a robot language of beeps and whistles. Nothing is recorded: every
+  phrase is generated on the spot, so no two are alike, and the mood changes
+  the intonation (happy when it wakes up, a question when Claude needs you,
+  grumpy on an error, a quick "done!" when Claude finishes, sleepy at bedtime).
 
 Everything works on it (faces, usage, scenes, printer, games, demo mode,
 languages): the setup skill recognizes the board on its own. Two notes: the
@@ -376,6 +383,8 @@ scripts/claudinho.sh bambu desligar       # disconnect it and erase the code ("d
 scripts/claudinho.sh painel               # show the printer panel ("painel" = panel)
 scripts/claudinho.sh idioma [code]        # screen language: en, pt-BR... (no code: current and available)
 scripts/claudinho.sh demo [parar]         # demo mode: a ~2 min tour of everything, for filming ("parar" = stop)
+scripts/claudinho.sh som [mood|liga|desliga|volume N]  # single-board: try a voice (feliz, pergunta, sono...), on/off, volume
+scripts/claudinho.sh desligar             # single-board: deep sleep, to save the battery (BOOT wakes it)
 scripts/claudinho.sh alerta [type]        # sample printer alert: bom, ruim, filamento, hms
 scripts/claudinho.sh cena <type>          # try a scene: codando (editing), terminal, lendo (reading), agente
 scripts/claudinho.sh atualizar [file.bin] # update firmware

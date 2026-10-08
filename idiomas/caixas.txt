@@ -40,6 +40,7 @@ uso.janela_livre        p16 176
 uso.aguardando          p16 176
 uso.sessao_5h           p16 220
 uso.semana_7d           p16 220
+uso.ctx                 p16 88
 
 botao.tokens            p16 94
 botao.impressora        p16 94

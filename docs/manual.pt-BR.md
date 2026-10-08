@@ -55,7 +55,9 @@ codando` (`terminal`, `lendo`, `agente`).
 
 - **Tocando na tela** aparece o cartão de consumo: janelas de 5 horas e de 7
   dias, quando cada uma renova, quantos terminais estão abertos e o IP da
-  placa. Depois de 15 segundos ele volta ao rosto (ou toque fora dos botões).
+  placa. No alto, o **ctx** é quanto do contexto da conversa atual já foi usado
+  (cinza; amarelo a partir de 75 %; vermelho a partir de 90 %, quando o Claude
+  Code está para compactar). Depois de 15 segundos ele volta ao rosto (ou toque fora dos botões).
 - **Os botões de baixo** (no cartão de consumo e no painel da impressora):
   - **Tokens** e **Impressora** alternam entre as duas telas; uma moldura
     dourada fina marca a atual. Sem impressora configurada, só aparece
@@ -186,6 +188,27 @@ Num jogo, na paleta de cores ou numa atualização, os alertas esperam você
 voltar ao rosto. Para ver como ficam: `claudinho.sh alerta bom` (notícia
 boa), `ruim` (uma pausa), `filamento` ou `hms`. Para desligar: `claudinho.sh bambu desligar` (apaga o código
 da placa).
+
+## Som e bateria (só na versão de placa única)
+
+Na E32R28T com um alto-falante pequeno, o Claudinho **fala um idioma de
+robô**, de bipes e assobios, inventado na hora: nenhuma fala é gravada, então
+nenhuma sai igual, e o humor muda a entonação. Ele fala ao acordar, quando o
+Claude precisa de você (uma pergunta), num erro (bravo), quando o Claude
+termina (um "pronto!" rápido) e ao ir dormir, e chama a cada 15 segundos
+enquanto a tela de atualização espera o seu toque. Logo depois de ligar ele
+fica quieto.
+
+- `claudinho.sh som desliga` / `som liga`: silencia ou volta a falar.
+- `claudinho.sh som volume 150`: volume de 10 a 200 % (acima de 100 pode
+  distorcer um pouco).
+- `claudinho.sh som feliz` (ou `pergunta`, `sono`, `bravo`, `pronto`,
+  `pensando`, `zonzo`...): ouve uma fala daquele humor.
+
+**Bateria:** o cartão de consumo mostra um ícone de bateria ao lado do
+relógio. Para guardar por uns dias, o `claudinho.sh desligar` apaga a tela e
+põe a placa em sono profundo, gastando quase nada; aperte **BOOT** (ou RESET)
+para ligar de novo.
 
 ## Modo demonstração
 

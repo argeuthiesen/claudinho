@@ -46,6 +46,7 @@ uso.janela_livre = janela livre
 uso.aguardando = aguardando
 uso.sessao_5h = SESSAO  5 HORAS
 uso.semana_7d = SEMANA  7 DIAS
+uso.ctx = ctx %d%%
 
 botao.tokens = Tokens
 botao.impressora = Impressora

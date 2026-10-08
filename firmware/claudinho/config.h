@@ -1,7 +1,7 @@
 // Configuracao de compilacao do Claudinho. Nada pessoal aqui: Wi-Fi e segredo
 // sao gravados na placa na primeira vez (ver o cabecalho do claudinho.ino).
 
-#define VERSAO "1.11.0"
+#define VERSAO "1.13.0"
 
 // Placa. A E32R28T (ESP32 com tela embutida) e escolhida na compilacao com
 // -DPLACA_E32R28T (o compilar.sh faz isso); as outras usam o Nextion.

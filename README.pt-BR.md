@@ -277,8 +277,15 @@ Nextion. Simplifica bastante:
 - **Sem Nextion Editor e sem `.tft`.** O próprio ESP32 desenha a tela, com as
   fontes dentro do firmware (texto mais suave, sem serrilhado). A
   configuração perde uma etapa e atualizar é só o firmware.
-- **Conector de bateria com carregador na placa**, para um Claudinho portátil
-  de verdade, e **conector de alto-falante** para sons (vem a seguir).
+- **Bateria com carregador na placa**, para um Claudinho portátil de verdade:
+  um ícone de bateria no cartão de consumo mostra quanto resta, e o
+  `claudinho.sh desligar` põe a placa em sono profundo (aperte BOOT para
+  ligar), para a bateria não secar enquanto ela fica guardada.
+- **Ele fala.** Com um alto-falante pequeno no conector da placa, o Claudinho
+  fala um idioma de robô, de bipes e assobios. Nada é gravado: cada fala é
+  gerada na hora, então nenhuma sai igual, e o humor muda a entonação (feliz
+  ao acordar, uma pergunta quando o Claude precisa de você, bravo num erro, um
+  "pronto!" rápido quando o Claude termina, sonolento na hora de dormir).
 
 Tudo funciona nela (caras, consumo, cenas, impressora, jogos, modo
 demonstração, idiomas): a skill de configuração reconhece a placa sozinha.
@@ -373,6 +380,8 @@ scripts/claudinho.sh bambu desligar       # desliga e apaga o código da placa
 scripts/claudinho.sh painel               # mostra o painel da impressora
 scripts/claudinho.sh idioma [código]      # idioma da tela: en, pt-BR... (sem código: o atual e os disponíveis)
 scripts/claudinho.sh demo [parar]         # modo demonstração: um passeio de ~2 min por tudo, para filmar
+scripts/claudinho.sh som [humor|liga|desliga|volume N]  # placa única: ouve uma fala (feliz, pergunta, sono...), liga/desliga, volume
+scripts/claudinho.sh desligar             # placa única: sono profundo, para poupar a bateria (o BOOT acorda)
 scripts/claudinho.sh alerta [tipo]        # alerta de exemplo da impressora: bom, ruim, filamento, hms
 scripts/claudinho.sh cena <tipo>          # mostra uma cena: codando, terminal, lendo, agente
 scripts/claudinho.sh atualizar [arquivo.bin]

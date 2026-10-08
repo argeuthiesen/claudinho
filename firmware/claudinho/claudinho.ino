@@ -26,6 +26,8 @@
 #include <WiFiClientSecure.h>
 #ifdef PLACA_E32R28T
 #include "tela_e32.h"        // a E32R28T desenha direto (sem Nextion)
+#include <LittleFS.h>         // sons enviados pela rede (claudinho.sh som envia)
+#include "soc/rtc_io_reg.h"   // escrita direta no DAC do IO26 (rapida)
 #endif
 #include "textos.h"        // textos da tela por idioma (gerado de idiomas/*.txt)
 #include "hms_codigos.h"   // codigos HMS da Bambu (gerado por firmware/hms/gerar.py)      // avisos HMS da Bambu em portugues (gerado por firmware/hms/gerar.py)
@@ -177,7 +179,8 @@ struct Barra {
 };
 
 // ---------------------------------------------------------------- layout
-Campo cTitulo  = {12,  3, 200, 20, FONTE_P, 0, COR_FUNDO};
+Campo cTitulo  = {12,  3, 100, 20, FONTE_P, 0, COR_FUNDO};
+Campo cCtx     = {112, 3, 88, 20, FONTE_P, 0, COR_FUNDO};   // contexto da conversa; termina antes do icone da bateria (E32R28T)
 Campo cRelogio = {240, 3,  68, 20, FONTE_P, 2, COR_FUNDO};
 Campo cRodape  = {0, 168, LARG, 17, FONTE_P, 1, COR_FUNDO};
 
@@ -557,6 +560,7 @@ void cuidaRosto() {
   Expr x;
 
   if (!caraDesenhada || c != caraNaTela) {
+    if (caraDesenhada) somDaCara(caraNaTela, c);
     caraNaTela = c; caraDesenhada = true; fase = 0;
     Serial.printf("CARA %d\n", (int)c);
     expressao(c, fase, x); desenhaExpr(x); extras(c, fase);
@@ -595,7 +599,7 @@ void cuidaRosto() {
 
 // ---------------------------------------------------------------- telas
 void desenhaMoldura() {
-  cTitulo.limpa(); cRelogio.limpa(); cRodape.limpa();
+  cTitulo.limpa(); cCtx.limpa(); cRelogio.limpa(); cRodape.limpa();
   if (pagina == 0) {
     limpaTela(corRosto());
     caraDesenhada = false; ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
@@ -625,10 +629,241 @@ void desenhaMoldura() {
   }
 }
 
+// ---- bateria (so a E32R28T: divisor de 100k + 100k no IO34, le metade da tensao)
+int batNaTela = -2;                       // nivel desenhado no cabecalho (-2: redesenhar)
+#ifdef PLACA_E32R28T
+int bateriaMv() {
+  uint32_t soma = 0; for (int i = 0; i < 16; i++) soma += analogReadMilliVolts(34);
+  return soma / 16 * 2;
+}
+// Curva tipica de uma LiPo (4,2 V cheia, 3,3 V vazia). -1: sem bateria.
+int bateriaPct(int mv) {
+  if (mv < 2500) return -1;
+  static const int MV[] = {3300, 3500, 3600, 3700, 3800, 3900, 4000, 4100, 4200}, PCT[] = {0, 10, 20, 35, 50, 65, 80, 90, 100};
+  if (mv <= MV[0]) return 0;
+  for (int i = 1; i < 9; i++) if (mv <= MV[i]) return PCT[i - 1] + (PCT[i] - PCT[i - 1]) * (mv - MV[i - 1]) / (MV[i] - MV[i - 1]);
+  return 100;
+}
+void desenhaBateria() {
+  int pct = bateriaPct(bateriaMv());
+  int nivel = pct < 0 ? -1 : (pct + 5) / 10;            // so redesenha quando muda de faixa de 10 %
+  if (nivel == batNaTela) return;
+  batNaTela = nivel;
+  const int x = 206, y = 7, w = 24, h = 12;
+  preenche(x - 2, y - 1, w + 6, h + 2, COR_FUNDO);
+  if (pct < 0) return;
+  uint16_t c = pct > 50 ? COR_OK : pct > 20 ? COR_OURO : COR_CRITICO;
+  preenche(x, y, w, h, COR_TEXTO); preenche(x + 1, y + 1, w - 2, h - 2, COR_FUNDO);   // contorno
+  preenche(x + w, y + 3, 2, h - 6, COR_TEXTO);                                         // polo
+  preenche(x + 2, y + 2, max(1, (w - 4) * pct / 100), h - 4, c);
+}
+#else
+int bateriaMv() { return 0; }
+int bateriaPct(int) { return -1; }
+void desenhaBateria() {}
+#endif
+
+// ---- som (so a E32R28T: amplificador FM8002E ligado pelo IO4 em nivel baixo,
+// som pelo IO26). O Claudiao "fala" num idioma de robo gerado na hora: cada
+// fala e montada por sorteio (voz, ritmo, silabas, notas), entao nunca se
+// repete e nada e gravado. O humor muda a gramatica da fala. Um som enviado
+// pela rede (claudinho.sh som envia acordar|dormir arq.wav) tem preferencia.
+// Logo depois de ligar fica quieto. claudinho.sh som liga|desliga|volume N.
+bool somLigado = true;
+int somVolume = 100;                   // % (10 a 200; acima de 100 pode distorcer nos picos)
+inline int somAmostra(int x) { return constrain(128 + (x - 128) * somVolume / 100, 0, 255); }
+enum Humor { H_FELIZ, H_PERGUNTA, H_SONO, H_BRAVO, H_PRONTO, H_PENSANDO, H_EMPOLGADO, H_PREOCUPADO, H_SUSTO,
+             H_TRABALHANDO, H_DESCONFIADO, H_ZONZO, H_CANSADO, H_NERVOSO };
+#ifdef PLACA_E32R28T
+static const int SOM_PINO = 26, SOM_LIGA = 4;
+void somAmp(bool liga) { pinMode(SOM_LIGA, OUTPUT); digitalWrite(SOM_LIGA, liga ? LOW : HIGH); }
+
+// Saida de som: o DAC do IO26, amostra por amostra, no ritmo de micros().
+// A escrita vai direto no registrador (dacWrite, a funcao do core, e lenta
+// demais para 22050 amostras/s: o som saia devagar e grave). No fim, o log
+// diz quanto tempo levou contra o esperado.
+static const uint32_t SOM_TAXA = 22050;
+uint32_t somT = 0, somInicio = 0, somAmostras = 0;
+bool somAbre() {
+  dacWrite(SOM_PINO, 128);                           // liga o DAC e o pino (uma vez, pela funcao do core)
+  somAmp(true); somT = somInicio = micros(); somAmostras = 0;
+  return true;
+}
+inline void somPoe(int v) {
+  SET_PERI_REG_BITS(RTC_IO_PAD_DAC2_REG, RTC_IO_PDAC2_DAC, somAmostra(v), RTC_IO_PDAC2_DAC_S);   // DAC2 = IO26
+  somAmostras++;
+  somT += 1000000UL / SOM_TAXA; while ((int32_t)(micros() - somT) < 0) {}
+}
+void somFecha() {
+  uint32_t real = micros() - somInicio, esperado = (uint64_t)somAmostras * 1000000ULL / SOM_TAXA;
+  dacDisable(SOM_PINO); somAmp(false);
+  registra("som: %u amostras em %u ms (esperado %u ms)", (unsigned)somAmostras, (unsigned)(real / 1000), (unsigned)(esperado / 1000));
+}
+
+// ---- o idioma do Claudiao: assobio quase puro (seno + um pouco do 2o harmonico)
+float vozFase = 0, vozTom = 1, vozRitmo = 1;
+inline float rnd(float a, float b) { return a + (b - a) * (esp_random() / 4294967295.0f); }
+inline int vozMs(float ms) { return (int)(ms * vozRitmo * SOM_TAXA / 1000); }
+// Toca n amostras com a frequencia dada por f(i) e um envelope curto (sem estalo).
+template <typename F> void vozSoa(int n, F freq) {
+  int a = SOM_TAXA / 250;                                      // 4 ms
+  for (int i = 0; i < n; i++) {
+    float f = freq(i) * vozTom;
+    vozFase += 6.2831853f * f / SOM_TAXA; if (vozFase > 6.2831853f) vozFase -= 6.2831853f;
+    float env = min(1.0f, min((float)i / a, (float)(n - i) / a));
+    somPoe(128 + (int)(105 * env * (sinf(vozFase) + 0.12f * sinf(2 * vozFase)) / 1.12f));
+  }
+}
+void vozPausa(float ms) { int n = vozMs(ms); for (int i = 0; i < n; i++) somPoe(128); }
+void vozDesliza(float f0, float f1, float ms, float curva) { int n = max(1, vozMs(ms)); float r = f1 / f0;
+  vozSoa(n, [&](int i) { return f0 * powf(r, powf((float)i / n, curva)); }); }
+void vozBip(float f, float ms) { vozSoa(vozMs(ms), [&](int) { return f; }); }
+void vozTrinado(float f1, float f2, float ms, float hz) { int meio = (int)(SOM_TAXA / (hz * 2));
+  vozSoa(vozMs(ms), [&](int i) { return (i / meio) % 2 ? f2 : f1; }); }
+void vozBorbulho(float ms, float lo, float hi, float hz) {
+  int passo = (int)(SOM_TAXA / hz); float alvo = rnd(lo, hi), f = alvo;
+  vozSoa(vozMs(ms), [&](int i) { if (i % passo == 0) alvo = rnd(lo, hi); f += (alvo - f) * 0.008f; return f; });
+}
+// Uma silaba sorteada, puxada para a faixa [lo, hi] da fala.
+void vozSilaba(float lo, float hi, int pesoDesliza, int pesoBip, int pesoTrinado, int pesoBorbulho) {
+  int t = random(pesoDesliza + pesoBip + pesoTrinado + pesoBorbulho);
+  if (t < pesoDesliza) { float a = rnd(lo, hi), b = rnd(lo, hi); vozDesliza(a, b, rnd(60, 160), rnd(0.6f, 1.6f)); }
+  else if ((t -= pesoDesliza) < pesoBip) { int k = random(1, 4); for (int q = 0; q < k; q++) { vozBip(rnd(lo, hi), rnd(30, 65)); if (q < k - 1) vozPausa(rnd(12, 28)); } }
+  else if ((t -= pesoBip) < pesoTrinado) { float f = rnd(lo, hi * 0.85f); vozTrinado(f, f * rnd(1.15f, 1.35f), rnd(120, 240), rnd(14, 22)); }
+  else vozBorbulho(rnd(150, 320), lo, hi, rnd(18, 30));
+}
+
+void fala(int h) {   // h: um Humor (int porque o Arduino declara as funcoes antes do enum)
+  if (!somLigado || !somAbre()) return;
+  vozTom = rnd(0.82f, 1.2f); vozRitmo = rnd(0.8f, 1.25f); vozFase = 0;
+  switch (h) {
+    case H_FELIZ: {                                            // sobe, animado, termina la em cima
+      vozDesliza(rnd(850, 1100), rnd(1900, 2500), rnd(60, 90), 0.7f); vozPausa(rnd(15, 35));
+      int n = random(4, 8);
+      for (int k = 0; k < n; k++) { vozSilaba(1200, 3100, 3, 4, 2, 2); vozPausa(rnd(15, 45)); }
+      float f = rnd(1100, 1500); vozDesliza(f * 2.2f, f, rnd(110, 160), 0.8f); vozDesliza(f, rnd(3000, 3500), rnd(100, 150), 1.6f);
+      if (random(2)) { vozPausa(15); vozBip(rnd(2600, 3300), rnd(30, 50)); }
+    } break;
+    case H_PERGUNTA: {                                         // conversa e termina subindo ("hein?")
+      int n = random(2, 5);
+      for (int k = 0; k < n; k++) { vozSilaba(1100, 2600, 2, 4, 1, 2); vozPausa(rnd(25, 55)); }
+      float f = rnd(1100, 1500); vozDesliza(f, f * rnd(2.2f, 2.8f), rnd(240, 340), rnd(2.0f, 2.8f));
+    } break;
+    case H_SONO: {                                             // mais lento e grave, sempre descendo
+      vozRitmo *= 1.35f;
+      int n = random(2, 4);
+      for (int k = 0; k < n; k++) { float a = rnd(1500, 2200); vozDesliza(a, a * rnd(0.5f, 0.7f), rnd(140, 220), 0.7f); vozPausa(rnd(50, 90)); }
+      float f = rnd(1300, 1700); vozTrinado(f, f * 0.85f, rnd(160, 240), 9); vozPausa(40);
+      vozDesliza(f * 0.9f, f * 0.4f, rnd(380, 480), 1.5f);
+    } break;
+    case H_BRAVO: {                                            // trinados rapidos e deslizes para baixo
+      vozTom *= 0.75f;
+      int n = random(3, 6);
+      for (int k = 0; k < n; k++) {
+        if (random(2)) { float f = rnd(900, 1500); vozTrinado(f, f * 1.2f, rnd(90, 160), rnd(24, 32)); }
+        else { float a = rnd(1600, 2200); vozDesliza(a, a * 0.45f, rnd(90, 140), 0.6f); }
+        vozPausa(rnd(20, 40));
+      }
+    } break;
+    case H_PENSANDO: {                                         // murmurio baixinho, borbulho lento
+      vozTom *= 0.85f; vozBorbulho(rnd(420, 620), 900, 1700, rnd(9, 13)); vozPausa(40); vozBip(rnd(1100, 1400), 50);
+    } break;
+    case H_EMPOLGADO: {                                        // feliz, mais rapido e agudo
+      vozTom *= 1.15f; vozRitmo *= 0.75f;
+      int n = random(5, 9);
+      for (int k = 0; k < n; k++) { vozSilaba(1500, 3400, 3, 3, 2, 2); vozPausa(rnd(10, 25)); }
+      vozDesliza(rnd(1600, 2000), rnd(3400, 3800), rnd(80, 120), 1.4f);
+    } break;
+    case H_PREOCUPADO: {                                       // pergunta que cai no fim: "hmm..."
+      vozSilaba(1100, 2200, 2, 3, 1, 1); vozPausa(rnd(30, 50));
+      float f = rnd(1600, 2000); vozDesliza(f, f * 1.4f, rnd(120, 160), 1.2f); vozDesliza(f * 1.4f, f * 0.6f, rnd(260, 340), 0.7f);
+    } break;
+    case H_SUSTO: {                                            // guincho curto e agudo, de repente
+      vozRitmo = 1; float f = rnd(900, 1200); vozDesliza(f, rnd(3600, 4200), rnd(70, 100), 0.4f); vozPausa(30);
+      vozTrinado(rnd(3000, 3400), rnd(3600, 3900), rnd(90, 130), 28);
+    } break;
+    case H_TRABALHANDO: {                                      // tagarelando apressado
+      vozRitmo *= 0.8f; vozBorbulho(rnd(300, 450), 1300, 2900, rnd(28, 36)); vozPausa(25); vozBip(rnd(1800, 2400), 40);
+      vozPausa(20); vozBorbulho(rnd(200, 300), 1300, 2900, rnd(28, 36));
+    } break;
+    case H_DESCONFIADO: {                                      // "hmmm" grave e lento
+      vozTom *= 0.7f; vozRitmo *= 1.3f; float f = rnd(1100, 1300);
+      vozTrinado(f, f * 1.06f, rnd(260, 340), 6); vozPausa(50); vozDesliza(f * 1.05f, f * 0.8f, rnd(220, 280), 1.0f);
+    } break;
+    case H_ZONZO: {                                            // sobe e desce, cambaleando
+      vozRitmo *= 1.1f; float f = rnd(1300, 1600);
+      for (int k = 0; k < 3; k++) { vozDesliza(f, f * 1.6f, rnd(110, 150), 1.0f); vozDesliza(f * 1.6f, f * 0.8f, rnd(110, 150), 1.0f); f *= rnd(0.85f, 1.05f); }
+    } break;
+    case H_CANSADO: {                                          // suspiro descendo
+      vozRitmo *= 1.4f; float f = rnd(1600, 1900); vozDesliza(f, f * 0.55f, rnd(420, 520), 0.8f); vozPausa(60); vozBip(f * 0.5f, 90);
+    } break;
+    case H_NERVOSO: {                                          // trinados nervosos
+      vozRitmo *= 0.85f; int n = random(3, 5);
+      for (int k = 0; k < n; k++) { float f = rnd(1800, 2600); vozTrinado(f, f * 1.12f, rnd(80, 130), rnd(26, 34)); vozPausa(rnd(20, 40)); }
+    } break;
+    case H_PRONTO: {                                           // curtinho: bips e um trinado subindo
+      int n = random(2, 4);
+      for (int k = 0; k < n; k++) { vozBip(rnd(1500, 2600), rnd(35, 55)); vozPausa(rnd(15, 30)); }
+      float f = rnd(2000, 2600); vozTrinado(f, f * 1.25f, rnd(110, 160), 20);
+    } break;
+  }
+  somFecha();
+}
+
+// Som enviado pela rede (LittleFS, particao "spiffs" de 128 KB): WAV 8 bits mono 22050 Hz.
+bool somFs = false;
+bool tocaArquivo(const char* nome) {
+  if (!somLigado) return false;
+  if (!somFs) { registra("som: %s: memoria de sons nao montada", nome); return false; }
+  if (!LittleFS.exists(nome)) return false;
+  File f = LittleFS.open(nome, "r"); uint8_t h[44];
+  if (!f) { registra("som: %s: nao abriu", nome); return false; }
+  if (f.read(h, 44) != 44) { registra("som: %s: cabecalho curto (%u bytes)", nome, (unsigned)f.size()); f.close(); return false; }
+  registra("som: tocando %s (%u bytes)", nome, (unsigned)f.size());
+  if (!somAbre()) { f.close(); return false; }
+  uint8_t b[512]; int n;
+  while ((n = f.read(b, sizeof b)) > 0) for (int i = 0; i < n; i++) somPoe(b[i]);
+  f.close(); somFecha();
+  return true;
+}
+void somAcordar() { if (!tocaArquivo("/acordar.wav")) fala(H_FELIZ); }
+void somDormir()  { if (!tocaArquivo("/dormir.wav")) fala(H_SONO); }
+// Chamado quando a cara muda: acordou ou foi dormir.
+void somDaCara(Cara antes, Cara depois) {
+  if (millis() < 15000) return;                            // ligou agora: sem barulho
+  if (antes == C_DORMINDO && depois != C_DORMINDO) { registra("som: acordou"); somAcordar(); }
+  else if (depois == C_DORMINDO && antes != C_DORMINDO) { registra("som: dormiu"); somDormir(); }
+}
+// Eventos do Claude Code que falam: esperando voce, erro, terminou.
+// A placa responde ao PC primeiro e fala logo depois, no loop.
+int somPendente = -1;
+void somDoEvento(const char* tipo) {
+  if (millis() < 15000 || demo) return;
+  if (!strcmp(tipo, "atencao")) somPendente = H_PERGUNTA;
+  else if (!strcmp(tipo, "erro")) somPendente = H_BRAVO;
+  else if (!strcmp(tipo, "parou")) somPendente = H_PRONTO;
+}
+void cuidaSomE32() { if (somPendente >= 0) { int h = somPendente; somPendente = -1; fala(h); } }
+#else
+void fala(int) {}
+void somAcordar() {}
+void somDormir() {}
+void somDaCara(Cara, Cara) {}
+void somDoEvento(const char*) {}
+void cuidaSomE32() {}
+#endif
+void cuidaSom() { cuidaSomE32(); }
+
 void desenhaCabecalho() {
+  desenhaBateria();
   char t[24];
   snprintf(t, sizeof t, "CLAUDE CODE");
   cTitulo.mostra(t, COR_OURO);
+  // ctx: quanto do contexto da conversa (do ultimo terminal que mandou numeros) ja foi usado
+  if (dados.ok && dados.ctx > 0) {
+    snprintf(t, sizeof t, tx(T_USO_CTX), dados.ctx);
+    cCtx.mostra(t, dados.ctx >= 90 ? COR_CRITICO : dados.ctx >= 75 ? COR_ALERTA : COR_APAGADO);
+  } else cCtx.mostra("", COR_APAGADO);
   if (relogioValido()) { horaStr(time(nullptr), t, sizeof t); cRelogio.mostra(t, COR_TEXTO); }
   else cRelogio.mostra("--:--", COR_APAGADO);
 }
@@ -685,7 +920,7 @@ void desenha() {
 }
 
 void mudaPagina(int p) {
-  pagina = p; paginaDesde = millis(); paginaDur = VOLTA_PAGINA_MS;
+  pagina = p; batNaTela = -2; paginaDesde = millis(); paginaDur = VOLTA_PAGINA_MS;
   consumo.naTela = false; consumo.telaIntensa = false;
   desenhaMoldura();
   desenha();
@@ -2026,16 +2261,21 @@ long demoPasso(int n) {
   demoSub = 0; demoDesde = millis(); demoTick = 0;
   int k = n;
   if (k == 0) { demoCara(C_DORMINDO); return 4000; }
-  if (k == 1) { demoCara(C_FELIZ); return 2200; }
+  if (k == 1) { demoCara(C_FELIZ); fala(H_FELIZ); return 1600; }
   k -= 2;
-  if (k < N_CARAS) { demoCara(CARAS[k]); return 2000; }
+  if (k < N_CARAS) {                                         // cada cara com a sua fala (a fala ja consome parte do tempo)
+    static const int FALA[] = {H_PENSANDO, H_EMPOLGADO, H_PREOCUPADO, H_SUSTO, H_TRABALHANDO,
+                               H_DESCONFIADO, H_BRAVO, H_PERGUNTA, H_ZONZO, H_PRONTO};
+    demoCara(CARAS[k]); fala(FALA[k]);
+    return 900;
+  }
   k -= N_CARAS;
   switch (k) {
     case 0: demoUso(38, 61); abreTela(1); demoFixa(); return 2500;                       // consumo
-    case 1: demoUso(76, 61); demoCara(C_CANSADO); return 2000;                         // cansado
+    case 1: demoUso(76, 61); demoCara(C_CANSADO); fala(H_CANSADO); return 1000;         // cansado
     case 2: demoUso(92, 61); mudaPagina(1); demoFixa();                                 // limite: pisca
             consumo.naTela = true; consumo.telaIntensa = true; return 2500;
-    case 3: demoCara(C_SUANDO); return 2000;
+    case 3: demoCara(C_SUANDO); fala(H_NERVOSO); return 1000;
     case 4: abreCena(S_CODANDO); demoFixa(); return 5000;                               // cenas
     case 5: abreCena(S_TERMINAL); demoFixa(); return 5000;
     case 6: abreCena(S_LENDO); demoFixa(); return 4000;
@@ -2055,7 +2295,7 @@ long demoPasso(int n) {
       case 5: demoAlerta(A_FILAMENTO, COR_AZUL, tx(T_ALERTA_TROCOU_FILAMENTO), "slot 2 > slot 4  PLA", 0x3F6FD9FF); return 2200;
       case 6: demoAlerta(A_GERAL, COR_CRITICO, tx(T_ALERTA_PAUSADA), tx(T_PAUSA_FILAMENTO), 0); return 2200;
       case 7: { char t[40]; snprintf(t, sizeof t, tx(T_ALERTA_LEVOU_H), 2UL, 31UL);
-                demoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_TERMINOU), t, 0); return 2200; }
+                demoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_TERMINOU), t, 0); fala(H_PRONTO); return 1600; }
       case 8: { const HmsCodigo* e = hmsBusca(0x03001A00, 0x00020002);                  // bico entupido
                 demoAlerta(A_GERAL, COR_CRITICO, e ? hmsCatTxt(e->cat) : "HMS", e ? hmsMsgTxt(e->msg) : "", 0);
                 strcpy(aFila[0].codigo, "HMS 0300-1A00-0002-0002"); abreAlerta(); demoFixa(); return 2500; }
@@ -2072,7 +2312,7 @@ long demoPasso(int n) {
             mudaPagina(6); demoFixa(); vNovaPartida(); vErro = 0; return 30000;
     case 5: gUltQ = -1; gToques = 0; mudaPagina(7); demoFixa(); gNovoJogo(); return 30000;   // Genius
     case 6: mudaPagina(2); demoFixa(); return 2500;                                     // atualizacao
-    case 7: demoCara(C_DORMINDO); return 3500;
+    case 7: demoCara(C_DORMINDO); somDormir(); return 2500;
   }
   return -1;
 }
@@ -2124,6 +2364,9 @@ void liberaManutencao(const char* como) {
 }
 void cuidaManutencao() {
   if (!manutPedidaEm) return;
+  static unsigned long chamouEm = 0, pedido = 0;           // chama com uma pergunta a cada 15 s
+  if (pedido != manutPedidaEm) { pedido = manutPedidaEm; chamouEm = 0; }   // pedido novo: chama na hora
+  if (!chamouEm || millis() - chamouEm > 15000) { chamouEm = millis(); fala(H_PERGUNTA); }
   if (digitalRead(BOTAO_BOOT) == LOW) { liberaManutencao("botao"); return; }
   if (millis() - manutPedidaEm > MANUT_PEDIDO_MS) { manutPedidaEm = 0; registra("manutencao: ninguem tocou; cancelada"); voltaRepouso(); }
 }
@@ -2279,6 +2522,7 @@ void webEvento() {
   recebeuLocal();
   registra("local evento: %s %s%s (n=%d)", tipo, humor, acaoEvento, dados.n);
   trataEvento(tipo, humor);
+  somDoEvento(tipo);
   web.send(200, "text/plain", "ok\n");
 }
 
@@ -2289,10 +2533,10 @@ void webMini() {
   if (!autorizado()) { web.send(401, "text/plain", "segredo invalido\n"); return; }
   char buf[560], lista[80] = "";
   for (int i = 0; i < I_N; i++) { if (i) strlcat(lista, ",", sizeof lista); strlcat(lista, IDIOMA_COD[i], sizeof lista); }
-  snprintf(buf, sizeof buf, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,\"ctx\":%d,\"n\":%d,\"mod\":\"%s\",\"at\":%ld,\"now\":%ld,\"local\":%s,\"rssi\":%d,\"manut\":\"%s\",\"bambu\":%s,\"bcon\":%s,\"best\":\"%s\",\"bpct\":%d,\"idioma\":\"%s\",\"idiomas\":\"%s\"}\n",
+  snprintf(buf, sizeof buf, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,\"ctx\":%d,\"n\":%d,\"mod\":\"%s\",\"at\":%ld,\"now\":%ld,\"local\":%s,\"rssi\":%d,\"manut\":\"%s\",\"bambu\":%s,\"bcon\":%s,\"best\":\"%s\",\"bpct\":%d,\"idioma\":\"%s\",\"idiomas\":\"%s\",\"bat_mv\":%d,\"bat_pct\":%d}\n",
            VERSAO, dados.h5, dados.h5r, dados.d7, dados.d7r, dados.ctx, dados.n, dados.mod, dados.at, (long)time(nullptr), localRecente() ? "true" : "false", (int)WiFi.RSSI(),
            manutPedidaEm ? "pedida" : manutLiberada() ? "liberada" : "",
-           bambuLigado() ? "true" : "false", bConectado ? "true" : "false", bi.estado, bi.pct, IDIOMA_COD[idioma], lista);
+           bambuLigado() ? "true" : "false", bConectado ? "true" : "false", bi.estado, bi.pct, IDIOMA_COD[idioma], lista, bateriaMv(), bateriaPct(bateriaMv()));
   web.send(200, "application/json", buf);
 }
 
@@ -2336,6 +2580,60 @@ void webCmd() {
   if (doc["velha"] | false) abreVelha();
   // {"paleta":true}: abre a escolha de cor do rosto na tela
   if (doc["paleta"] | false) abrePaleta();
+  // {"som":"teste"|"liga"|"desliga"} (so na placa com alto-falante)
+  if (doc["som"].is<const char*>()) {
+    const char* k = doc["som"];
+    if (!strcmp(k, "teste")) fala(H_FELIZ);
+#ifdef PLACA_E32R28T
+    else if (!strcmp(k, "lista")) {
+      if (!somFs) registra("som: memoria nao montada");
+      else { File d = LittleFS.open("/"); for (File f = d.openNextFile(); f; f = d.openNextFile()) registra("som: arquivo %s %u bytes", f.name(), (unsigned)f.size());
+             registra("som: usados %u de %u bytes", (unsigned)LittleFS.usedBytes(), (unsigned)LittleFS.totalBytes()); }
+    }
+    else if (!strcmp(k, "apaga-acordar") || !strcmp(k, "apaga-dormir")) {
+      if (somFs) LittleFS.remove(!strcmp(k, "apaga-acordar") ? "/acordar.wav" : "/dormir.wav");
+      registra("som: %s", k);
+    }
+    else if (!strcmp(k, "padrao")) { if (somFs) { LittleFS.remove("/acordar.wav"); LittleFS.remove("/dormir.wav"); } registra("som: sons padrao"); }
+    else if (!strcmp(k, "acordar")) somAcordar();
+    else if (!strcmp(k, "dormir")) somDormir();
+    else if (!strcmp(k, "feliz")) fala(H_FELIZ);
+    else if (!strcmp(k, "pergunta")) fala(H_PERGUNTA);
+    else if (!strcmp(k, "sono")) fala(H_SONO);
+    else if (!strcmp(k, "bravo")) fala(H_BRAVO);
+    else if (!strcmp(k, "pronto")) fala(H_PRONTO);
+    else if (!strcmp(k, "pensando")) fala(H_PENSANDO);
+    else if (!strcmp(k, "empolgado")) fala(H_EMPOLGADO);
+    else if (!strcmp(k, "preocupado")) fala(H_PREOCUPADO);
+    else if (!strcmp(k, "susto")) fala(H_SUSTO);
+    else if (!strcmp(k, "trabalhando")) fala(H_TRABALHANDO);
+    else if (!strcmp(k, "desconfiado")) fala(H_DESCONFIADO);
+    else if (!strcmp(k, "zonzo")) fala(H_ZONZO);
+    else if (!strcmp(k, "cansado")) fala(H_CANSADO);
+    else if (!strcmp(k, "nervoso")) fala(H_NERVOSO);
+#endif
+    else if (!strcmp(k, "volume")) {
+      somVolume = constrain(doc["volume"] | 100, 10, 200); prefs.begin("claudinho", false); prefs.putInt("som_vol", somVolume); prefs.end();
+      registra("som: volume %d%%", somVolume);
+    }
+    else if (!strcmp(k, "liga") || !strcmp(k, "desliga")) {
+      somLigado = !strcmp(k, "liga"); prefs.begin("claudinho", false); prefs.putBool("som", somLigado); prefs.end();
+      registra("som: %s", somLigado ? "ligado" : "desligado");
+    }
+  }
+  // {"desligar":true}: so a E32R28T (bateria). Apaga a tela, desliga o som e
+  // dorme fundo (quase sem gastar); acorda com o botao BOOT (IO0) ou RESET.
+#ifdef PLACA_E32R28T
+  if (doc["desligar"] | false) {
+    web.send(200, "text/plain", "desligando; aperte BOOT (ou RESET) na placa para ligar\n");
+    registra("desligando (sono profundo)"); delay(300);
+    pinMode(SOM_LIGA, OUTPUT); digitalWrite(SOM_LIGA, HIGH);   // amplificador desligado
+    e32.setBrightness(0); e32.sleep();                          // luz e tela
+    WiFi.disconnect(true); WiFi.mode(WIFI_OFF);
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, 0);                // BOOT apertado = acorda
+    esp_deep_sleep_start();
+  }
+#endif
   // {"demo":true}: modo demonstracao (trailer de ~2 min); {"demo":false} para
   if (doc["demo"].is<bool>()) { if (doc["demo"]) demoInicia(); else demoFim("pedido"); }
   // {"idioma":"pt-BR"}: idioma da tela (gravado na placa)
@@ -2383,6 +2681,30 @@ bool negaFim(bool iniciado) {
   if (!iniciado)         { web.send(400, "text/plain", "nenhum arquivo recebido\n"); return true; }
   return false;
 }
+#ifdef PLACA_E32R28T
+// POST /som?evento=acordar|dormir (multipart): troca o som daquele evento.
+File somArq; bool somUpOk = false; size_t somUpTam = 0;
+void webSomDados() {
+  HTTPUpload& u = web.upload();
+  if (u.status == UPLOAD_FILE_START) {
+    String ev = web.arg("evento");
+    somUpOk = autorizado() && somFs && (ev == "acordar" || ev == "dormir"); somUpTam = 0;
+    if (somUpOk) { somArq = LittleFS.open("/" + ev + ".wav", "w"); somUpOk = (bool)somArq; }
+  } else if (u.status == UPLOAD_FILE_WRITE && somUpOk) {
+    somUpTam += u.currentSize;
+    if (somUpTam > 120000) { somUpOk = false; somArq.close(); LittleFS.remove("/" + web.arg("evento") + ".wav"); }
+    else if (somArq.write(u.buf, u.currentSize) != u.currentSize) {   // memoria cheia
+      somUpOk = false; somArq.close(); LittleFS.remove("/" + web.arg("evento") + ".wav"); registra("som: sem espaco");
+    }
+  } else if ((u.status == UPLOAD_FILE_END || u.status == UPLOAD_FILE_ABORTED) && somArq) somArq.close();
+}
+void webSomFim() {
+  if (!autorizado()) { web.send(401, "text/plain", "segredo invalido\n"); return; }
+  registra("som: %s %s (%u bytes)", web.arg("evento").c_str(), somUpOk ? "trocado" : "recusado", (unsigned)somUpTam);
+  web.send(somUpOk ? 200 : 400, "text/plain", somUpOk ? "ok\n" : "recusado: evento acordar|dormir, WAV ate 120 KB e espaco livre na placa (som lista)\n");
+}
+#endif
+
 void webOtaFim() {
   bool iniciado = otaIniciado; otaIniciado = false;
   if (negaFim(iniciado)) return;
@@ -2482,6 +2804,9 @@ void iniciaLocal() {
   web.on("/evento", HTTP_POST, webEvento);
   web.on("/cmd", HTTP_POST, webCmd);
   web.on("/ota", HTTP_POST, webOtaFim, webOtaDados);
+#ifdef PLACA_E32R28T
+  web.on("/som", HTTP_POST, webSomFim, webSomDados);
+#endif
   web.on("/tft", HTTP_POST, webTftFim, webTftDados);
   web.begin();
   registra("local: http://%s/ pronto", WiFi.localIP().toString().c_str());
@@ -2492,6 +2817,7 @@ void carregaConfig() {
   prefs.begin("claudinho", true);
   cfgSsid = prefs.getString("ssid", ""); cfgSenha = prefs.getString("senha", ""); cfgToken = prefs.getString("token", "");
   corRostoAtual = prefs.getUShort("cor", COR_ROSTO);
+  somLigado = prefs.getBool("som", true); somVolume = prefs.getInt("som_vol", 100);
   { int i = idiomaPorCodigo(prefs.getString("idioma", "en").c_str()); idioma = i < 0 ? 0 : i; }
   bIp = prefs.getString("bambu_ip", ""); bCod = prefs.getString("bambu_cod", ""); bSerial = prefs.getString("bambu_sn", "");
   prefs.end();
@@ -2611,6 +2937,10 @@ void setup() {
   mudaPagina(0);
 
   carregaConfig();
+#ifdef PLACA_E32R28T
+  somFs = LittleFS.begin(true, "/littlefs", 5, "spiffs");   // sons enviados pela rede
+  if (!somFs) registra("som: memoria de sons indisponivel");
+#endif
   if (corRostoAtual != COR_ROSTO) mudaPagina(0);    // cor gravada: redesenha o rosto que ja apareceu laranja
   WiFi.mode(WIFI_STA);          // para o MAC e o SCAN funcionarem mesmo sem config
   if (cfgSsid.isEmpty()) {
@@ -2657,6 +2987,7 @@ void loop() {
   cuidaGenius();
   cuidaBambu();
   cuidaCena();
+  cuidaSom();
   cuidaDemo();
   cuidaAlertaAnim();
 

@@ -358,6 +358,19 @@ comando. Se a pessoa perguntar, explique isso; para mostrar uma:
 (JetBrains Mono) da tela: quem atualizar o firmware para 1.6 ou mais precisa
 também da tela nova (`claudinho.sh tela`, pede um toque).
 
+## Som e bateria (só E32R28T)
+
+Na placa única, o Claudinho fala um idioma de robô gerado na hora (nunca
+gravado, nunca igual), conforme o humor. Comandos: `claudinho.sh som
+desliga|liga`, `som volume N` (10 a 200), `som <humor>` para ouvir (feliz,
+pergunta, sono, bravo, pronto, pensando, empolgado, preocupado, susto,
+trabalhando, desconfiado, zonzo, cansado, nervoso). A placa também aceita um
+som enviado pela rede no lugar do acordar/dormir (`som envia acordar|dormir
+arq.wav`, até ~5 s; `som padrao` volta ao gerado): é escolha de quem usa e
+nunca vai para o repositório. Bateria: ícone no cartão de consumo;
+`claudinho.sh desligar` põe a placa em sono profundo (BOOT acorda): sugira
+antes de a pessoa guardar o Claudinho por dias.
+
 ## Modo demonstração
 
 Quando a pessoa quiser filmar ou mostrar o Claudinho ("roda a demo",
@@ -369,7 +382,7 @@ idioma, troque antes com `claudinho.sh idioma`.
 
 ## Referência rápida
 
-`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | idioma [código] | demo [parar] | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
+`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | idioma [código] | demo [parar] | som [humor|liga|desliga|volume N] | desligar | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
 
 `atualizar` e `tela` pedem um toque na tela do Claudinho (avise a pessoa antes).
 Tipos de cara: inicio, prompt, ferramenta, erro, parou, atencao, compact, fim, dormir.

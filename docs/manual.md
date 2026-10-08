@@ -53,7 +53,9 @@ face. Tap to see the usage card. To try one: `claudinho.sh cena codando`
 ## Plan usage
 
 - **Tap the screen** to see the usage card: 5-hour and 7-day windows, when
-  each one resets, how many terminals are open and the board's IP. After 15
+  each one resets, how many terminals are open and the board's IP. At the top,
+  **ctx** is how full the current conversation's context is (gray, yellow from
+  75%, red from 90%, when Claude Code is about to compact it). After 15
   seconds it goes back to the face (or tap outside the buttons).
 - **The buttons at the bottom** (on the usage card and on the printer
   panel):
@@ -188,6 +190,27 @@ During a game, the color palette or an update, the alerts wait until you're
 back on the face. To see what they look like: `claudinho.sh alerta bom` (good
 news), `ruim` (a pause), `filamento` or `hms`. To turn it off: `claudinho.sh bambu desligar` (erases the
 code from the board).
+
+## Sound and battery (single-board version only)
+
+On the E32R28T with a small speaker, Claudinho **speaks a robot language** of
+beeps and whistles, made up on the spot: no phrase is recorded, so no two are
+alike, and the mood changes the intonation. It speaks when it wakes up, when
+Claude needs you (a question), on an error (grumpy), when Claude finishes (a
+quick "done!") and when it goes to sleep, and it calls out every 15 seconds
+while the update screen waits for your tap. It stays quiet right after being
+turned on.
+
+- `claudinho.sh som desliga` / `som liga`: silence it or bring it back.
+- `claudinho.sh som volume 150`: volume from 10 to 200% (above 100 it may
+  distort a little).
+- `claudinho.sh som feliz` (or `pergunta`, `sono`, `bravo`, `pronto`,
+  `pensando`, `zonzo`...): hear a phrase in that mood.
+
+**Battery:** the usage card shows a battery icon next to the clock. To put it
+away for a few days, `claudinho.sh desligar` turns off the screen and puts the
+board to deep sleep, using almost nothing; press **BOOT** (or RESET) to turn it
+back on.
 
 ## Demo mode
 
