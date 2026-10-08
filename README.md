@@ -286,13 +286,18 @@ Nextion. It simplifies a lot:
   the intonation (happy when it wakes up, a question when Claude needs you,
   grumpy on an error, a quick "done!" when Claude finishes, sleepy at bedtime).
 
+<p>
+  <img src="docs/img/e32r28t-montagem-frente.jpg" alt="E32R28T running Claudinho, with speaker and battery" width="49%">
+  <img src="docs/img/e32r28t-montagem-verso.jpg" alt="Back of the E32R28T: speaker and battery plugged into their connectors" width="49%">
+</p>
+
 What you need for it:
 
 | Part | Notes |
 |---|---|
 | [E32R28T board (ESP32 + 2.8" touch screen)](https://www.aliexpress.com/item/1005009659317465.html) | the resistive-touch version; listings may call it "ESP32-32E 2.8" |
 | [8 Ω speaker with a JST 1.25 plug](https://www.aliexpress.com/item/1005009194531045.html) | optional, for the voice; the small 2415 (24 × 15 mm) fits well |
-| 3.7 V LiPo battery with a JST 1.25 2-pin plug | optional; **check the polarity** before plugging it in (cheap batteries sometimes come reversed) |
+| 3.7 V LiPo battery with a **JST 1.25 mm 2-pin** plug and a protection board | optional. The one in the photos is a 103450 (10 × 34 × 51 mm, 2000 mAh): <br><img src="docs/img/bateria-103450.jpg" alt="103450 battery" width="160"> <img src="docs/img/e32r28t-conector-bateria.jpg" alt="battery plug on the board" width="160"><br>Other capacities work, but the size changes: check that it fits the case. Watch out for listings with the bigger 2.54 mm plug. **Check the polarity** before plugging it in (cheap batteries sometimes come reversed). |
 | USB-C data cable | to set it up and to charge |
 
 Everything works on it (faces, usage, scenes, printer, games, demo mode,

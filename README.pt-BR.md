@@ -287,13 +287,18 @@ Nextion. Simplifica bastante:
   ao acordar, uma pergunta quando o Claude precisa de você, bravo num erro, um
   "pronto!" rápido quando o Claude termina, sonolento na hora de dormir).
 
+<p>
+  <img src="docs/img/e32r28t-montagem-frente.jpg" alt="E32R28T rodando o Claudinho, com alto-falante e bateria" width="49%">
+  <img src="docs/img/e32r28t-montagem-verso.jpg" alt="Verso da E32R28T: alto-falante e bateria ligados nos conectores" width="49%">
+</p>
+
 O que você precisa:
 
 | Peça | Observações |
 |---|---|
 | [Placa E32R28T (ESP32 + tela de toque de 2,8")](https://www.aliexpress.com/item/1005009659317465.html) | a versão com toque resistivo; o anúncio pode chamar de "ESP32-32E 2.8" |
 | [Alto-falante de 8 Ω com plugue JST 1,25](https://www.aliexpress.com/item/1005009194531045.html) | opcional, para a voz; o pequeno 2415 (24 × 15 mm) encaixa bem |
-| Bateria LiPo de 3,7 V com plugue JST 1,25 de 2 pinos | opcional; **confira a polaridade** antes de ligar (bateria barata às vezes vem invertida) |
+| Bateria LiPo de 3,7 V com plugue **JST 1,25 mm de 2 pinos** e placa de proteção | opcional. A das fotos é uma 103450 (10 × 34 × 51 mm, 2000 mAh): <br><img src="docs/img/bateria-103450.jpg" alt="bateria 103450" width="160"> <img src="docs/img/e32r28t-conector-bateria.jpg" alt="plugue da bateria na placa" width="160"><br>Outras capacidades servem, mas o tamanho muda: confira se cabe na caixa. Cuidado com anúncios do plugue maior, de 2,54 mm. **Confira a polaridade** antes de ligar (bateria barata às vezes vem invertida). |
 | Cabo USB-C de dados | para configurar e carregar |
 
 Tudo funciona nela (caras, consumo, cenas, impressora, jogos, modo
