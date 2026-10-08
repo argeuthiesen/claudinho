@@ -1,6 +1,6 @@
 ---
 name: configurar
-description: Configura o Claudinho (mascote do Claude Code em ESP32 + display Nextion) do zero ou depois de trocar de rede - acha a placa no USB, grava o firmware, configura o Wi-Fi, grava a tela do Nextion, liga a status line e testa. Use também para diagnosticar quando o Claudinho não reage, para atualizar o firmware e para ligar uma impressora 3D Bambu Lab (painel e alertas da impressão).
+description: Configura o Claudinho (mascote do Claude Code: placa única E32R28T ou ESP32 + display Nextion) do zero ou depois de trocar de rede - acha a placa no USB, grava o firmware, configura o Wi-Fi, grava a tela do Nextion (versão clássica), liga a status line e testa. Use também para diagnosticar quando o Claudinho não reage, para atualizar o firmware e para ligar uma impressora 3D Bambu Lab (painel e alertas da impressão).
 ---
 
 # Configurar o Claudinho

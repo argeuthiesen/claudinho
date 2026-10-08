@@ -6,12 +6,13 @@ O mascote do Claude Code, vivo, na sua mesa.
 
 https://github.com/user-attachments/assets/efdd0e27-0e4b-4182-9e59-d393eee27717
 
-A caixa para imprimir em 3D está no MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
+A caixa para imprimir em 3D da versão clássica está no MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho) (a caixa da placa única está vindo).
 
 Já montou o seu? O [manual de uso](docs/manual.pt-BR.md) explica as caras, os toques, as cores, os dois joguinhos, o painel da impressora Bambu e as atualizações.
 
-Claudinho é um plugin do Claude Code que dá corpo ao Clawd: um ESP32 com um
-display Nextion que reage ao que o Claude está fazendo (pensando, usando uma
+Claudinho é um plugin do Claude Code que dá corpo ao Clawd: um ESP32 com tela
+de toque (a placa única E32R28T, recomendada, ou o clássico ESP32-C3 + Nextion)
+que reage ao que o Claude está fazendo (pensando, usando uma
 ferramenta, esperando você, terminou, deu erro) e mostra quanto do seu plano
 já foi usado nas janelas de 5 horas e de 7 dias.
 
@@ -27,6 +28,9 @@ já foi usado nas janelas de 5 horas e de 7 dias.
   tokens como qualquer outra.)
 - **Configuração guiada.** Uma skill grava o firmware, configura o Wi-Fi e a
   tela, e testa tudo. Você só pluga o cabo.
+- **Voz e bateria (placa única).** Na E32R28T, o Claudinho fala um idioma de
+  robô, de bipes, por um alto-falante pequeno, e funciona com uma bateria que
+  a própria placa carrega.
 - **Opcional: sua impressora Bambu Lab.** O Claudinho também conecta direto
   numa impressora 3D Bambu da sua rede e mostra um painel da impressão e
   alertas (começou, pausou e por quê, terminou, falhou...) que ficam até você
@@ -72,10 +76,10 @@ com que comecei: lembrei que tinha um parado na sucata e pensei "por que
 não?". Existem várias outras alternativas, e quem sabe no futuro apareça uma
 versão com hardware mais interessante ou mais barato.
 
-Esta versão que estou publicando é alimentada direto na tomada, por uma
-fonte USB. Estou esperando chegar uma bateria e outros componentes para
-montar uma versão sem fio nenhum. Não porque seja necessária, só porque é
-legal.
+A primeira versão que publiquei (hoje a clássica) é alimentada direto na
+tomada, por uma fonte USB. Depois veio a versão de placa única, com conector
+de bateria, para um Claudinho sem fio nenhum. Não porque seja necessário, só
+porque é legal.
 
 ## Como funciona
 
@@ -178,7 +182,7 @@ Claude Code do que foi invenção nossa.
   placa e desenha o rodapé como antes, para você nem perceber que ele existe.
 - O firmware do ESP32: um servidorzinho web que recebe os recados, desenha as
   caras e as animações e mostra o consumo.
-- A tela do Nextion, a skill `configurar`, os scripts de gravação e a parte
+- A tela do Nextion (versão clássica), a skill `configurar`, os scripts de gravação e a parte
   de segurança (o segredo próprio, o toque para atualizar).
 
 **Onde fica cada coisa:**
@@ -207,8 +211,8 @@ assunto: nada fica rodando esperando, e o Claudinho vai dormir de tédio.
 ## Aviso: por sua conta e risco
 
 Ferro de solda, fontes de alimentação e portas USB de computador: tem muita
-coisa que pode dar errado, e o resultado pode ser um ESP32 queimado, um
-Nextion queimado ou, pior, uma porta USB do seu computador queimada. (Durante
+coisa que pode dar errado, e o resultado pode ser uma placa queimada, uma
+tela queimada ou, pior, uma porta USB do seu computador queimada. (Durante
 o desenvolvimento, uma plaquinha de teste esquentou a ponto de queimar o meu
 dedo. Não foi nada instrutivo, só doeu.)
 
@@ -223,6 +227,72 @@ alternativas de baixo custo e alto risco.
 
 ## Peças
 
+**Qual versão?** O Claudinho roda em dois tipos de hardware. Para montar um
+novo, vá de **placa única (E32R28T)**. Ela simplifica bastante:
+
+- **Uma placa em vez de duas.** Sem fios para soldar, sem alimentação
+  separada para a tela: plugou o USB, pronto.
+- **Sem Nextion Editor e sem `.tft`.** O próprio ESP32 desenha a tela, com as
+  fontes dentro do firmware (texto mais suave, sem serrilhado). A
+  configuração perde uma etapa e atualizar é só o firmware.
+- **Bateria com carregador na placa**, para um Claudinho portátil de verdade:
+  um ícone de bateria no cartão de consumo mostra quanto resta, e o
+  `claudinho.sh desligar` põe a placa em sono profundo (aperte BOOT para
+  ligar), para a bateria não secar enquanto ela fica guardada.
+- **Ele fala.** Com um alto-falante pequeno no conector da placa, o Claudinho
+  fala um idioma de robô, de bipes e assobios. Nada é gravado: cada fala é
+  gerada na hora, então nenhuma sai igual, e o humor muda a entonação (feliz
+  ao acordar, uma pergunta quando o Claude precisa de você, bravo num erro, um
+  "pronto!" rápido quando o Claude termina, sonolento na hora de dormir).
+
+A **versão clássica** (ESP32-C3 + display Nextion, com 4 fios) é a do vídeo
+e a da caixa que está no MakerWorld. Ela continua totalmente suportada.
+
+### Placa única (recomendada): E32R28T
+
+A **E32R28T** ("2.8inch ESP32-32E Display", da LCDWiki) é um ESP32 com tela
+de toque de 2,8" embutida, 320×240.
+
+<p>
+  <img src="docs/img/e32r28t-montagem-frente.jpg" alt="E32R28T rodando o Claudinho, com alto-falante e bateria" width="49%">
+  <img src="docs/img/e32r28t-montagem-verso.jpg" alt="Verso da E32R28T: alto-falante e bateria ligados nos conectores" width="49%">
+</p>
+
+| Peça | Observações |
+|---|---|
+| [Placa E32R28T (ESP32 + tela de toque de 2,8")](https://www.aliexpress.com/item/1005009659317465.html) | a versão com toque resistivo; o anúncio pode chamar de "ESP32-32E 2.8"<br><img src="docs/img/e32r28t-placa.jpg" alt="E32R28T, verso" width="220"> |
+| [Alto-falante de 8 Ω com plugue JST 1,25](https://www.aliexpress.com/item/1005009194531045.html) | opcional, para a voz; o pequeno 2415 (24 × 15 mm) encaixa bem<br><img src="docs/img/alto-falante-2415.jpg" alt="alto-falante 2415" width="110"> |
+| Bateria LiPo de 3,7 V com plugue **JST 1,25 mm de 2 pinos** e placa de proteção | opcional. A das fotos é uma 103450 (10 × 34 × 51 mm, 2000 mAh): <br><img src="docs/img/bateria-103450.jpg" alt="bateria 103450" width="160"> <img src="docs/img/e32r28t-conector-bateria.jpg" alt="plugue da bateria na placa" width="160"><br>Outras capacidades servem, mas o tamanho muda: confira se cabe na caixa. Cuidado com anúncios do plugue maior, de 2,54 mm. **Confira a polaridade** antes de ligar (bateria barata às vezes vem invertida). |
+| Cabo USB-C de dados | para configurar e carregar |
+
+> [!WARNING]
+> **Grave antes de montar.** Antes de colocar qualquer coisa na caixa, grave
+> o firmware base pela USB (a skill de configuração faz isso). Depois, as
+> atualizações vão pelo Wi-Fi, e a porta USB não é mais necessária.
+>
+> **Alimentação: uma fonte só.** Na montagem do Claudinho, a placa é
+> alimentada com **5 V** pelo conector UART dela (o de 4 pinos, passo 1,25 mm,
+> muitas vezes vendido como "MX1.25"): pino 1 é +5 V e pino 2 é GND no
+> esquema da placa. Confira a marcação na placa e meça com multímetro antes
+> de ligar. **Nunca** ligue essa alimentação externa e o cabo USB ao mesmo
+> tempo: duas fontes brigando podem danificar a placa ou a porta USB do seu
+> computador.
+
+Tudo funciona nela (caras, consumo, cenas, impressora, jogos, modo
+demonstração, idiomas), e a skill de configuração reconhece a placa sozinha.
+Alguns avisos:
+
+- **Driver USB no Windows.** O chip USB da placa é um CH340. Se a porta não
+  aparecer no Windows, instale o driver do CH340.
+- **Abrir a porta USB reinicia a placa.** É assim que ela grava sem apertar
+  botão. A tela pode piscar: é normal.
+- **ILI9341 ou ST7789?** A ficha da placa diz ILI9341, mas a tela é uma
+  ST7789. O firmware já sabe disso.
+- **Caixa:** a caixa dela ainda não está no MakerWorld (está vindo). Por
+  enquanto, é para quem não se importa com a placa sem caixa.
+
+### Versão clássica (Nextion)
+
 | Peça | Observação |
 |---|---|
 | ESP32-C3 Super Mini | testado; o ESP32-S3 DevKitC-1 também é suportado (sem teste real) |
@@ -232,7 +302,7 @@ alternativas de baixo custo e alto risco.
 | Fonte USB de 5 V, **pelo menos 1 A** | veja abaixo |
 | Caixa impressa em 3D | [no MakerWorld](https://makerworld.com/models/3365275-claudinho) (PLA, sem suportes) |
 
-### Alimentação
+#### Alimentação
 
 ![Alimentação do ESP32 e do Nextion](docs/pt/alimentacao.svg)
 
@@ -252,7 +322,7 @@ pela rede falham. A porta USB do computador (500 mA no USB 2.0) serve para
 gravar e configurar, mas não é o ideal para o dia a dia. E nunca ligue a
 fonte e o USB do computador ao mesmo tempo.
 
-### Ligação
+#### Ligação
 
 ![Ligação entre o ESP32-C3 Super Mini e o Nextion](docs/pt/ligacao.svg)
 
@@ -265,49 +335,6 @@ fonte e o USB do computador ao mesmo tempo.
 
 A tela é montada girada 270°: a área útil do Nextion não fica no centro da
 placa, e só nessa posição ela fica centralizada na caixa.
-
-### Novidade: a versão de placa única (em teste)
-
-O Claudinho agora também roda na **E32R28T** ("2.8inch ESP32-32E Display", da
-LCDWiki): um ESP32 com tela de toque de 2,8" embutida, 320×240 como o
-Nextion. Simplifica bastante:
-
-- **Uma placa em vez de duas.** Sem fios para soldar, sem alimentação
-  separada para a tela: plugou o USB, pronto.
-- **Sem Nextion Editor e sem `.tft`.** O próprio ESP32 desenha a tela, com as
-  fontes dentro do firmware (texto mais suave, sem serrilhado). A
-  configuração perde uma etapa e atualizar é só o firmware.
-- **Bateria com carregador na placa**, para um Claudinho portátil de verdade:
-  um ícone de bateria no cartão de consumo mostra quanto resta, e o
-  `claudinho.sh desligar` põe a placa em sono profundo (aperte BOOT para
-  ligar), para a bateria não secar enquanto ela fica guardada.
-- **Ele fala.** Com um alto-falante pequeno no conector da placa, o Claudinho
-  fala um idioma de robô, de bipes e assobios. Nada é gravado: cada fala é
-  gerada na hora, então nenhuma sai igual, e o humor muda a entonação (feliz
-  ao acordar, uma pergunta quando o Claude precisa de você, bravo num erro, um
-  "pronto!" rápido quando o Claude termina, sonolento na hora de dormir).
-
-<p>
-  <img src="docs/img/e32r28t-montagem-frente.jpg" alt="E32R28T rodando o Claudinho, com alto-falante e bateria" width="49%">
-  <img src="docs/img/e32r28t-montagem-verso.jpg" alt="Verso da E32R28T: alto-falante e bateria ligados nos conectores" width="49%">
-</p>
-
-O que você precisa:
-
-| Peça | Observações |
-|---|---|
-| [Placa E32R28T (ESP32 + tela de toque de 2,8")](https://www.aliexpress.com/item/1005009659317465.html) | a versão com toque resistivo; o anúncio pode chamar de "ESP32-32E 2.8"<br><img src="docs/img/e32r28t-placa.jpg" alt="E32R28T, verso" width="220"> |
-| [Alto-falante de 8 Ω com plugue JST 1,25](https://www.aliexpress.com/item/1005009194531045.html) | opcional, para a voz; o pequeno 2415 (24 × 15 mm) encaixa bem<br><img src="docs/img/alto-falante-2415.jpg" alt="alto-falante 2415" width="110"> |
-| Bateria LiPo de 3,7 V com plugue **JST 1,25 mm de 2 pinos** e placa de proteção | opcional. A das fotos é uma 103450 (10 × 34 × 51 mm, 2000 mAh): <br><img src="docs/img/bateria-103450.jpg" alt="bateria 103450" width="160"> <img src="docs/img/e32r28t-conector-bateria.jpg" alt="plugue da bateria na placa" width="160"><br>Outras capacidades servem, mas o tamanho muda: confira se cabe na caixa. Cuidado com anúncios do plugue maior, de 2,54 mm. **Confira a polaridade** antes de ligar (bateria barata às vezes vem invertida). |
-| Cabo USB-C de dados | para configurar e carregar |
-
-Tudo funciona nela (caras, consumo, cenas, impressora, jogos, modo
-demonstração, idiomas): a skill de configuração reconhece a placa sozinha.
-Dois avisos: a ficha da placa diz ILI9341, mas a tela é uma ST7789 (o firmware
-já sabe disso); e a caixa dela ainda não está no MakerWorld, então por
-enquanto é para quem não se importa com a placa sem caixa. A versão com
-Nextion continua suportada.
-
 ## Instalação
 
 1. Crie uma pasta para o projeto e abra o Claude Code nela:
@@ -323,23 +350,26 @@ Nextion continua suportada.
    /plugin install claudinho@claudinho
    ```
 
-3. Ligue o ESP32 no computador com o cabo de dados e peça:
+3. Ligue a placa no computador com o cabo de dados e peça:
 
    ```
    /claudinho:configurar
    ```
 
-   A skill acha a placa, grava o firmware (~30 s), lista as redes Wi-Fi que a
-   placa enxerga e pede para você rodar um comando num terminal, onde você
-   digita a senha do Wi-Fi escondida: ela não passa pela conversa com o
-   Claude e fica gravada **só na placa**. Depois grava a tela do Nextion pela
-   rede (~40 s, pedindo um toque na tela), liga a status line e faz um teste.
+   A skill acha a placa, descobre sozinha qual é a versão (placa única ou
+   clássica), grava o firmware (~30 s), lista as redes Wi-Fi que a placa
+   enxerga e pede para você rodar um comando num terminal, onde você digita a
+   senha do Wi-Fi escondida: ela não passa pela conversa com o Claude e fica
+   gravada **só na placa**. Na versão clássica, depois grava a tela do
+   Nextion pela rede (~40 s, pedindo um toque na tela). Na placa única não há
+   fios para conferir nem etapa do Nextion. Por fim, liga a status line e faz
+   um teste.
 
 4. Anote o IP e o MAC que a skill mostrar e reserve esse IP no roteador
    (DHCP estático). Se o IP mudar, rode a skill de novo.
 
 Depois da primeira gravação, o cabo não é mais necessário: a placa pode
-ficar na fonte.
+ficar na fonte (ou na bateria, na placa única).
 
 ### Status line
 
@@ -358,8 +388,10 @@ Depois da primeira vez, tudo vai pela rede, sem cabo:
 
 ```bash
 scripts/claudinho.sh atualizar   # firmware (~40 s)
-scripts/claudinho.sh tela        # tela do Nextion
+scripts/claudinho.sh tela        # tela do Nextion (só versão clássica)
 ```
+
+Na placa única, basta o `atualizar`: a tela faz parte do firmware.
 
 Os dois pedem **um toque na tela do Claudinho** (ou o botão BOOT da placa)
 antes de enviar qualquer coisa: a tela mostra "Toque na tela para permitir"
@@ -368,13 +400,14 @@ quem descobrir o segredo pela rede.
 
 É seguro: o ESP32 grava o firmware novo numa partição reserva e só troca se
 tudo chegar inteiro. Se a rede cair no meio, ele continua no firmware atual
-e basta repetir. Se a gravação da tela for interrompida, o Nextion pode
+e basta repetir. Na versão clássica, se a gravação da tela for interrompida,
+o Nextion pode
 mostrar "System Data Error": repita o comando, não estraga nada.
 
 Ou simplesmente peça ao Claude: "atualiza o Claudinho".
 
-**Vindo da 1.5 ou anterior?** O firmware 1.6 trouxe as cenas, que usam uma
-fonte mono nova na tela: rode também `scripts/claudinho.sh tela` (mais um
+**Vindo da 1.5 ou anterior (versão clássica)?** O firmware 1.6 trouxe as
+cenas, que usam uma fonte mono nova na tela do Nextion: rode também `scripts/claudinho.sh tela` (mais um
 toque), senão o texto das cenas não aparece.
 
 ## Comandos
@@ -398,8 +431,8 @@ scripts/claudinho.sh som [humor|liga|desliga|volume N]  # placa única: ouve uma
 scripts/claudinho.sh desligar             # placa única: sono profundo, para poupar a bateria (o BOOT acorda)
 scripts/claudinho.sh alerta [tipo]        # alerta de exemplo da impressora: bom, ruim, filamento, hms
 scripts/claudinho.sh cena <tipo>          # mostra uma cena: codando, terminal, lendo, agente
-scripts/claudinho.sh atualizar [arquivo.bin]
-scripts/claudinho.sh tela [arquivo.tft]
+scripts/claudinho.sh atualizar [arquivo.bin]  # atualiza o firmware
+scripts/claudinho.sh tela [arquivo.tft]   # atualiza a tela do Nextion (versão clássica)
 scripts/wifi.sh PORTA "REDE"              # troca o Wi-Fi pela USB (senha escondida)
 ```
 
@@ -436,9 +469,9 @@ conta da Anthropic.
 
 ## Ambientes testados
 
-**Testado de ponta a ponta:** WSL2 no Windows 11, ESP32-C3 Super Mini,
-Nextion NX3224F024_011. Módulo da impressora: Bambu Lab P2S com AMS. Placa
-única: E32R28T (tela ST7789).
+**Testado de ponta a ponta:** WSL2 no Windows 11. Placa única: E32R28T (tela
+ST7789), com alto-falante e bateria. Versão clássica: ESP32-C3 Super Mini com
+Nextion NX3224F024_011. Módulo da impressora: Bambu Lab P2S com AMS.
 
 **Escrito para funcionar, ainda sem teste real:** Linux nativo, macOS,
 Windows com Git Bash, ESP32-S3 DevKitC-1, outras impressoras Bambu com acesso
@@ -469,14 +502,16 @@ Coisas que aprendemos no caminho (algumas do jeito difícil):
   Claudinho entra no de sinal mais forte, que nem sempre é o melhor. Se as
   atualizações falharem com frequência, é por aí; não estraga nada, repita.
   O `claudinho.sh log` mostra em que ponto ele entrou e com que sinal.
-- **Atualizar firmware ou tela pede um toque na tela** (ou o botão BOOT) em
+- **Atualizar o firmware (ou a tela do Nextion) pede um toque na tela** (ou o botão BOOT) em
   até 1 minuto. Depois do toque, o envio fica liberado por 2 minutos.
 - **O log fica na memória da placa:** reiniciou, recomeça do zero. Olhe o log
   antes de reiniciar, se estiver investigando algo.
-- **Abrir a porta serial reinicia o ESP32-C3.** Normal; os scripts já contam
-  com isso.
-- **A tela só funciona girada 270°** (é como a caixa foi pensada) e só no
-  Nextion NX3224F024; outros modelos precisam de outra tela compilada no
+- **Abrir a porta serial reinicia a placa** (ESP32-C3 e E32R28T; na placa
+  única a tela pode piscar). Normal; os scripts já contam com isso.
+- **Vai guardar por dias (placa única)?** Rode antes o `claudinho.sh
+  desligar`, para a bateria não secar. O BOOT acorda.
+- **A tela do Nextion só funciona girada 270° (versão clássica)** (é como a
+  caixa foi pensada) e só no Nextion NX3224F024; outros modelos precisam de outra tela compilada no
   Nextion Editor (o projeto `.HMI` está em `nextion/`).
 - **A primeira gravação é sempre pela USB.** Depois, tudo vai pela rede.
 - **Antes de dar ou descartar a placa, apague a memória** (ver Segurança):
@@ -486,12 +521,12 @@ Coisas que aprendemos no caminho (algumas do jeito difícil):
 
 | Sintoma | O que fazer |
 |---|---|
-| A placa não aparece no USB | Troque o cabo (muitos são só de carga). Segure BOOT enquanto pluga. |
+| A placa não aparece no USB | Troque o cabo (muitos são só de carga). Segure BOOT enquanto pluga. Placa única no Windows: instale o driver do CH340. |
 | `PRECISA_BOOT` na gravação | Segure BOOT, tire e ponha o USB, solte BOOT, rode de novo. |
 | Não entra no Wi-Fi | Só redes de 2,4 GHz. Confira a senha rodando a skill de novo. |
 | Parou de reagir | O IP mudou: rode `/claudinho:configurar` (reserve o IP no roteador). |
-| `atualizar` ou `tela` falham no meio | Wi-Fi perdendo pacotes. Não estraga nada: repita. Se insistir, `claudinho.sh reiniciar` e tente de novo; confira a fonte (1 A ou mais). |
-| Tela com lixo ou branca | `claudinho.sh tela` de novo, depois `claudinho.sh reiniciar`. |
+| `atualizar` ou `tela` falham no meio | Wi-Fi perdendo pacotes. Não estraga nada: repita. Se insistir, `claudinho.sh reiniciar` e tente de novo; na versão clássica, confira a fonte (1 A ou mais). |
+| Tela com lixo ou branca (versão clássica) | `claudinho.sh tela` de novo, depois `claudinho.sh reiniciar`. |
 
 Para diagnóstico sem cabo, `claudinho.sh log` mostra o que a placa registrou
 desde que ligou.
@@ -499,7 +534,7 @@ desde que ligou.
 ## Para quem quer mexer no código
 
 - `firmware/claudinho/`: o firmware (Arduino, core ESP32 3.x, ArduinoJson 7).
-  `firmware/compilar.sh` gera os `.bin` de C3 e S3 em `firmware/bin/`.
+  `firmware/compilar.sh` gera os `.bin` de C3, S3 e E32R28T em `firmware/bin/`.
 - `firmware/claudinho/tela_e32.h`: tela e toque da E32R28T (LovyanGFX). O
   resto do firmware é o mesmo para as duas placas. As fontes dela:
   `python3 firmware/fontes/gerar_vlw.py` (DM Sans e JetBrains Mono, OFL).
@@ -528,7 +563,7 @@ desde que ligou.
 ## Autoria
 
 A modelagem 3D da caixa não foi feita por IA: é 100% minha, desenhada à
-mão no SketchUp (e está no [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
+mão no SketchUp (a caixa da versão clássica está no [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
 
 No software, de mim saíram os conceitos. O trabalho braçal (firmware, scripts, skill,
 testes e boa parte deste texto) foi do Claude, trabalhando comigo no próprio

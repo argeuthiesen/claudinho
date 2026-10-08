@@ -6,12 +6,13 @@ Claude Code's mascot, alive, on your desk.
 
 https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
 
-The 3D-printable case is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho)
+The 3D-printable case for the classic version is on MakerWorld: [https://makerworld.com/models/3365275-claudinho](https://makerworld.com/models/3365275-claudinho) (the single-board case is coming).
 
 Already built one? The [user manual](docs/manual.md) covers faces, touch, colors, the two built-in games, the Bambu printer panel and updates.
 
 Claudinho is a Claude Code plugin that gives Clawd a body: an ESP32 with a
-Nextion display that reacts to what Claude is doing (thinking, using a tool,
+touch screen (the single-board E32R28T, recommended, or the classic ESP32-C3 +
+Nextion) that reacts to what Claude is doing (thinking, using a tool,
 waiting for you, done, error) and shows how much of your plan you've used in
 the 5-hour and 7-day windows.
 
@@ -27,6 +28,9 @@ the 5-hour and 7-day windows.
   conversation with Claude and uses tokens like any other.)
 - **Guided setup.** A skill flashes the firmware, sets up Wi-Fi and the
   screen, and tests everything. You just plug in the cable.
+- **Voice and battery (single board).** On the E32R28T, Claudinho speaks a
+  robot language of beeps through a small speaker, and runs on a battery
+  charged by the board itself.
 - **Optional: your Bambu Lab printer.** Claudinho can also connect straight
   to a Bambu 3D printer on your network and show a print panel plus alerts
   (started, paused and why, finished, failed...) that stay until you tap.
@@ -70,9 +74,10 @@ board I started with: I remembered I had one lying in the junk drawer and
 thought "why not?". There are plenty of alternatives, and maybe someday
 there'll be a version with more interesting or cheaper hardware.
 
-The version I'm publishing is powered straight from the wall, through a USB
-power supply. I'm waiting for a battery and a few other parts to build a
-completely wireless version. Not because it's needed, just because it's cool.
+The first version I published (now the classic one) is powered straight from
+the wall, through a USB power supply. Then came the single-board version, with
+a battery connector, for a completely wireless Claudinho. Not because it's
+needed, just because it's cool.
 
 ## How it works
 
@@ -175,7 +180,7 @@ comes out of the box with Claude Code from what we invented.
   there.
 - The ESP32 firmware: a tiny web server that receives the notes, draws the
   faces and animations, and shows the usage.
-- The Nextion screen, the `configurar` skill, the flashing scripts and the
+- The Nextion screen (classic version), the `configurar` skill, the flashing scripts and the
   security bits (its own secret, touch-to-update).
 
 **Where everything lives:**
@@ -206,7 +211,7 @@ boredom.
 ## Warning: at your own risk
 
 Soldering irons, power supplies and computer USB ports: a lot can go wrong,
-and you might end up with a fried ESP32, a fried Nextion or, worse, a fried
+and you might end up with a fried board, a fried screen or, worse, a fried
 USB port on your computer. (During development, a test board got hot enough
 to burn my finger. Nothing educational about it, it just hurt.)
 
@@ -221,6 +226,72 @@ rather: in low-cost, high-risk alternative technical solutions.
 
 ## Parts
 
+**Which version?** Claudinho runs on two kinds of hardware. For a new build,
+go with the **single board (E32R28T)**. It simplifies a lot:
+
+- **One board instead of two.** No wires to solder, no separate power for the
+  display: plug in the USB and that's it.
+- **No Nextion Editor and no `.tft`.** The ESP32 draws the screen itself, with
+  the fonts built into the firmware (smoother, anti-aliased text). Setup loses
+  a step and updating is just the firmware.
+- **Battery with a charger on the board**, for a truly portable Claudinho: a
+  battery icon on the usage card shows how much is left, and
+  `claudinho.sh desligar` puts it to deep sleep (press BOOT to wake it), so the
+  battery doesn't drain while it's put away.
+- **It talks.** With a small speaker on the board's connector, Claudinho
+  speaks a robot language of beeps and whistles. Nothing is recorded: every
+  phrase is generated on the spot, so no two are alike, and the mood changes
+  the intonation (happy when it wakes up, a question when Claude needs you,
+  grumpy on an error, a quick "done!" when Claude finishes, sleepy at bedtime).
+
+The **classic version** (ESP32-C3 + Nextion display, with 4 wires) is the one
+in the video and the one the MakerWorld case was made for. It stays fully
+supported.
+
+### Single board (recommended): E32R28T
+
+The **E32R28T** (LCDWiki "2.8inch ESP32-32E Display") is an ESP32 with a 2.8"
+touch screen built in, 320×240.
+
+<p>
+  <img src="docs/img/e32r28t-montagem-frente.jpg" alt="E32R28T running Claudinho, with speaker and battery" width="49%">
+  <img src="docs/img/e32r28t-montagem-verso.jpg" alt="Back of the E32R28T: speaker and battery plugged into their connectors" width="49%">
+</p>
+
+| Part | Notes |
+|---|---|
+| [E32R28T board (ESP32 + 2.8" touch screen)](https://www.aliexpress.com/item/1005009659317465.html) | the resistive-touch version; listings may call it "ESP32-32E 2.8"<br><img src="docs/img/e32r28t-placa.jpg" alt="E32R28T, back" width="220"> |
+| [8 Ω speaker with a JST 1.25 plug](https://www.aliexpress.com/item/1005009194531045.html) | optional, for the voice; the small 2415 (24 × 15 mm) fits well<br><img src="docs/img/alto-falante-2415.jpg" alt="2415 speaker" width="110"> |
+| 3.7 V LiPo battery with a **JST 1.25 mm 2-pin** plug and a protection board | optional. The one in the photos is a 103450 (10 × 34 × 51 mm, 2000 mAh): <br><img src="docs/img/bateria-103450.jpg" alt="103450 battery" width="160"> <img src="docs/img/e32r28t-conector-bateria.jpg" alt="battery plug on the board" width="160"><br>Other capacities work, but the size changes: check that it fits the case. Watch out for listings with the bigger 2.54 mm plug. **Check the polarity** before plugging it in (cheap batteries sometimes come reversed). |
+| USB-C data cable | to set it up and to charge |
+
+> [!WARNING]
+> **Flash it before assembling.** Before putting anything into the case,
+> flash the base firmware over USB (the setup skill does it). After that,
+> updates go over Wi-Fi, so you no longer need the USB port.
+>
+> **Power: one source only.** In the Claudinho build, the board is powered
+> with **5 V** through its UART connector (the 4-pin, 1.25 mm pitch one, often
+> sold as "MX1.25"): pin 1 is +5 V and pin 2 is GND in the board's schematic.
+> Check the markings on the board and measure with a multimeter before
+> connecting.
+> **Never** connect that external power and the USB cable at the same time:
+> two sources fighting can damage the board or your computer's USB port.
+
+Everything works on it (faces, usage, scenes, printer, games, demo mode,
+languages), and the setup skill recognizes the board on its own. A few notes:
+
+- **USB driver on Windows.** The board's USB chip is a CH340. If the port
+  doesn't show up on Windows, install the CH340 driver.
+- **Opening the USB port restarts the board.** That's how it gets flashed
+  without pressing buttons. The screen may blink: that's normal.
+- **ILI9341 or ST7789?** The board's spec sheet says ILI9341, but the screen
+  is an ST7789. The firmware already knows.
+- **Case:** its own case isn't on MakerWorld yet (it's coming). For now it's
+  for people who don't mind a bare board.
+
+### Classic version (Nextion)
+
 | Part | Notes |
 |---|---|
 | ESP32-C3 Super Mini | tested; the ESP32-S3 DevKitC-1 is also supported (not tested on real hardware) |
@@ -230,7 +301,7 @@ rather: in low-cost, high-risk alternative technical solutions.
 | 5 V USB power supply, **at least 1 A** | see below |
 | 3D-printed case | [on MakerWorld](https://makerworld.com/models/3365275-claudinho) (PLA, no supports) |
 
-### Power
+#### Power
 
 ![ESP32 and Nextion power](docs/en/power.svg)
 
@@ -251,7 +322,7 @@ over-the-network updates fail. A computer USB port (500 mA on USB 2.0) is
 fine for flashing and setup, but not ideal for everyday use. And never
 connect the power supply and the computer's USB at the same time.
 
-### Wiring
+#### Wiring
 
 ![Wiring between the ESP32-C3 Super Mini and the Nextion](docs/en/wiring.svg)
 
@@ -264,48 +335,6 @@ connect the power supply and the computer's USB at the same time.
 
 The screen is mounted rotated 270°: the Nextion's visible area isn't centered
 on its board, and only in this position does it end up centered in the case.
-
-### New: the single-board version (in testing)
-
-Claudinho now also runs on the **E32R28T** (LCDWiki "2.8inch ESP32-32E
-Display"): an ESP32 with a 2.8" touch screen built in, 320×240 like the
-Nextion. It simplifies a lot:
-
-- **One board instead of two.** No wires to solder, no separate power for the
-  display: plug in the USB and that's it.
-- **No Nextion Editor and no `.tft`.** The ESP32 draws the screen itself, with
-  the fonts built into the firmware (smoother, anti-aliased text). Setup loses
-  a step and updating is just the firmware.
-- **Battery with a charger on the board**, for a truly portable Claudinho: a
-  battery icon on the usage card shows how much is left, and
-  `claudinho.sh desligar` puts it to deep sleep (press BOOT to wake it), so the
-  battery doesn't drain while it's put away.
-- **It talks.** With a small speaker on the board's connector, Claudinho
-  speaks a robot language of beeps and whistles. Nothing is recorded: every
-  phrase is generated on the spot, so no two are alike, and the mood changes
-  the intonation (happy when it wakes up, a question when Claude needs you,
-  grumpy on an error, a quick "done!" when Claude finishes, sleepy at bedtime).
-
-<p>
-  <img src="docs/img/e32r28t-montagem-frente.jpg" alt="E32R28T running Claudinho, with speaker and battery" width="49%">
-  <img src="docs/img/e32r28t-montagem-verso.jpg" alt="Back of the E32R28T: speaker and battery plugged into their connectors" width="49%">
-</p>
-
-What you need for it:
-
-| Part | Notes |
-|---|---|
-| [E32R28T board (ESP32 + 2.8" touch screen)](https://www.aliexpress.com/item/1005009659317465.html) | the resistive-touch version; listings may call it "ESP32-32E 2.8"<br><img src="docs/img/e32r28t-placa.jpg" alt="E32R28T, back" width="220"> |
-| [8 Ω speaker with a JST 1.25 plug](https://www.aliexpress.com/item/1005009194531045.html) | optional, for the voice; the small 2415 (24 × 15 mm) fits well<br><img src="docs/img/alto-falante-2415.jpg" alt="2415 speaker" width="110"> |
-| 3.7 V LiPo battery with a **JST 1.25 mm 2-pin** plug and a protection board | optional. The one in the photos is a 103450 (10 × 34 × 51 mm, 2000 mAh): <br><img src="docs/img/bateria-103450.jpg" alt="103450 battery" width="160"> <img src="docs/img/e32r28t-conector-bateria.jpg" alt="battery plug on the board" width="160"><br>Other capacities work, but the size changes: check that it fits the case. Watch out for listings with the bigger 2.54 mm plug. **Check the polarity** before plugging it in (cheap batteries sometimes come reversed). |
-| USB-C data cable | to set it up and to charge |
-
-Everything works on it (faces, usage, scenes, printer, games, demo mode,
-languages): the setup skill recognizes the board on its own. Two notes: the
-board's spec sheet says ILI9341, but the screen is an ST7789 (the firmware
-already knows); and its own case isn't on MakerWorld yet, so for now it's for
-people who don't mind a bare board. The Nextion version stays supported.
-
 ## Installation
 
 1. Create a folder for the project and open Claude Code in it:
@@ -321,25 +350,28 @@ people who don't mind a bare board. The Nextion version stays supported.
    /plugin install claudinho@claudinho
    ```
 
-3. Plug the ESP32 into your computer with the data cable and ask:
+3. Plug the board into your computer with the data cable and ask:
 
    ```
    /claudinho:configurar
    ```
 
    (The skill name is Portuguese for "configure"; Claude will talk to you in
-   your own language.) The skill finds the board, flashes the firmware
-   (~30 s), lists the Wi-Fi networks the board can see and asks you to run a
-   command in a terminal, where you type the Wi-Fi password hidden: it never
-   goes through the conversation with Claude and is stored **only on the
-   board**. Then it flashes the Nextion screen over the network (~40 s,
-   asking for a tap on the screen), enables the status line and runs a test.
+   your own language.) The skill finds the board, tells which version it is
+   on its own (single board or classic), flashes the firmware (~30 s), lists
+   the Wi-Fi networks the board can see and asks you to run a command in a
+   terminal, where you type the Wi-Fi password hidden: it never goes through
+   the conversation with Claude and is stored **only on the board**. On the
+   classic version, it then flashes the Nextion screen over the network
+   (~40 s, asking for a tap on the screen). On the single board there are no
+   wires to check and no Nextion step. Finally it enables the status line and
+   runs a test.
 
 4. Write down the IP and MAC the skill shows you and reserve that IP on your
    router (static DHCP). If the IP changes, run the skill again.
 
 After the first flash you no longer need the cable: the board can stay on
-the power supply.
+the power supply (or on the battery, on the single board).
 
 ### Status line
 
@@ -358,8 +390,11 @@ After the first time, everything goes over the network, no cable needed:
 
 ```bash
 scripts/claudinho.sh atualizar   # firmware (~40 s)
-scripts/claudinho.sh tela        # Nextion screen
+scripts/claudinho.sh tela        # Nextion screen (classic version only)
 ```
+
+On the single board, `atualizar` is all you need: the screen lives in the
+firmware.
 
 Both ask for **a tap on Claudinho's screen** (or the board's BOOT button)
 before sending anything: the screen shows a "tap to allow" message and waits
@@ -368,14 +403,14 @@ someone who sniffed the secret on your network.
 
 It's safe: the ESP32 writes the new firmware to a spare partition and only
 switches if everything arrived intact. If the network drops halfway, it
-keeps running the current firmware and you just try again. If the screen
-upload is interrupted, the Nextion may show "System Data Error": run the
+keeps running the current firmware and you just try again. On the classic
+version, if the screen upload is interrupted, the Nextion may show "System Data Error": run the
 command again, nothing breaks.
 
 Or just ask Claude: "update Claudinho".
 
-**Coming from 1.5 or older?** Firmware 1.6 added the scenes, which use a new
-monospace font on the screen: run `scripts/claudinho.sh tela` too (one more
+**Coming from 1.5 or older (classic version)?** Firmware 1.6 added the
+scenes, which use a new monospace font on the Nextion screen: run `scripts/claudinho.sh tela` too (one more
 tap), or the scenes' text won't show up.
 
 ## Commands
@@ -397,12 +432,12 @@ scripts/claudinho.sh bambu desligar       # disconnect it and erase the code ("d
 scripts/claudinho.sh painel               # show the printer panel ("painel" = panel)
 scripts/claudinho.sh idioma [code]        # screen language: en, pt-BR... (no code: current and available)
 scripts/claudinho.sh demo [parar]         # demo mode: a ~2 min tour of everything, for filming ("parar" = stop)
-scripts/claudinho.sh som [mood|liga|desliga|volume N]  # single-board: try a voice (feliz, pergunta, sono...), on/off, volume
-scripts/claudinho.sh desligar             # single-board: deep sleep, to save the battery (BOOT wakes it)
+scripts/claudinho.sh som [mood|liga|desliga|volume N]  # single board: try a voice (feliz, pergunta, sono...), on/off, volume
+scripts/claudinho.sh desligar             # single board: deep sleep, to save the battery (BOOT wakes it)
 scripts/claudinho.sh alerta [type]        # sample printer alert: bom, ruim, filamento, hms
 scripts/claudinho.sh cena <type>          # try a scene: codando (editing), terminal, lendo (reading), agente
 scripts/claudinho.sh atualizar [file.bin] # update firmware
-scripts/claudinho.sh tela [file.tft]      # update the screen
+scripts/claudinho.sh tela [file.tft]      # update the Nextion screen (classic version)
 scripts/wifi.sh PORT "NETWORK"            # change Wi-Fi over USB (hidden password)
 ```
 
@@ -442,9 +477,9 @@ your Anthropic account.
 
 ## Tested environments
 
-**Tested end to end:** WSL2 on Windows 11, ESP32-C3 Super Mini, Nextion
-NX3224F024_011. Printer module: Bambu Lab P2S with AMS. Single-board: E32R28T
-(ST7789 screen).
+**Tested end to end:** WSL2 on Windows 11. Single board: E32R28T (ST7789
+screen), with speaker and battery. Classic version: ESP32-C3 Super Mini with
+Nextion NX3224F024_011. Printer module: Bambu Lab P2S with AMS.
 
 **Written to work, not yet tested on real hardware:** native Linux, macOS,
 Windows with Git Bash, ESP32-S3 DevKitC-1, other Bambu printers with local
@@ -476,14 +511,17 @@ Things we learned along the way (some the hard way):
   the best one. If updates fail often, that's probably why; nothing breaks,
   just try again. `claudinho.sh log` shows which access point it joined and
   with what signal.
-- **Updating firmware or screen needs a tap on the screen** (or the BOOT
+- **Updating firmware (or the Nextion screen) needs a tap on the screen** (or the BOOT
   button) within 1 minute. After the tap, uploads are allowed for 2 minutes.
 - **The log lives in the board's memory:** restart it and it starts over.
   Check the log before restarting if you're investigating something.
-- **Opening the serial port restarts the ESP32-C3.** That's normal; the
-  scripts account for it.
-- **The screen only works rotated 270°** (that's how the case was designed)
-  and only on the Nextion NX3224F024; other models need another screen
+- **Opening the serial port restarts the board** (ESP32-C3 and E32R28T; on
+  the single board the screen may blink). That's normal; the scripts account
+  for it.
+- **Putting it away for days (single board)?** Run `claudinho.sh desligar`
+  first, so the battery doesn't drain. BOOT wakes it up.
+- **The Nextion screen only works rotated 270° (classic version)** (that's how
+  the case was designed) and only on the Nextion NX3224F024; other models need another screen
   compiled in the Nextion Editor (the `.HMI` project is in `nextion/`).
 - **The first flash is always over USB.** After that, everything goes over
   the network.
@@ -494,12 +532,12 @@ Things we learned along the way (some the hard way):
 
 | Symptom | What to do |
 |---|---|
-| The board doesn't show up on USB | Change the cable (many are charge-only). Hold BOOT while plugging it in. |
+| The board doesn't show up on USB | Change the cable (many are charge-only). Hold BOOT while plugging it in. Single board on Windows: install the CH340 driver. |
 | `PRECISA_BOOT` while flashing | Hold BOOT, unplug and replug the USB, release BOOT, run it again. |
 | Won't join Wi-Fi | 2.4 GHz networks only. Check the password by running the skill again. |
 | Stopped reacting | The IP changed: run `/claudinho:configurar` (reserve the IP on your router). |
-| `atualizar` or `tela` fail halfway | Wi-Fi dropping packets. Nothing breaks: try again. If it keeps happening, `claudinho.sh reiniciar` and try again; check the power supply (1 A or more). |
-| Garbled or blank screen | Run `claudinho.sh tela` again, then `claudinho.sh reiniciar`. |
+| `atualizar` or `tela` fail halfway | Wi-Fi dropping packets. Nothing breaks: try again. If it keeps happening, `claudinho.sh reiniciar` and try again; on the classic version, check the power supply (1 A or more). |
+| Garbled or blank screen (classic version) | Run `claudinho.sh tela` again, then `claudinho.sh reiniciar`. |
 
 For diagnosis without a cable, `claudinho.sh log` shows what the board has
 logged since it started.
@@ -507,7 +545,7 @@ logged since it started.
 ## For those who want to hack on it
 
 - `firmware/claudinho/`: the firmware (Arduino, ESP32 core 3.x, ArduinoJson 7).
-  `firmware/compilar.sh` builds the C3 and S3 `.bin` files into `firmware/bin/`.
+  `firmware/compilar.sh` builds the C3, S3 and E32R28T `.bin` files into `firmware/bin/`.
 - `firmware/claudinho/tela_e32.h`: the E32R28T screen and touch (LovyanGFX).
   The rest of the firmware is the same for both boards. Fonts for it:
   `python3 firmware/fontes/gerar_vlw.py` (DM Sans and JetBrains Mono, OFL).
@@ -539,7 +577,7 @@ logged since it started.
 ## Authorship
 
 The case's 3D model was not made by AI: it's 100% mine, modeled by hand in
-SketchUp (and it's on [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
+SketchUp (the classic version's case is on [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
 
 On the software side, the concepts came from me. The heavy lifting
 (firmware, scripts, skill, tests and a good part of this text) was done by
