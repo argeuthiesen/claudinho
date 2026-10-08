@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 675" width="960" height="675" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
   <rect width="960" height="675" fill="#f7f4ee"/>
-  <text x="480" y="44" text-anchor="middle" font-size="24" font-weight="bold" fill="#2b2a29">Single board: power inside the case</text>
-  <text x="480" y="72" text-anchor="middle" font-size="15" fill="#6b6560">5 V comes in through the board's UART connector. On the desk, the board's own USB-C is enough.</text>
+  <text x="480" y="44" text-anchor="middle" font-size="24" font-weight="bold" fill="#2b2a29">Single board: everyday power</text>
+  <text x="480" y="72" text-anchor="middle" font-size="15" fill="#6b6560">5 V comes in through the case's USB-C and the board's UART connector. The board's own USB-C is only for the first flash.</text>
 
   <g font-size="15" text-anchor="middle">
     <rect x="20" y="130" width="110" height="90" rx="10" fill="#e6e0d6" stroke="#b9b1a4" stroke-width="2"/>
@@ -22,7 +22,7 @@
     <rect x="740" y="150" width="160" height="110" rx="4" fill="#0f141a" stroke="#4a5868"/>
     <text x="820" y="212" font-weight="bold" fill="#e9edf2" font-size="18">E32R28T</text>
     <text x="820" y="128" font-size="12" fill="#ffd166">UART 4P 1.25</text>
-    <text x="820" y="284" font-size="11" fill="#8a96a3">own USB-C: flashing or desk use</text>
+    <text x="820" y="284" font-size="11" fill="#8a96a3">own USB-C: first flash only</text>
     <text x="760" y="336" font-size="11" fill="#b8c2cc">speaker 2P 1.25</text>
     <text x="882" y="336" font-size="11" fill="#b8c2cc">battery 2P 1.25</text>
 

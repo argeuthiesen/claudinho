@@ -48,7 +48,7 @@ Claudinho runs on two kinds of hardware. For a new build, go with the
 |---|---|---|
 | Status | **recommended** for new builds | fully supported (the one in the video) |
 | Hardware | one board: ESP32 with a 2.8" touch screen built in | ESP32-C3 Super Mini + Nextion 2.4" display |
-| Soldering | none | 4 wires |
+| Soldering | 2 wires (the case's USB-C power input) | 4 wires |
 | Voice and battery | optional speaker and battery (charger on the board) | no (powered by a USB power supply) |
 | Screen updates | part of the firmware | separate Nextion screen file (`.tft`) |
 | 3D-printed case | being modeled right now, coming to MakerWorld soon | [on MakerWorld](https://makerworld.com/models/3365275-claudinho) |
@@ -63,8 +63,8 @@ Claudinho runs on two kinds of hardware. For a new build, go with the
 The **E32R28T** (LCDWiki "2.8inch ESP32-32E Display") is an ESP32 with a 2.8"
 touch screen built in, 320×240. It simplifies a lot:
 
-- **One board instead of two.** No wires to solder, no separate power for the
-  display: plug in the USB and that's it.
+- **One board instead of two.** No wiring between boards and no separate
+  power for the display: only the case's power input takes 2 wires.
 - **No Nextion Editor and no `.tft`.** The ESP32 draws the screen itself, with
   the fonts built into the firmware (smoother, anti-aliased text). Setup has
   one fewer step, and updates only require flashing the firmware.
@@ -88,15 +88,17 @@ languages), and the setup skill recognizes the board on its own.
 | [E32R28T board (ESP32 + 2.8" touch screen)](https://www.aliexpress.com/item/1005009659317465.html) | the resistive-touch version; listings may call it "ESP32-32E 2.8"<br><img src="docs/img/e32r28t-placa.jpg" alt="E32R28T, back" width="220"> |
 | [8 Ω speaker with a JST 1.25 plug](https://www.aliexpress.com/item/1005009194531045.html) | optional, for the voice; the small 2415 (24 × 15 mm) fits well<br><img src="docs/img/alto-falante-2415.jpg" alt="2415 speaker" width="110"> |
 | 3.7 V LiPo battery with a **JST 1.25 mm 2-pin** plug and a protection board | optional. The one in the photos is a 103450 (10 × 34 × 51 mm, 2000 mAh): <br><img src="docs/img/bateria-103450.jpg" alt="103450 battery" width="160"> <img src="docs/img/e32r28t-conector-bateria.jpg" alt="battery plug on the board" width="160"><br>Other capacities work, but the size changes: check that it fits the case. Watch out for listings with the bigger 2.54 mm plug. **Check the polarity** before plugging it in (cheap batteries sometimes come reversed). |
-| USB-C data cable | to set it up, flash it and charge it |
-| 5 V USB power supply with a USB-A port, **at least 1 A** | for everyday use (a regular phone charger); in the case build, with a USB-A to USB-C cable |
-| USB-C female breakout (bare, VBUS and GND) | for the case build: the power input on the case (see [Power](#power)) |
-| 4-pin 1.25 mm cable | for the case build; comes with the board |
+| USB-C data cable | only for the first flash, from the computer |
+| 5 V USB power supply with a USB-A port, **at least 1 A** | powers Claudinho and charges the battery (a regular phone charger), with a USB-A to USB-C cable into the case |
+| USB-C female breakout (bare, VBUS and GND) | the power input on the case (see [Power](#power)) |
+| 4-pin 1.25 mm cable | from the UART connector to the case's USB-C; comes with the board |
 
 ### Power
 
-- **On the desk (bare board):** just the USB-C cable. No soldering.
-- **Inside the Claudinho case:** the board is powered with **5 V** through its
+- **The board's own USB-C is only for the first flash**, from the computer.
+  After that, updates go over Wi-Fi. Don't leave Claudinho on a computer USB
+  port day to day: charging the battery on top of Wi-Fi strains that port.
+- **Every day, through the case's USB-C:** the board is powered with **5 V** through its
   UART connector (the 4-pin, 1.25 mm pitch one, often sold as "MX1.25"):
   pin 1 is +5 V and pin 2 is GND in the board's schematic. The 4-pin cable
   that comes with the board goes from that connector to a bare USB-C female
@@ -108,7 +110,7 @@ languages), and the setup skill recognizes the board on its own.
   TP4054 charger is fed from the same +5 V rail). Unplug it and the board
   switches to the battery automatically.
 
-![Single board: power inside the case](docs/en/power-e32.svg)
+![Single board: everyday power](docs/en/power-e32.svg)
 
 > [!WARNING]
 > **Flash it before assembling.** Before putting anything into the case,
@@ -205,7 +207,8 @@ rather: in low-cost, high-risk alternative technical solutions.
    already react.
 
 After the first flash you no longer need the cable: the board can stay on
-the power supply (or on the battery, on the single board).
+the power supply (on the single board, through the case's USB-C, or on the
+battery).
 
 ### Status line
 

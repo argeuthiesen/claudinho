@@ -49,7 +49,7 @@ O Claudinho roda em dois tipos de hardware. Para montar um novo, vá de
 |---|---|---|
 | Situação | **recomendada** para montar um novo | totalmente suportada (é a do vídeo) |
 | Hardware | uma placa só: ESP32 com tela de toque de 2,8" embutida | ESP32-C3 Super Mini + display Nextion de 2,4" |
-| Solda | nenhuma | 4 fios |
+| Solda | 2 fios (a entrada USB-C da caixa) | 4 fios |
 | Voz e bateria | alto-falante e bateria opcionais (carregador na placa) | não (alimentada por fonte USB) |
 | Atualizar a tela | faz parte do firmware | arquivo de tela do Nextion separado (`.tft`) |
 | Caixa impressa em 3D | sendo modelada agora, sai no MakerWorld em breve | [no MakerWorld](https://makerworld.com/models/3365275-claudinho) |
@@ -64,8 +64,8 @@ O Claudinho roda em dois tipos de hardware. Para montar um novo, vá de
 A **E32R28T** ("2.8inch ESP32-32E Display", da LCDWiki) é um ESP32 com tela
 de toque de 2,8" embutida, 320×240. Ela simplifica bastante:
 
-- **Uma placa em vez de duas.** Sem fios para soldar, sem alimentação
-  separada para a tela: plugou o USB, pronto.
+- **Uma placa em vez de duas.** Sem fios entre placas e sem alimentação
+  separada para a tela: só a entrada de energia da caixa leva 2 fios.
 - **Sem Nextion Editor e sem `.tft`.** O próprio ESP32 desenha a tela, com as
   fontes dentro do firmware (texto mais suave, sem serrilhado). A
   configuração tem uma etapa a menos, e atualizar é só gravar o firmware.
@@ -89,15 +89,18 @@ demonstração, idiomas), e a skill de configuração reconhece a placa sozinha.
 | [Placa E32R28T (ESP32 + tela de toque de 2,8")](https://www.aliexpress.com/item/1005009659317465.html) | a versão com toque resistivo; o anúncio pode chamar de "ESP32-32E 2.8"<br><img src="docs/img/e32r28t-placa.jpg" alt="E32R28T, verso" width="220"> |
 | [Alto-falante de 8 Ω com plugue JST 1,25](https://www.aliexpress.com/item/1005009194531045.html) | opcional, para a voz; o pequeno 2415 (24 × 15 mm) encaixa bem<br><img src="docs/img/alto-falante-2415.jpg" alt="alto-falante 2415" width="110"> |
 | Bateria LiPo de 3,7 V com plugue **JST 1,25 mm de 2 pinos** e placa de proteção | opcional. A das fotos é uma 103450 (10 × 34 × 51 mm, 2000 mAh): <br><img src="docs/img/bateria-103450.jpg" alt="bateria 103450" width="160"> <img src="docs/img/e32r28t-conector-bateria.jpg" alt="plugue da bateria na placa" width="160"><br>Outras capacidades servem, mas o tamanho muda: confira se cabe na caixa. Cuidado com anúncios do plugue maior, de 2,54 mm. **Confira a polaridade** antes de ligar (bateria barata às vezes vem invertida). |
-| Cabo USB-C de dados | para configurar, gravar e carregar |
-| Fonte USB 5 V com saída USB-A, **pelo menos 1 A** | para o dia a dia (um carregador de celular comum); na montagem na caixa, com cabo USB-A para USB-C |
-| Conector USB-C fêmea avulso (placa simples, com VBUS e GND) | para a montagem na caixa: é a entrada de energia da caixa (veja [Alimentação](#alimentação)) |
-| Cabo de 4 pinos, 1,25 mm | para a montagem na caixa; vem com a placa |
+| Cabo USB-C de dados | só para a primeira gravação, pelo computador |
+| Fonte USB 5 V com saída USB-A, **pelo menos 1 A** | alimenta o Claudinho e carrega a bateria (um carregador de celular comum), com cabo USB-A para USB-C na caixa |
+| Conector USB-C fêmea avulso (placa simples, com VBUS e GND) | a entrada de energia da caixa (veja [Alimentação](#alimentação)) |
+| Cabo de 4 pinos, 1,25 mm | do conector UART até o USB-C da caixa; vem com a placa |
 
 ### Alimentação
 
-- **Na mesa (placa sem caixa):** só o cabo USB-C. Nada de solda.
-- **Dentro da caixa do Claudinho:** a placa é alimentada com **5 V** pelo
+- **O USB-C da própria placa é só para a primeira gravação**, pelo
+  computador. Depois, as atualizações vão pelo Wi-Fi. Não deixe o Claudinho
+  numa porta USB do computador no dia a dia: carregar a bateria além do Wi-Fi
+  força essa porta.
+- **No dia a dia, pelo USB-C da caixa:** a placa é alimentada com **5 V** pelo
   conector UART dela (o de 4 pinos, passo 1,25 mm, muitas vezes vendido como
   "MX1.25"): pino 1 é +5 V e pino 2 é GND no esquema da placa. O cabo de 4
   pinos que vem com a placa vai desse conector até um conector USB-C fêmea
@@ -109,7 +112,7 @@ demonstração, idiomas), e a skill de configuração reconhece a placa sozinha.
   TP4054 da placa é alimentado pela mesma linha de +5 V). Desligou da
   tomada, a placa passa para a bateria sozinha.
 
-![Placa única: alimentação dentro da caixa](docs/pt/alimentacao-e32.svg)
+![Placa única: alimentação no dia a dia](docs/pt/alimentacao-e32.svg)
 
 > [!WARNING]
 > **Grave antes de montar.** Antes de colocar qualquer coisa na caixa, grave
@@ -206,7 +209,7 @@ alternativas de baixo custo e alto risco.
    reagem.
 
 Depois da primeira gravação, o cabo não é mais necessário: a placa pode
-ficar na fonte (ou na bateria, na placa única).
+ficar na fonte (na placa única, pelo USB-C da caixa, ou na bateria).
 
 ### Status line
 
