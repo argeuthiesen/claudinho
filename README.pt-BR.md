@@ -296,8 +296,8 @@ O que você precisa:
 
 | Peça | Observações |
 |---|---|
-| [Placa E32R28T (ESP32 + tela de toque de 2,8")](https://www.aliexpress.com/item/1005009659317465.html) | a versão com toque resistivo; o anúncio pode chamar de "ESP32-32E 2.8" |
-| [Alto-falante de 8 Ω com plugue JST 1,25](https://www.aliexpress.com/item/1005009194531045.html) | opcional, para a voz; o pequeno 2415 (24 × 15 mm) encaixa bem |
+| [Placa E32R28T (ESP32 + tela de toque de 2,8")](https://www.aliexpress.com/item/1005009659317465.html) | a versão com toque resistivo; o anúncio pode chamar de "ESP32-32E 2.8"<br><img src="docs/img/e32r28t-placa.jpg" alt="E32R28T, verso" width="220"> |
+| [Alto-falante de 8 Ω com plugue JST 1,25](https://www.aliexpress.com/item/1005009194531045.html) | opcional, para a voz; o pequeno 2415 (24 × 15 mm) encaixa bem<br><img src="docs/img/alto-falante-2415.jpg" alt="alto-falante 2415" width="110"> |
 | Bateria LiPo de 3,7 V com plugue **JST 1,25 mm de 2 pinos** e placa de proteção | opcional. A das fotos é uma 103450 (10 × 34 × 51 mm, 2000 mAh): <br><img src="docs/img/bateria-103450.jpg" alt="bateria 103450" width="160"> <img src="docs/img/e32r28t-conector-bateria.jpg" alt="plugue da bateria na placa" width="160"><br>Outras capacidades servem, mas o tamanho muda: confira se cabe na caixa. Cuidado com anúncios do plugue maior, de 2,54 mm. **Confira a polaridade** antes de ligar (bateria barata às vezes vem invertida). |
 | Cabo USB-C de dados | para configurar e carregar |
 
