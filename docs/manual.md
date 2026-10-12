@@ -19,6 +19,9 @@ Claudinho reacts on its own to what Claude Code is doing:
 | Working | Claude is about to use a tool (or one of the scenes below) |
 | Suspicious | 5 tool calls in a row |
 | Angry | a tool call failed |
+| Excited | a `git commit` went through (it celebrates) |
+| Happy | tests passed (`pytest`, `npm test`, `cargo test`, `go test`...) |
+| Worried | tests failed |
 | Waiting for you | Claude needs your permission or an answer |
 | Dizzy | compacting the context |
 | Done | Claude just finished responding |
@@ -28,7 +31,13 @@ Claudinho reacts on its own to what Claude Code is doing:
 
 Mood words are matched in English and Portuguese, and your prompt text never
 leaves your computer: only the label ("happy", "worried", "startled") goes to
-the board.
+the board. The same goes for commits and tests: the command is checked on
+your computer, and only the word ("commit", "tests passed", "tests failed")
+goes to the board.
+
+Along with the face, a short **caption** shows at the bottom for a few
+seconds ("Thinking...", "Committed!", "I need you!") and then disappears,
+leaving the face clean.
 
 ## Scenes while Claude works
 

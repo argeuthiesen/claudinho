@@ -2,7 +2,7 @@
 # Manutencao do Claudinho pela rede (depois de configurado).
 #   claudinho.sh info                 estado atual (GET /mini.json)
 #   claudinho.sh log                  log interno do aparelho
-#   claudinho.sh cara <tipo> [humor]  dispara uma cara (inicio, prompt, ferramenta, erro, parou, atencao, compact, fim, dormir)
+#   claudinho.sh cara <tipo> [humor]  dispara uma cara (inicio, prompt, ferramenta, erro, parou, atencao, compact, commit, teste_ok, teste_falhou, fim, dormir)
 #   claudinho.sh cor                  abre a paleta na tela (6 cores > 12 tons na moldura, toque no centro > previa com Gravar/Voltar/Cancelar)
 #   claudinho.sh cor R G B [salvar]   cor exata do rosto (com "salvar", fica gravada na placa)
 #   claudinho.sh reiniciar
@@ -25,7 +25,7 @@ IP=$(le_config CLAUDINHO_IP)
 J=(-H 'Content-Type: application/json')
 uso() { sed -n '2,20p' "$0"; exit 1; }
 num() { case "$1" in ''|*[!0-9]*) return 1 ;; esac; }
-palavra() { case "$1" in *[!a-z]*) return 1 ;; esac; }      # so letras minusculas (ou vazio)
+palavra() { case "$1" in *[!a-z_]*) return 1 ;; esac; }    # so letras minusculas e _ (ou vazio)
 cmd() { curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/cmd" -d "$1"; }
 mini() { curl_claudinho -s -m 5 "http://$IP/mini.json"; }
 

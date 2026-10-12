@@ -522,6 +522,21 @@ Cara caraDesejada() {
 }
 void poeCara(Cara c, unsigned long dur) { evento.cara = c; evento.ate = millis() + dur; caraDesenhada = false; }
 
+// Legenda: uma frase curta embaixo do rosto dizendo o que aconteceu. Aparece
+// junto com a cara do evento e some sozinha depois de uns segundos.
+int legenda = -1;                         // T_LEGENDA_... (-1: nenhuma)
+unsigned long legendaAte = 0;
+bool legendaNaTela = false;               // desenhada (ou ainda por apagar)
+void poeLegenda(int t, unsigned long dur = 5000) { legenda = t; legendaAte = millis() + dur; legendaNaTela = false; }
+void cuidaLegenda() {                     // so na tela 0, depois do rosto
+  if (legenda >= 0 && (long)(millis() - legendaAte) >= 0) legenda = -1;
+  if (legenda >= 0 && !legendaNaTela) { escreve(0, 202, 320, 30, FONTE_M, COR_OLHO, corRosto(), 1, tx((Txt)legenda)); legendaNaTela = true; }
+  else if (legenda < 0 && legendaNaTela) { preenche(0, 202, 320, 30, corRosto()); legendaNaTela = false; }
+}
+// Comemoracao (commit, testes): a ferramenta seguinte nao tira a cara antes da hora.
+unsigned long celebraAte = 0;
+bool celebrando() { return celebraAte && (long)(millis() - celebraAte) < 0; }
+
 void trataEvento(const char* tipo, const char* humor) {
   static int ferramentasSeguidas = 0;
   if (strcmp(tipo, "ferramenta") != 0 && strcmp(tipo, "erro") != 0) ferramentasSeguidas = 0;
@@ -529,23 +544,32 @@ void trataEvento(const char* tipo, const char* humor) {
   if (pagina == 9 && !manter && !strcmp(tipo, "atencao")) mudaPagina(0);
   if (pagina == 10 && strcmp(tipo, "ferramenta")) mudaPagina(0);   // qualquer outro evento: sai da cena e mostra a cara   // o Claude precisa de voce: vale mais que o painel
   if (pagina == 6 && !strcmp(tipo, "atencao")) avisoVelha();   // no jogo: so avisa no canto
-  if      (!strcmp(tipo, "inicio"))     { poeCara(C_FELIZ, 5000); pedeConsumo(20000, false, false); }
+  if (strcmp(tipo, "ferramenta") && strcmp(tipo, "parou")) celebraAte = 0;   // outro evento: a comemoracao acaba
+  if      (!strcmp(tipo, "inicio"))     { poeCara(C_FELIZ, 5000); poeLegenda(T_LEGENDA_OI); pedeConsumo(20000, false, false); }
   else if (!strcmp(tipo, "prompt")) {
-    if      (!strcmp(humor, "feliz"))      poeCara(C_EMPOLGADO, 5000);
-    else if (!strcmp(humor, "preocupado")) poeCara(C_PREOCUPADO, 6000);
-    else if (!strcmp(humor, "susto"))      poeCara(C_SUSTO, 5000);
-    else                                   poeCara(C_PENSANDO, 120000);
+    if      (!strcmp(humor, "feliz"))      { poeCara(C_EMPOLGADO, 5000); poeLegenda(T_LEGENDA_EMPOLGADO); }
+    else if (!strcmp(humor, "preocupado")) { poeCara(C_PREOCUPADO, 6000); poeLegenda(T_LEGENDA_PREOCUPADO); }
+    else if (!strcmp(humor, "susto"))      { poeCara(C_SUSTO, 5000); poeLegenda(T_LEGENDA_SUSTO); }
+    else                                   { poeCara(C_PENSANDO, 120000); poeLegenda(T_LEGENDA_PENSANDO); }
   }
   else if (!strcmp(tipo, "ferramenta")) {
     ++ferramentasSeguidas;
-    if (cenaPorFerramenta(forcaCena)) {}                                     // editor, terminal, Matrix ou organograma
-    else if (ferramentasSeguidas == 5) poeCara(C_DESCONFIADO, 4000);
-    else if (caraDesejada() != C_DESCONFIADO) poeCara(C_TRABALHANDO, 120000);
+    if (celebrando()) {}                                                    // deixa a festa terminar
+    else if (cenaPorFerramenta(forcaCena)) {}                               // editor, terminal, Matrix ou organograma
+    else if (ferramentasSeguidas == 5) { poeCara(C_DESCONFIADO, 4000); poeLegenda(T_LEGENDA_DESCONFIADO, 4000); }
+    else if (caraDesejada() != C_DESCONFIADO) {
+      if (caraDesejada() != C_TRABALHANDO) poeLegenda(T_LEGENDA_TRABALHANDO);
+      poeCara(C_TRABALHANDO, 120000);
+    }
   }
-  else if (!strcmp(tipo, "erro"))       poeCara(C_BRAVO, 3500);
-  else if (!strcmp(tipo, "parou"))      { poeCara(C_TERMINOU, 5000); pedeConsumo(15000, true, false); }
-  else if (!strcmp(tipo, "atencao"))    poeCara(C_ESPERANDO, 120000);
-  else if (!strcmp(tipo, "compact"))    poeCara(C_ZONZO, 5000);
+  else if (!strcmp(tipo, "erro"))       { poeCara(C_BRAVO, 3500); poeLegenda(T_LEGENDA_ERRO, 3500); }
+  else if (!strcmp(tipo, "parou"))      { if (!celebrando()) { poeCara(C_TERMINOU, 5000); poeLegenda(T_LEGENDA_PRONTO); } pedeConsumo(15000, true, false); }
+  else if (!strcmp(tipo, "atencao"))    { poeCara(C_ESPERANDO, 120000); poeLegenda(T_LEGENDA_ATENCAO, 8000); }
+  else if (!strcmp(tipo, "compact"))    { poeCara(C_ZONZO, 5000); poeLegenda(T_LEGENDA_COMPACT); }
+  // commit e testes: o hook ve o comando no PC e manda so a palavra
+  else if (!strcmp(tipo, "commit"))       { poeCara(C_EMPOLGADO, 5000); poeLegenda(T_LEGENDA_COMMIT); celebraAte = millis() + 5000; }
+  else if (!strcmp(tipo, "teste_ok"))     { poeCara(C_FELIZ, 4000); poeLegenda(T_LEGENDA_TESTE_OK, 4000); celebraAte = millis() + 4000; }
+  else if (!strcmp(tipo, "teste_falhou")) { poeCara(C_PREOCUPADO, 5000); poeLegenda(T_LEGENDA_TESTE_FALHOU); }
   else if (!strcmp(tipo, "dormir"))     poeCara(C_DORMINDO, 20000);    // so para teste (claudinho.sh cara dormir)
   else if (!strcmp(tipo, "fim"))        { evento.ate = 0; caraDesenhada = false; }   // quem decide e o contador de sessoes (estado)
 }
@@ -604,6 +628,7 @@ void desenhaMoldura() {
     limpaTela(corRosto());
     caraDesenhada = false; ultimaEsq = {}; ultimaDir = {}; ultimaExtra = {}; ultimaBoca = {};
     formaEsq = Forma(); formaDir = Forma(); bocaNaTela = BP_NENHUMA; esqueceExtras();
+    legendaNaTela = false;
   } else if (pagina == 9) {
     painel(true);
   } else if (pagina == 8) {
@@ -886,7 +911,7 @@ void somDaCara(Cara antes, Cara depois) {
   if (antes == C_DORMINDO && depois != C_DORMINDO) { registra("som: acordou"); somAcordar(); somOiEm = millis(); }
   else if (depois == C_DORMINDO && antes != C_DORMINDO && (!somTchauEm || millis() - somTchauEm > 600000)) { registra("som: dormiu"); somDormir(); }
 }
-// Eventos do Claude Code que falam: esperando voce, erro, terminou,
+// Eventos do Claude Code que falam: esperando voce, erro, terminou, commit, teste que falhou,
 // abriu uma sessao (oi) e fechou a ultima (tchau).
 // A placa responde ao PC primeiro e fala logo depois, no loop.
 #define SOM_OI -2
@@ -897,6 +922,8 @@ void somDoEvento(const char* tipo) {
   if (!strcmp(tipo, "inicio")) { if (millis() - somOiEm > 3000) somPendente = SOM_OI; }   // se acordou agora, ja disse oi
   else if (!strcmp(tipo, "fim")) { if (dados.n == 0) somPendente = SOM_TCHAU; }
   else if (!strcmp(tipo, "atencao")) somPendente = H_PERGUNTA;
+  else if (!strcmp(tipo, "commit")) somPendente = H_EMPOLGADO;
+  else if (!strcmp(tipo, "teste_falhou")) somPendente = H_PREOCUPADO;
   else if (!strcmp(tipo, "erro")) somPendente = H_BRAVO;
   else if (!strcmp(tipo, "parou")) somPendente = H_PRONTO;
 }
@@ -987,7 +1014,7 @@ void mudaPagina(int p) {
   consumo.naTela = false; consumo.telaIntensa = false;
   desenhaMoldura();
   desenha();
-  if (pagina == 0) cuidaRosto();
+  if (pagina == 0) { cuidaRosto(); cuidaLegenda(); }
 }
 
 // ---------------------------------------------------------------- consumo automatico
@@ -1021,7 +1048,7 @@ void confereRenovacao() {
   if (v5 && !renovou5) { mostrado5 = 0; faixa5 = 0; }
   if (v7 && !renovou7) { mostrado7 = 0; faixa7 = 0; }
   renovou5 = v5; renovou7 = v7;
-  if (nova && dados.n > 0 && !congelado()) { registra("consumo: janela renovou"); poeCara(C_FELIZ, 5000); }
+  if (nova && dados.n > 0 && !congelado()) { registra("consumo: janela renovou"); poeCara(C_FELIZ, 5000); poeLegenda(T_LEGENDA_JANELA); }
 }
 
 // Atende o pedido pendente quando o Claudinho esta parado no rosto.
@@ -3070,6 +3097,6 @@ void loop() {
   // boot do ESP (ou foi regravado), perdeu o sendxy e o toque some.
   static unsigned long ultimoAjuste = 0;
   if (millis() - ultimoAjuste >= 30000) { ultimoAjuste = millis(); nexCmd("bkcmd=0"); nexCmd("sendxy=1"); nexCmd("thsp=0"); }
-  if (pagina == 0) cuidaRosto();
+  if (pagina == 0) { cuidaRosto(); cuidaLegenda(); }
   delay(10);
 }

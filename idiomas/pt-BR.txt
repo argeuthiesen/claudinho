@@ -63,6 +63,23 @@ velha.chama = chama!
 velha.voce_ganhou = You win!
 velha.eu_ganhei = I win!
 velha.empate = Draw!
+
+# Legenda embaixo do rosto, por uns segundos depois de um evento
+legenda.oi = Oi! Sessão nova
+legenda.pensando = Pensando...
+legenda.trabalhando = Trabalhando...
+legenda.desconfiado = Hmm, quantos passos...
+legenda.empolgado = Eba!
+legenda.preocupado = Xi, um bug?
+legenda.susto = Opa!
+legenda.erro = Ops, algo falhou
+legenda.pronto = Pronto!
+legenda.atencao = Preciso de você!
+legenda.compact = Arrumando a memória...
+legenda.commit = Commit feito!
+legenda.teste_ok = Testes passaram!
+legenda.teste_falhou = Testes falharam
+legenda.janela = Janela de uso nova!
 genius.placar = Score: %d
 
 cena.agente = agente %d

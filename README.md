@@ -259,7 +259,7 @@ inside the plugin folder. After a marketplace install, the paths are:
 
 - **`<plugin>`** (the plugin itself, with the scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<version>/`, for example
-  `.../claudinho/1.14.0/`. If there's more than one version folder, use the
+  `.../claudinho/1.15.0/`. If there's more than one version folder, use the
   newest. (If you cloned this repository, `<plugin>` is its root.)
 - **`<plugin-data>`** (the board's IP and secret):
   `~/.claude/plugins/data/claudinho-claudinho/`. The scripts find it on their
@@ -518,6 +518,7 @@ the mood label goes to the board ("happy", "worried", "startled").
 | gets your prompt                    | thinks (and reacts to your mood: thanks, scolding, "it broke") |
 | uses a tool                         | works (and gets suspicious after 5 in a row) |
 | has a tool fail                     | gets angry for a moment                 |
+| makes a `git commit` or runs tests  | celebrates the commit; happy or worried about the tests |
 | needs you (permission, question)    | waits, looking at you                   |
 | finishes responding                 | shows it's done                         |
 | compacts the context                | gets dizzy                              |

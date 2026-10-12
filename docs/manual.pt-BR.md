@@ -19,6 +19,9 @@ O Claudinho reage sozinho ao que o Claude Code está fazendo:
 | Trabalhando | o Claude vai usar uma ferramenta (ou uma das cenas abaixo) |
 | Desconfiado | 5 ferramentas seguidas |
 | Bravo | uma ferramenta falhou |
+| Empolgado | um `git commit` deu certo (ele comemora) |
+| Feliz | os testes passaram (`pytest`, `npm test`, `cargo test`, `go test`...) |
+| Preocupado | os testes falharam |
 | Esperando você | o Claude precisa da sua permissão ou de uma resposta |
 | Zonzo | compactando o contexto |
 | Terminou | o Claude acabou de responder |
@@ -28,7 +31,13 @@ O Claudinho reage sozinho ao que o Claude Code está fazendo:
 
 As palavras do humor são procuradas em português e em inglês, e o texto do
 prompt nunca sai do seu computador: só a etiqueta ("feliz", "preocupado",
-"susto") vai para a placa.
+"susto") vai para a placa. O mesmo vale para commit e testes: o comando é
+conferido no seu computador, e só a palavra ("commit", "testes passaram",
+"testes falharam") vai para a placa.
+
+Junto com a cara, aparece uma **legenda** curta embaixo por uns segundos
+("Pensando...", "Commit feito!", "Preciso de você!"), que depois some e
+deixa o rosto limpo.
 
 ## Cenas enquanto o Claude trabalha
 

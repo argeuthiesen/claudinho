@@ -3,6 +3,7 @@
     "SessionStart":       [{ "hooks": [{ "type": "command", "command": "CLAUDINHO_DADOS=\"${CLAUDE_PLUGIN_DATA}\" bash \"${CLAUDE_PLUGIN_ROOT}/scripts/evento.sh\" inicio", "async": true, "timeout": 5 }] }],
     "UserPromptSubmit":   [{ "hooks": [{ "type": "command", "command": "CLAUDINHO_DADOS=\"${CLAUDE_PLUGIN_DATA}\" bash \"${CLAUDE_PLUGIN_ROOT}/scripts/evento.sh\" prompt", "async": true, "timeout": 5 }] }],
     "PreToolUse":         [{ "hooks": [{ "type": "command", "command": "CLAUDINHO_DADOS=\"${CLAUDE_PLUGIN_DATA}\" bash \"${CLAUDE_PLUGIN_ROOT}/scripts/evento.sh\" ferramenta", "async": true, "timeout": 5 }] }],
+    "PostToolUse":        [{ "matcher": "Bash|PowerShell", "hooks": [{ "type": "command", "command": "CLAUDINHO_DADOS=\"${CLAUDE_PLUGIN_DATA}\" bash \"${CLAUDE_PLUGIN_ROOT}/scripts/evento.sh\" feito", "async": true, "timeout": 5 }] }],
     "PostToolUseFailure": [{ "hooks": [{ "type": "command", "command": "CLAUDINHO_DADOS=\"${CLAUDE_PLUGIN_DATA}\" bash \"${CLAUDE_PLUGIN_ROOT}/scripts/evento.sh\" erro", "async": true, "timeout": 5 }] }],
     "Stop":               [{ "hooks": [{ "type": "command", "command": "CLAUDINHO_DADOS=\"${CLAUDE_PLUGIN_DATA}\" bash \"${CLAUDE_PLUGIN_ROOT}/scripts/evento.sh\" parou", "async": true, "timeout": 5 }] }],
     "Notification":       [{ "matcher": "permission_prompt|agent_needs_input", "hooks": [{ "type": "command", "command": "CLAUDINHO_DADOS=\"${CLAUDE_PLUGIN_DATA}\" bash \"${CLAUDE_PLUGIN_ROOT}/scripts/evento.sh\" atencao", "async": true, "timeout": 5 }] }],

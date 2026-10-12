@@ -261,7 +261,7 @@ pasta do plugin. Depois de instalar pelo marketplace, os caminhos são:
 
 - **`<plugin>`** (o plugin em si, com os scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<versão>/`, por exemplo
-  `.../claudinho/1.14.0/`. Se houver mais de uma pasta de versão, use a mais
+  `.../claudinho/1.15.0/`. Se houver mais de uma pasta de versão, use a mais
   nova. (Se você clonou este repositório, `<plugin>` é a raiz dele.)
 - **`<dados-do-plugin>`** (o IP e o segredo da placa):
   `~/.claude/plugins/data/claudinho-claudinho/`. Os scripts acham essa pasta
@@ -516,6 +516,7 @@ vai para a placa a etiqueta do humor ("feliz", "preocupado", "susto").
 | recebe seu prompt                   | fica pensando (e reage ao seu humor: agradecimento, bronca, "deu erro") |
 | usa uma ferramenta                  | trabalha (e desconfia, se forem 5 seguidas) |
 | tem uma ferramenta que falha        | fica bravo por um instante              |
+| faz um `git commit` ou roda testes   | comemora o commit; fica feliz ou preocupado com os testes |
 | precisa de você (permissão, pergunta) | fica esperando, olhando para você     |
 | termina a resposta                  | mostra que terminou                     |
 | compacta o contexto                 | fica zonzo                              |

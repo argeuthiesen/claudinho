@@ -57,6 +57,7 @@ velha.chama             p16 55
 velha.voce_ganhou       m24 320
 velha.eu_ganhei         m24 320
 velha.empate            m24 320
+legenda.*               m24 320
 genius.placar           m24 320
 
 cena.agente             p16 88

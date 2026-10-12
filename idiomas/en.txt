@@ -63,6 +63,23 @@ velha.chama = calls!
 velha.voce_ganhou = You win!
 velha.eu_ganhei = I win!
 velha.empate = Draw!
+
+# Caption under the face, for a few seconds after an event
+legenda.oi = Hi! New session
+legenda.pensando = Thinking...
+legenda.trabalhando = Working...
+legenda.desconfiado = Hmm, so many steps...
+legenda.empolgado = Yay!
+legenda.preocupado = Uh oh, a bug?
+legenda.susto = Whoa!
+legenda.erro = Oops, something failed
+legenda.pronto = Done!
+legenda.atencao = I need you!
+legenda.compact = Tidying up memory...
+legenda.commit = Committed!
+legenda.teste_ok = Tests passed!
+legenda.teste_falhou = Tests failed
+legenda.janela = Fresh usage window!
 genius.placar = Score: %d
 
 cena.agente = agent %d
