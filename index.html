@@ -671,10 +671,10 @@ function demonstracao() {
   Object.assign(dados, { ok:true, n:1, h5:42, d7:18, ctx:23, mod:"Opus", at:Date.now() / 1000,
                          h5r:Date.now() / 1000 + 2.4 * 3600, d7r:Date.now() / 1000 + 4.2 * 86400 });
   painel();
-  const roteiro = [["inicio",3],["prompt",3],["ferramenta",4,"","codando"],["ferramenta",5,"","codando"],["ferramenta",4,"","terminal"],
-                   ["ferramenta",5,"","terminal"],["commit",5],["ferramenta",5,"","lendo"],["ferramenta",5,"","lendo"],["ferramenta",3,"","agente"],
-                   ["ferramenta",3,"","agente"],["ferramenta",4,"","agente"],["teste_ok",5],["atencao",7],["prompt",2,"feliz"],["erro",4],
-                   ["teste_falhou",5],["compact",5],["parou",8]];
+  // cada cena fica uns 5 s e sai com um evento que nao e ferramenta (como na placa)
+  const roteiro = [["inicio",3],["prompt",3],["ferramenta",5,"","codando"],["commit",5],["ferramenta",5,"","terminal"],
+                   ["teste_ok",4],["prompt",2],["ferramenta",5,"","lendo"],["atencao",6],["prompt",2,"feliz"],
+                   ["ferramenta",2,"","agente"],["ferramenta",3,"","agente"],["erro",4],["teste_falhou",5],["compact",5],["parou",8]];
   let i = 0;
   (function proximo() {
     const [tipo, s, humor, acao] = roteiro[i++ % roteiro.length];
