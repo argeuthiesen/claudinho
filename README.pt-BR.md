@@ -285,14 +285,20 @@ pasta do plugin. Depois de instalar pelo marketplace, os caminhos são:
 
 - **`<plugin>`** (o plugin em si, com os scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<versão>/`, por exemplo
-  `.../claudinho/1.15.0/`. Se houver mais de uma pasta de versão, use a mais
+  `.../claudinho/1.17.2/`. Se houver mais de uma pasta de versão, use a mais
   nova. (Se você clonou este repositório, `<plugin>` é a raiz dele.)
 - **`<dados-do-plugin>`** (o IP e o segredo da placa):
   `~/.claude/plugins/data/claudinho-claudinho/`. Os scripts acham essa pasta
   sozinhos.
 
 A skill acha as duas por conta própria (o Claude Code entrega a ela
-`${CLAUDE_PLUGIN_ROOT}` e `${CLAUDE_PLUGIN_DATA}`). Neste README,
+`${CLAUDE_PLUGIN_ROOT}` e `${CLAUDE_PLUGIN_DATA}`).
+
+**Atalho.** Dentro do Claude Code o plugin põe um comando `claudinho` no
+PATH, então `! claudinho info` funciona no prompt. Para o seu terminal, rode
+uma vez `claudinho.sh atalho`: ele cria `~/.local/bin/claudinho`, que sempre
+acha a versão mais nova do plugin (`claudinho.sh atalho remover` tira). Daí
+`claudinho web`, `claudinho info` etc. funcionam em qualquer lugar. Neste README,
 `claudinho.sh` é abreviação de `bash <plugin>/scripts/claudinho.sh`. Os
 comandos mais úteis:
 

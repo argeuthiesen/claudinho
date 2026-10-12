@@ -282,14 +282,20 @@ inside the plugin folder. After a marketplace install, the paths are:
 
 - **`<plugin>`** (the plugin itself, with the scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<version>/`, for example
-  `.../claudinho/1.15.0/`. If there's more than one version folder, use the
+  `.../claudinho/1.17.2/`. If there's more than one version folder, use the
   newest. (If you cloned this repository, `<plugin>` is its root.)
 - **`<plugin-data>`** (the board's IP and secret):
   `~/.claude/plugins/data/claudinho-claudinho/`. The scripts find it on their
   own.
 
 The skill finds both by itself (Claude Code gives it `${CLAUDE_PLUGIN_ROOT}`
-and `${CLAUDE_PLUGIN_DATA}`). In this README, `claudinho.sh` is short for
+and `${CLAUDE_PLUGIN_DATA}`).
+
+**Shortcut.** Inside Claude Code the plugin puts a `claudinho` command on the
+PATH, so `! claudinho info` works at the prompt. For your own terminal, run
+`claudinho.sh atalho` once: it creates `~/.local/bin/claudinho`, which always
+finds the newest plugin version (`claudinho.sh atalho remover` takes it
+away). Then `claudinho web`, `claudinho info` and so on work anywhere. In this README, `claudinho.sh` is short for
 `bash <plugin>/scripts/claudinho.sh`. The most useful commands (they're in
 Portuguese, sorry, it's a Brazilian project):
 

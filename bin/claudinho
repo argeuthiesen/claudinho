@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# claudinho <comando>: o mesmo que scripts/claudinho.sh <comando>.
+# O Claude Code poe esta pasta (bin/ do plugin) no PATH do terminal dele.
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/scripts/claudinho.sh" "$@"

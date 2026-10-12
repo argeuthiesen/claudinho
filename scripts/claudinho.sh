@@ -20,6 +20,7 @@
 #   claudinho.sh alerta [bom|ruim|filamento|hms]  alerta de exemplo da impressora
 #   claudinho.sh virtual [parar]      Claudinho virtual: o mascote numa aba do navegador, sem placa
 #   claudinho.sh web                  painel web da placa no navegador (estado, consumo, ultimos eventos)
+#   claudinho.sh atalho [remover]     cria ~/.local/bin/claudinho: o comando "claudinho" no seu terminal
 # O segredo nunca vai na linha de comando (ver curl_claudinho no comum.sh).
 source "$(dirname "$0")/comum.sh"
 
@@ -29,6 +30,26 @@ num() { case "$1" in ''|*[!0-9]*) return 1 ;; esac; }
 # da placa em 127.0.0.1 e a pagina mostra o rosto. Os hooks e a status line
 # nao mudam: so o endereco do Claudinho passa a ser o do servidor. "parar"
 # desliga e volta para a placa (se havia uma).
+# Atalho para o terminal da pessoa (fora do Claude Code, que ja tem o bin/ do
+# plugin no PATH). Procura a versao mais nova do plugin a cada uso, entao
+# sobrevive as atualizacoes.
+if [ "${1:-}" = atalho ]; then
+  A="$HOME/.local/bin/claudinho"
+  if [ "${2:-}" = remover ]; then rm -f "$A"; echo "atalho removido"; exit 0; fi
+  mkdir -p "$HOME/.local/bin"
+  printf '%s\n' '#!/usr/bin/env bash' \
+    '# claudinho <comando>: atalho criado pelo "claudinho.sh atalho" (plugin do Claudinho)' \
+    'd=$(ls -d "$HOME"/.claude/plugins/cache/claudinho/claudinho/*/ 2>/dev/null | sort -V | tail -1)' \
+    '[ -n "$d" ] || { echo "plugin do Claudinho nao encontrado" >&2; exit 1; }' \
+    'exec bash "${d}scripts/claudinho.sh" "$@"' > "$A"
+  chmod 755 "$A"
+  echo "atalho criado: $A (ex.: claudinho web, claudinho info)"
+  case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *)
+    echo "a pasta ~/.local/bin nao esta no PATH: acrescente no ~/.bashrc (ou ~/.zshrc):"
+    echo '  export PATH="$HOME/.local/bin:$PATH"' ;; esac
+  exit 0
+fi
+
 if [ "${1:-}" = virtual ]; then
   PORTA=$(le_config CLAUDINHO_PORTA_VIRTUAL); PORTA=${PORTA:-8737}
   num "$PORTA" || { echo "CLAUDINHO_PORTA_VIRTUAL invalida" >&2; exit 1; }

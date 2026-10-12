@@ -1935,6 +1935,9 @@ void abrePainel() {                                   // o automatico, a cada 5 
 enum { S_NENHUMA = -1, S_CODANDO, S_TERMINAL, S_LENDO, S_AGENTE };
 static const int FONTE_MONO = 5, MONO_W = 7, MONO_LH = 17;
 static const unsigned long CENA_MIN_MS = 8000, CENA_FIM_MS = 12000;
+// O organograma (Agent) e raro e importante: entra na hora, por cima de
+// qualquer cena, e os comandos que vem logo depois nao o tiram antes de 6 s.
+static const unsigned long CENA_AGENTE_MIN_MS = 6000;
 int cenaAtual = S_NENHUMA; unsigned long cenaDesde = 0, cenaProx = 0;
 char acaoEvento[12] = "";
 
@@ -2287,8 +2290,10 @@ bool cenaPorFerramenta(bool forca) {   // forca: teste (claudinho.sh cena) troca
     paginaDesde = millis();
     if (forca && s != S_NENHUMA && s != cenaAtual) { abreCena(s); return true; }                            // ainda trabalhando: a cena fica
     poeCara(C_TRABALHANDO, 120000);                    // e a cara de depois continua valendo
+    unsigned long minMs = cenaAtual == S_AGENTE ? CENA_AGENTE_MIN_MS : CENA_MIN_MS;
     if (s == S_AGENTE && cenaAtual == S_AGENTE) novoAgente();
-    else if (s != S_NENHUMA && s != cenaAtual && millis() - cenaDesde >= CENA_MIN_MS) abreCena(s);
+    else if (s == S_AGENTE) abreCena(s);                                   // agente: na hora
+    else if (s != S_NENHUMA && s != cenaAtual && millis() - cenaDesde >= minMs) abreCena(s);
     return true;
   }
   if (s == S_NENHUMA || pagina != 0) return false;

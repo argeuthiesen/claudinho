@@ -236,7 +236,7 @@ const PISCA = new Set([C.NEUTRO, C.CANSADO, C.ESPERANDO, C.PREOCUPADO, C.DESCONF
 // manda so a categoria. Cada cena fica pelo menos 8 s; 12 s sem ferramenta,
 // volta ao rosto. Desenho incremental, como na placa.
 const S = { NENHUMA:-1, CODANDO:0, TERMINAL:1, LENDO:2, AGENTE:3 };
-const MONO_W = 7, MONO_LH = 17, CENA_MIN_MS = 8000, CENA_FIM_MS = 12000;
+const MONO_W = 7, MONO_LH = 17, CENA_MIN_MS = 8000, CENA_FIM_MS = 12000, CENA_AGENTE_MIN_MS = 6000;
 const FUNDO = "#363435", OURO = "#d0ad6c", TEXTO = "#f2f3f4", APAGADO = "#a5a09d";
 const rgb = (r, gg, b) => `rgb(${r},${gg},${b})`;
 const sorteia = (a, b) => b === undefined ? Math.floor(Math.random() * a) : a + Math.floor(Math.random() * (b - a));
@@ -444,8 +444,10 @@ function cenaPorFerramenta(acao) {
   if (pagina == 10) {
     paginaDesde = agoraMs();
     poeCara(C.TRABALHANDO, 120000);
+    const min = cenaAtual == S.AGENTE ? CENA_AGENTE_MIN_MS : CENA_MIN_MS;
     if (s == S.AGENTE && cenaAtual == S.AGENTE) novoAgente();
-    else if (s != S.NENHUMA && s != cenaAtual && agoraMs() - cenaDesde >= CENA_MIN_MS) abreCena(s);
+    else if (s == S.AGENTE) abreCena(s);                                  // agente: na hora
+    else if (s != S.NENHUMA && s != cenaAtual && agoraMs() - cenaDesde >= min) abreCena(s);
     return true;
   }
   if (s == S.NENHUMA) return false;

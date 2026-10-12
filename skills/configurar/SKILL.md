@@ -249,6 +249,20 @@ status line que a pessoa já tenha:
 python3 "$R/scripts/instalar-statusline.py" "$CLAUDINHO_DADOS"
 ```
 
+## Atalho no terminal (oferecer no fim)
+
+Dentro do Claude Code, o comando `claudinho` já está no PATH (pasta `bin/` do
+plugin). Ofereça criar o atalho para o terminal da pessoa, fora do Claude
+Code, e só crie se ela aceitar:
+
+```bash
+bash "$R/scripts/claudinho.sh" atalho
+```
+
+Cria `~/.local/bin/claudinho` (acha sozinho a versão mais nova do plugin). Se
+avisar que `~/.local/bin` não está no PATH, mostre a linha para o `~/.bashrc`
+ou `~/.zshrc`. Para tirar: `claudinho.sh atalho remover`.
+
 ## 7. Testar
 
 ```bash
@@ -413,7 +427,7 @@ https://argeuthiesen.github.io/claudinho/ (eventos de mentira).
 
 ## Referência rápida
 
-`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | idioma [código] | demo [parar] | som [humor|liga|desliga|volume N] | desligar | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft] | virtual [parar] | web`
+`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | idioma [código] | demo [parar] | som [humor|liga|desliga|volume N] | desligar | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft] | virtual [parar] | web | atalho [remover]`
 
 `atualizar` e `tela` pedem um toque na tela do Claudinho (avise a pessoa antes).
 Tipos de cara: inicio, prompt, ferramenta, erro, parou, atencao, compact, commit, teste_ok, teste_falhou, fim, dormir.
