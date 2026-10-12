@@ -33,6 +33,10 @@ já foi usado nas janelas de 5 horas e de 7 dias.
 - **Voz e bateria (placa única).** Na E32R28T, o Claudinho fala um idioma de
   robô, de bipes, por um alto-falante pequeno, e funciona com uma bateria que
   a própria placa carrega.
+- **Painel web na própria placa.** O `claudinho.sh web` abre uma página que
+  a placa serve na sua rede: a cara atual, o consumo, o Wi-Fi, a bateria, os
+  últimos eventos e ajustes inofensivos (som, volume, cor do rosto, idioma,
+  jogos, demonstração). Ideia do [fork de tela redonda do bserking](https://github.com/bserking/claudinho_GC9A01).
 - **Opcional: sua impressora Bambu Lab.** O Claudinho também conecta direto
   numa impressora 3D Bambu da sua rede e mostra um painel da impressão e
   alertas (começou, pausou e por quê, terminou, falhou...) que ficam até você
@@ -353,6 +357,10 @@ antes de enviar qualquer coisa: a tela mostra "Toque na tela para permitir"
 e espera 1 minuto. Sem alguém na frente dele, ninguém troca o firmware, nem
 quem descobrir o segredo pela rede.
 
+Antes de enviar, os scripts também conferem o firmware com o
+`firmware/bin/SHA256SUMS` e recusam um arquivo corrompido ou alterado
+(ideia do [fork do bserking](https://github.com/bserking/claudinho_GC9A01)).
+
 É seguro: o ESP32 grava o firmware novo numa partição reserva e só troca se
 tudo chegar inteiro. Se a rede cair no meio, ele continua no firmware atual
 e basta repetir. Na versão clássica, se a gravação da tela for interrompida,
@@ -628,6 +636,13 @@ conta da Anthropic.
   `bash <plugin>/scripts/esptool.sh --port PORTA erase-flash`.
 - **Em rede compartilhada** (escritório, coworking), prefira uma rede só para
   dispositivos, se houver.
+- **Painel web.** Tem uma chave de leitura própria, separada do segredo: ela
+  mostra o estado e permite só ajustes inofensivos (som, cor, idioma, mostrar
+  telas, jogos, demonstração, reiniciar, desligar). Firmware, Wi-Fi, segredo
+  e impressora continuam atrás do segredo, e o firmware continua pedindo o
+  toque. A chave fica só no seu computador (no endereço que o
+  `claudinho.sh web` abre); quem a vir na sua rede poderia deixar o
+  Claudinho mudo ou trocar a cor dele, nada além disso.
 - **Impressora Bambu (opcional).** O código de acesso LAN é digitado
   escondido e fica gravado só na placa; o computador não guarda. Ele vai para
   a placa uma vez, pela rede local, com o segredo do Claudinho (o mesmo HTTP

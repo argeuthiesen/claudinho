@@ -82,6 +82,22 @@ face. Tap to see the usage card. To try one: `claudinho.sh cena codando`
   face.
 - The numbers only show up after Claude's first response in a session.
 
+## Web panel
+
+`claudinho.sh web` (or ask Claude "open Claudinho's panel") opens, in your
+browser, a page served by the board itself: the face it's showing, open
+sessions, Wi-Fi signal, uptime, free memory, battery (single board), the
+printer (if connected), plan usage and the last 20 events with the face each
+one caused. It refreshes every 3 seconds.
+
+Below, **Settings**: sound on/muted, volume, test a mood, face color (pick
+it on the page and apply or save, or open the palette on the screen),
+screen language, show usage or the printer panel now, open a game, run the
+demo, restart and turn off. Updating the firmware, Wi-Fi and the printer
+stay with `claudinho.sh` (they need the secret). The panel's address has a
+read key that stays on your computer. Idea from
+[bserking's fork](https://github.com/bserking/claudinho_GC9A01).
+
 ## Touch
 
 | Touch | What it does |

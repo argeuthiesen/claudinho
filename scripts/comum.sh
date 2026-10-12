@@ -55,3 +55,22 @@ curl_claudinho() {
 sha256_de() {
   if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi
 }
+
+# SHA-256 de um arquivo (sha256sum, shasum ou Python, o que existir).
+sha256_de() {
+  if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1
+  elif command -v shasum >/dev/null 2>&1; then shasum -a 256 "$1" | cut -d' ' -f1
+  else python3 -c 'import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$1"; fi
+}
+# Confere um firmware contra o SHA256SUMS da pasta dele (o compilar.sh gera).
+# Arquivo que nao esta na lista (um .bin seu, de outro lugar) passa sem conferir.
+confere_sha() {
+  local lista esperado
+  lista="$(dirname "$1")/SHA256SUMS"
+  [ -f "$lista" ] || return 0
+  esperado=$(tr -d '\r' < "$lista" | grep " $(basename "$1")\$" | cut -d' ' -f1)   # sem \r: checkout no Windows
+  [ -n "$esperado" ] || return 0
+  [ "$(sha256_de "$1" | tr -d '\r')" = "$esperado" ] && return 0
+  echo "o firmware $(basename "$1") nao confere com o SHA256SUMS (arquivo corrompido ou alterado); nada foi gravado" >&2
+  return 1
+}

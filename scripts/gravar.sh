@@ -30,4 +30,5 @@ fi
 PLACA=$CHIP; [ "$CHIP" = esp32 ] && PLACA=e32r28t      # o firmware tem o nome da placa
 BINARIO=$(ls "$RAIZ"/firmware/bin/claudinho-$PLACA-*-completo.bin | sort -V | tail -1)
 echo "chip: $CHIP  placa: $PLACA  firmware: $(basename "$BINARIO")"
+confere_sha "$BINARIO" || exit 1
 "$(dirname "$0")/esptool.sh" --chip "$CHIP" --port "$PORTA" --baud 460800 --after watchdog-reset write-flash 0x0 "$(caminho_windows "$BINARIO")" 2>&1 | tr -d '\r' | grep -a -E "Wrote|Hash of data|Hard reset|rror" || true

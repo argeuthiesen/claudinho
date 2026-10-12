@@ -82,6 +82,23 @@ codando` (`terminal`, `lendo`, `agente`).
   ao rosto na hora.
 - Os números só aparecem depois da primeira resposta do Claude numa sessão.
 
+## Painel web
+
+O `claudinho.sh web` (ou peça ao Claude "abre o painel do Claudinho") abre,
+no navegador, uma página servida pela própria placa: a cara que está na
+tela, as sessões abertas, o sinal do Wi-Fi, há quanto tempo está ligado, a
+memória livre, a bateria (placa única), a impressora (se conectada), o
+consumo do plano e os últimos 20 eventos, com a cara que cada um deu.
+Atualiza a cada 3 segundos.
+
+Embaixo, **Ajustes**: som ligado/mudo, volume, testar um humor, cor do rosto
+(escolha na página e aplique ou salve, ou abra a paleta na tela), idioma da
+tela, mostrar agora o consumo ou o painel da impressora, abrir um jogo,
+rodar a demonstração, reiniciar e desligar. Atualizar o firmware, o Wi-Fi e
+a impressora continuam no `claudinho.sh` (pedem o segredo). O endereço do
+painel tem uma chave de leitura que fica só no seu computador. Ideia do
+[fork do bserking](https://github.com/bserking/claudinho_GC9A01).
+
 ## Toques na tela
 
 | Toque | O que faz |

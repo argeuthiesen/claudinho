@@ -24,4 +24,6 @@ for ALVO in "esp32c3|esp32:esp32:esp32c3:CDCOnBoot=cdc,PartitionScheme=min_spiff
   cp "$DIR/build/$CHIP/claudinho.ino.bin"        "$DIR/bin/claudinho-$CHIP-$V-ota.bin"
 done
 rm -rf "$DIR/build"
+# SHA-256 de cada binario: o claudinho.sh e o gravar.sh conferem antes de gravar
+(cd "$DIR/bin" && sha256sum claudinho-*.bin > SHA256SUMS)
 ls -la "$DIR/bin"

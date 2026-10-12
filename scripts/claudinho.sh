@@ -19,6 +19,7 @@
 #   claudinho.sh cena <tipo>          testa uma cena: codando, terminal, lendo, agente
 #   claudinho.sh alerta [bom|ruim|filamento|hms]  alerta de exemplo da impressora
 #   claudinho.sh virtual [parar]      Claudinho virtual: o mascote numa aba do navegador, sem placa
+#   claudinho.sh web                  painel web da placa no navegador (estado, consumo, ultimos eventos)
 # O segredo nunca vai na linha de comando (ver curl_claudinho no comum.sh).
 source "$(dirname "$0")/comum.sh"
 
@@ -180,9 +181,23 @@ PY
     CHIP=$(mini | grep -o '"placa":"[^"]*"' | cut -d'"' -f4)
     ARQ="${2:-$(ls "$RAIZ"/firmware/bin/claudinho-${CHIP:-esp32c3}-*-ota.bin 2>/dev/null | sort -V | tail -1)}"
     [ -f "$ARQ" ] || { echo "firmware nao encontrado" >&2; exit 1; }
+    confere_sha "$ARQ" || exit 1
     libera || exit 1
     echo "enviando $(basename "$ARQ") para $IP"
     curl_claudinho -s -m 180 -F "f=@$ARQ" "http://$IP/ota" ;;
+  web)
+    # Chave de leitura do painel: gerada uma vez, gravada na placa e no PC.
+    # So deixa ver o estado; nao comanda nada (isso continua com o segredo).
+    K=$(le_config CLAUDINHO_CHAVE_WEB)
+    if [ -z "$K" ]; then K=$(python3 -c 'import secrets,sys;sys.stdout.write(secrets.token_hex(16))' | tr -d '\r'); grava_config CLAUDINHO_CHAVE_WEB "$K"; fi
+    cmd "{\"leitura\":\"$K\"}" >/dev/null || { echo "o Claudinho nao respondeu" >&2; exit 1; }
+    URL="http://$IP/painel#k=$K"
+    case "$(ambiente)" in
+      wsl|windows) cmd.exe /c start "" "$URL" >/dev/null 2>&1 ;;
+      mac) open "$URL" ;;
+      linux) xdg-open "$URL" >/dev/null 2>&1 & ;;
+    esac
+    echo "painel aberto no navegador (o endereco, com a chave, fica so neste computador)" ;;
   tela)
     ARQ="${2:-$RAIZ/nextion/NX3224F024_270.tft}"
     [ -f "$ARQ" ] || { echo "tela nao encontrada: $ARQ" >&2; exit 1; }

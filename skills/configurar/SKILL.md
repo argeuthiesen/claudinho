@@ -258,7 +258,9 @@ bash "$R/scripts/claudinho.sh" info
 
 Pergunte se o Claudinho fez `> <` (olhos apertados de alegria). O `info` deve
 mostrar `"local":true` e os números do plano depois da próxima resposta.
-Para diagnóstico sem cabo: `claudinho.sh log`.
+Para diagnóstico sem cabo: `claudinho.sh log`, ou o painel web
+(`claudinho.sh web`, abre no navegador o estado, os últimos eventos e os
+ajustes inofensivos; "abre o painel do Claudinho").
 
 ## Mudar a cor do rosto
 
@@ -411,7 +413,7 @@ https://argeuthiesen.github.io/claudinho/ (eventos de mentira).
 
 ## Referência rápida
 
-`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | idioma [código] | demo [parar] | som [humor|liga|desliga|volume N] | desligar | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft] | virtual [parar]`
+`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | idioma [código] | demo [parar] | som [humor|liga|desliga|volume N] | desligar | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft] | virtual [parar] | web`
 
 `atualizar` e `tela` pedem um toque na tela do Claudinho (avise a pessoa antes).
 Tipos de cara: inicio, prompt, ferramenta, erro, parou, atencao, compact, commit, teste_ok, teste_falhou, fim, dormir.

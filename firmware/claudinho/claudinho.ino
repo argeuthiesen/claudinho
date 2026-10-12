@@ -30,6 +30,7 @@
 #include "soc/rtc_io_reg.h"   // escrita direta no DAC do IO26 (rapida)
 #endif
 #include "textos.h"        // textos da tela por idioma (gerado de idiomas/*.txt)
+#include "painel_web.h"    // a pagina do painel web (/painel)
 #include "hms_codigos.h"   // codigos HMS da Bambu (gerado por firmware/hms/gerar.py)      // avisos HMS da Bambu em portugues (gerado por firmware/hms/gerar.py)
 #include <esp_wifi.h>
 #include <WebServer.h>
@@ -141,6 +142,7 @@ HardwareSerial& nex = Serial1;
 // Configuracao gravada na placa (NVS). Vazia de fabrica.
 Preferences prefs;
 String cfgSsid, cfgSenha, cfgToken;
+String cfgLeitura;           // chave de leitura do painel web (so le; o segredo continua sendo o cfgToken)
 // Abrir a porta serial reinicia a placa. Enquanto ela ainda tenta entrar no
 // Wi-Fi, INFO nao e respondido (responderia "sem conexao" cedo demais); o
 // proprio setup imprime o INFO quando termina.
@@ -745,6 +747,11 @@ void desenhaBateria() {}
 // repete e nada e gravado. O humor muda a gramatica da fala. Um som enviado
 // pela rede (claudinho.sh som envia acordar|dormir arq.wav) tem preferencia.
 // Logo depois de ligar fica quieto. claudinho.sh som liga|desliga|volume N.
+#ifdef PLACA_E32R28T
+#define TEM_SOM true
+#else
+#define TEM_SOM false
+#endif
 bool somLigado = true;
 int somVolume = 100;                   // % (10 a 200; acima de 100 pode distorcer nos picos)
 inline int somAmostra(int x) { return constrain(128 + (x - 128) * somVolume / 100, 0, 255); }
@@ -2599,6 +2606,43 @@ void webEstado() {
   web.send(200, "text/plain", "ok\n");
 }
 
+// ---- painel web (/painel): a propria placa mostra o estado no navegador.
+// Historico dos ultimos eventos, so a palavra do evento e a cara que deu.
+struct Hist { long t; uint8_t cara; char ev[24]; };
+static const int HIST_N = 20;
+Hist hist[HIST_N]; int histN = 0, histPos = 0;
+void historico(const char* tipo, const char* extra, int cara) {
+  Hist& h = hist[histPos]; histPos = (histPos + 1) % HIST_N; if (histN < HIST_N) histN++;
+  h.t = relogioValido() ? (long)time(nullptr) : 0; h.cara = cara;
+  snprintf(h.ev, sizeof h.ev, extra[0] ? "%s %s" : "%s", tipo, extra);
+}
+void webPainel() { web.send_P(200, "text/html; charset=utf-8", PAINEL_HTML); }
+// Copia um texto para dentro de uma string JSON: sem aspas, barras ou controles.
+const char* jsonLimpo(const char* in, char* out, size_t n) {
+  size_t j = 0;
+  for (; *in && j + 1 < n; in++) { char c = *in; if (c == '"' || c == '\\' || (unsigned char)c < 32) c = '_'; out[j++] = c; }
+  out[j] = 0; return out;
+}
+void webPainelJson() {
+  if (cfgLeitura.length() < 16 || web.arg("k") != cfgLeitura) { web.send(401, "text/plain", "chave invalida\n"); return; }
+  char b[720], m1[40], m2[24];
+  snprintf(b, sizeof b, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"cara\":%d,\"pagina\":%d,\"n\":%d,\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,"
+           "\"ctx\":%d,\"mod\":\"%s\",\"now\":%ld,\"rssi\":%d,\"ip\":\"%s\",\"ligado\":%lu,\"heap\":%u,\"bat_mv\":%d,\"bat_pct\":%d,"
+           "\"bat_carga\":%s,\"bambu\":%s,\"best\":\"%s\",\"bpct\":%d,\"som\":%d,\"vol\":%d,\"idioma\":\"%s\",\"cor\":%u,\"eventos\":[",
+           VERSAO, (int)caraDesejada(), pagina, dados.n, dados.h5, dados.h5r, dados.d7, dados.d7r, dados.ctx, jsonLimpo(dados.mod, m1, sizeof m1), (long)time(nullptr),
+           (int)WiFi.RSSI(), WiFi.localIP().toString().c_str(), millis() / 1000, (unsigned)ESP.getFreeHeap(),
+           bateriaMv(), bateriaPct(bateriaMvReal()), batCarregando ? "true" : "false", bambuLigado() ? "true" : "false", jsonLimpo(bi.estado, m2, sizeof m2), bi.pct,
+           TEM_SOM ? (somLigado ? 1 : 0) : -1, TEM_SOM ? somVolume : 0, IDIOMA_COD[idioma], (unsigned)corRostoAtual);
+  String s = b;
+  for (int i = 0; i < histN; i++) {
+    const Hist& h = hist[(histPos - histN + i + HIST_N) % HIST_N];
+    char e[80], ev[sizeof h.ev]; snprintf(e, sizeof e, "%s{\"t\":%ld,\"ev\":\"%s\",\"cara\":%d}", i ? "," : "", h.t, jsonLimpo(h.ev, ev, sizeof ev), h.cara);
+    s += e;
+  }
+  s += "]}\n";
+  web.send(200, "application/json", s);
+}
+
 void webEvento() {
   if (!autorizado()) { web.send(401, "text/plain", "segredo invalido\n"); return; }
   if (demo) { web.send(200, "text/plain", "ok\n"); return; }      // demonstracao: nada atropela o roteiro
@@ -2613,6 +2657,7 @@ void webEvento() {
   registra("local evento: %s %s%s (n=%d)", tipo, humor, acaoEvento, dados.n);
   trataEvento(tipo, humor);
   somDoEvento(tipo);
+  historico(tipo, humor[0] ? humor : acaoEvento, (int)caraDesejada());
   web.send(200, "text/plain", "ok\n");
 }
 
@@ -2638,10 +2683,42 @@ void webLog() {
   web.send(200, "text/plain", s);
 }
 
+void executaCmd(JsonDocument& doc);
 void webCmd() {
   if (!autorizado()) { web.send(401, "text/plain", "segredo invalido\n"); return; }
   JsonDocument doc;
   if (deserializeJson(doc, web.arg("plain"))) { web.send(400, "text/plain", "json invalido\n"); return; }
+  executaCmd(doc);
+}
+// O painel web manda os mesmos comandos, com a chave de leitura no lugar do
+// segredo, mas so os inofensivos: som, cor, idioma, mostrar telas, jogos, demo,
+// reiniciar e desligar. Firmware, Wi-Fi, segredo e impressora ficam de fora.
+void webPainelCmd() {
+  if (cfgLeitura.length() < 16 || web.arg("k") != cfgLeitura) { web.send(401, "text/plain", "chave invalida\n"); return; }
+  JsonDocument doc;
+  if (deserializeJson(doc, web.arg("plain")) || !doc.is<JsonObject>()) { web.send(400, "text/plain", "json invalido\n"); return; }
+  static const char* const PODE[] = {"som", "volume", "cor", "salvar", "paleta", "idioma", "consumo", "painel", "velha", "genius", "demo", "reiniciar", "desligar"};
+  for (JsonPair kv : doc.as<JsonObject>()) {
+    bool ok = false;
+    for (const char* k : PODE) if (!strcmp(kv.key().c_str(), k)) ok = true;
+    if (!ok) { web.send(403, "text/plain", "nao pelo painel\n"); return; }
+  }
+  if (doc["som"].is<const char*>()) {                 // sons enviados pela rede: apagar ou trocar so pelo PC
+    const char* k = doc["som"];
+    if (!strncmp(k, "apaga", 5) || !strcmp(k, "padrao")) { web.send(403, "text/plain", "nao pelo painel\n"); return; }
+  }
+  registra("painel web: comando");
+  executaCmd(doc);
+}
+void executaCmd(JsonDocument& doc) {
+  // {"leitura":"..."}: chave de leitura do painel web (claudinho.sh web)
+  if (doc["leitura"].is<const char*>()) {
+    String k = doc["leitura"].as<String>();
+    if (k.length() >= 16 && k.length() <= 64) {
+      cfgLeitura = k; prefs.begin("claudinho", false); prefs.putString("leitura", k); prefs.end();
+      registra("painel web: chave gravada");
+    }
+  }
   if (doc["cor"].is<JsonArray>()) {
     corRostoAtual = RGB565(doc["cor"][0].as<int>(), doc["cor"][1].as<int>(), doc["cor"][2].as<int>());
     if (doc["salvar"] | false) gravaCor(corRostoAtual);
@@ -2889,6 +2966,9 @@ void iniciaLocal() {
   web.collectHeaders(cabecalhos, 1);
   web.on("/", HTTP_GET, webRaiz);
   web.on("/mini.json", HTTP_GET, webMini);
+  web.on("/painel", HTTP_GET, webPainel);
+  web.on("/painel.json", HTTP_GET, webPainelJson);
+  web.on("/painel/cmd", HTTP_POST, webPainelCmd);
   web.on("/log", HTTP_GET, webLog);
   web.on("/estado", HTTP_POST, webEstado);
   web.on("/evento", HTTP_POST, webEvento);
@@ -2906,6 +2986,7 @@ void iniciaLocal() {
 void carregaConfig() {
   prefs.begin("claudinho", true);
   cfgSsid = prefs.getString("ssid", ""); cfgSenha = prefs.getString("senha", ""); cfgToken = prefs.getString("token", "");
+  cfgLeitura = prefs.getString("leitura", "");
   corRostoAtual = prefs.getUShort("cor", COR_ROSTO);
   somLigado = prefs.getBool("som", true); somVolume = prefs.getInt("som_vol", 100);
   { int i = idiomaPorCodigo(prefs.getString("idioma", "en").c_str()); idioma = i < 0 ? 0 : i; }

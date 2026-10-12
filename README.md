@@ -32,6 +32,10 @@ the 5-hour and 7-day windows.
 - **Voice and battery (single board).** On the E32R28T, Claudinho speaks a
   robot language of beeps through a small speaker, and runs on a battery
   charged by the board itself.
+- **Web panel on the board itself.** `claudinho.sh web` opens a page the
+  board serves on your network: current face, usage, Wi-Fi, battery, the
+  last events, and harmless settings (sound, volume, face color, language,
+  games, demo). Idea from [bserking's round-screen fork](https://github.com/bserking/claudinho_GC9A01).
 - **Optional: your Bambu Lab printer.** Claudinho can also connect straight
   to a Bambu 3D printer on your network and show a print panel plus alerts
   (started, paused and why, finished, failed...) that stay until you tap.
@@ -352,6 +356,10 @@ before sending anything: the screen shows a "tap to allow" message and waits
 1 minute. Without someone in front of it, nobody swaps the firmware, not even
 someone who sniffed the secret on your network.
 
+Before sending, the scripts also check the firmware against
+`firmware/bin/SHA256SUMS` and refuse a file that was corrupted or altered
+(idea from [bserking's fork](https://github.com/bserking/claudinho_GC9A01)).
+
 It's safe: the ESP32 writes the new firmware to a spare partition and only
 switches if everything arrived intact. If the network drops halfway, it
 keeps running the current firmware and you just try again. On the classic
@@ -631,6 +639,13 @@ your Anthropic account.
   board on USB: `bash <plugin>/scripts/esptool.sh --port PORT erase-flash`.
 - **On a shared network** (office, coworking), prefer a devices-only network
   if there is one.
+- **Web panel.** It has its own read key, separate from the secret: it
+  shows the status and allows only harmless settings (sound, color,
+  language, showing screens, games, demo, restart, turn off). Firmware,
+  Wi-Fi, the secret and the printer stay behind the secret, and the
+  firmware still needs a tap. The key lives only on your computer (in the
+  address `claudinho.sh web` opens); anyone on your network who sees it
+  could mute Claudinho or change its color, nothing more.
 - **Bambu printer (optional).** You type its LAN access code without it being shown, and it is
   stored only on the board; the computer doesn't keep it. It goes to the board
   once, over the local network with Claudinho's secret (same plain HTTP as
