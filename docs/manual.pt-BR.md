@@ -224,6 +224,21 @@ leva uns 10 minutos (a subida é lenta). Para guardar por uns dias, o `claudinho
 põe a placa em sono profundo, gastando quase nada; aperte **BOOT** (ou RESET)
 para ligar de novo.
 
+## Claudinho virtual (sem placa)
+
+Ainda sem placa? O `claudinho.sh virtual` (ou peça ao Claude "liga o
+Claudinho virtual") sobe um servidorzinho local que faz o papel da placa e
+abre o Claudinho numa aba do navegador: a caixa em 3D com o rosto
+funcionando, ou só a tela (botão "Ver só a tela"), com o consumo do plano ao
+lado. Arraste para girar, use a rodinha para aproximar. Ele reage aos mesmos
+eventos da placa, não gasta tokens e só escuta em `127.0.0.1`.
+
+- Depois de reiniciar o computador, rode de novo.
+- `claudinho.sh virtual parar` desliga e aponta o plugin de volta para a
+  placa, se havia uma.
+- Só quer olhar? A [demonstração online](https://argeuthiesen.github.io/claudinho/?lang=pt)
+  roda com eventos de mentira, sem instalar nada.
+
 ## Modo demonstração
 
 Quer filmar o Claudinho ou mostrar para alguém? Rode `claudinho.sh demo` (ou

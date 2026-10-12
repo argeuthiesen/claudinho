@@ -18,13 +18,80 @@
 #   claudinho.sh demo [parar]         modo demonstracao: trailer de ~2 min para filmar (um toque interrompe)
 #   claudinho.sh cena <tipo>          testa uma cena: codando, terminal, lendo, agente
 #   claudinho.sh alerta [bom|ruim|filamento|hms]  alerta de exemplo da impressora
+#   claudinho.sh virtual [parar]      Claudinho virtual: o mascote numa aba do navegador, sem placa
 # O segredo nunca vai na linha de comando (ver curl_claudinho no comum.sh).
 source "$(dirname "$0")/comum.sh"
+
+num() { case "$1" in ''|*[!0-9]*) return 1 ;; esac; }
+
+# Claudinho virtual: um servidorzinho local (virtual/servidor.py) faz o papel
+# da placa em 127.0.0.1 e a pagina mostra o rosto. Os hooks e a status line
+# nao mudam: so o endereco do Claudinho passa a ser o do servidor. "parar"
+# desliga e volta para a placa (se havia uma).
+if [ "${1:-}" = virtual ]; then
+  PORTA=$(le_config CLAUDINHO_PORTA_VIRTUAL); PORTA=${PORTA:-8737}
+  num "$PORTA" || { echo "CLAUDINHO_PORTA_VIRTUAL invalida" >&2; exit 1; }
+  PID="$DADOS/virtual.pid"
+  # Para o servidor anterior, conferindo que o PID e mesmo dele (PID velho
+  # depois de reiniciar o computador pode ser de outro programa).
+  if [ -f "$PID" ]; then
+    p=$(cat "$PID")
+    if num "$p" && ps -p "$p" -o args= 2>/dev/null | grep -q 'virtual/servidor.py'; then
+      kill "$p" 2>/dev/null
+      for i in $(seq 15); do kill -0 "$p" 2>/dev/null || break; sleep 0.2; done
+    fi
+    rm -f "$PID"
+  fi
+  atual=$(le_config CLAUDINHO_IP)
+  if [ "${2:-}" = parar ]; then
+    case "$atual" in 127.0.0.1:*) grava_config CLAUDINHO_IP "$(le_config CLAUDINHO_IP_PLACA)" ;; esac
+    rm -f "$DADOS/virtual.url"
+    echo "Claudinho virtual desligado."; exit 0
+  fi
+  PY=""
+  for c in python3 python "py -3"; do
+    $c -c 'import sys; sys.exit(sys.version_info < (3, 8))' >/dev/null 2>&1 && { PY=$c; break; }
+  done
+  [ -n "$PY" ] || { echo "precisa do Python 3.8 ou mais novo" >&2; exit 1; }
+  gera() { $PY -c 'import secrets,sys;sys.stdout.write(secrets.token_hex(24))' | tr -d '\r'; }
+  TOKEN=$(le_config CLAUDINHO_TOKEN)
+  if [ -z "$TOKEN" ]; then TOKEN=$(gera) && [ -n "$TOKEN" ] || exit 1; grava_config CLAUDINHO_TOKEN "$TOKEN"; fi
+  CHAVE=$(gera); OI=$(gera)
+  [ -n "$CHAVE" ] && [ -n "$OI" ] || exit 1
+  # segredo, chave de leitura e "oi" vao pela entrada padrao, fora da linha de comando
+  nohup $PY "$RAIZ/virtual/servidor.py" "$PORTA" >/dev/null 2>&1 < <(printf '%s\n%s\n%s\n' "$TOKEN" "$CHAVE" "$OI") &
+  echo $! > "$PID"; disown 2>/dev/null || true
+  # So aceita se quem responde na porta e o servidor que acabou de subir (o "oi" bate)
+  ok=""
+  for i in $(seq 25); do
+    case "$(curl -s -m 1 "http://127.0.0.1:$PORTA/mini.json" 2>/dev/null)" in *"\"oi\": \"$OI\""*) ok=1; break ;; esac
+    sleep 0.2
+  done
+  if [ -z "$ok" ]; then
+    kill "$(cat "$PID")" 2>/dev/null; rm -f "$PID"
+    echo "o servidor nao subiu (porta $PORTA ocupada? escolha outra: CLAUDINHO_PORTA_VIRTUAL no claudinho.env)" >&2; exit 1
+  fi
+  case "$atual" in 127.0.0.1:*|'') ;; *) grava_config CLAUDINHO_IP_PLACA "$atual" ;; esac
+  grava_config CLAUDINHO_IP "127.0.0.1:$PORTA"
+  URL="http://127.0.0.1:$PORTA/#k=$CHAVE"
+  printf '%s\n' "$URL" > "$DADOS/virtual.url"
+  if [ -z "${CLAUDINHO_SEM_NAVEGADOR:-}" ]; then
+    case "$(ambiente)" in
+      wsl|windows) cmd.exe /c start "" "$URL" >/dev/null 2>&1 ;;
+      mac) open "$URL" ;;
+      linux) xdg-open "$URL" >/dev/null 2>&1 & ;;
+    esac
+  fi
+  echo "Claudinho virtual ligado. Se o navegador nao abriu, o endereco esta em $DADOS/virtual.url"
+  echo "Ele reage ao Claude Code a partir da proxima acao. Depois de reiniciar o computador, rode de novo."
+  echo "Para voltar para a placa: claudinho.sh virtual parar"
+  exit 0
+fi
+
 IP=$(le_config CLAUDINHO_IP)
 [ -n "$IP" ] || { echo "Claudinho ainda nao configurado (rode a skill /claudinho:configurar)" >&2; exit 1; }
 J=(-H 'Content-Type: application/json')
 uso() { sed -n '2,20p' "$0"; exit 1; }
-num() { case "$1" in ''|*[!0-9]*) return 1 ;; esac; }
 palavra() { case "$1" in *[!a-z_]*) return 1 ;; esac; }    # so letras minusculas e _ (ou vazio)
 cmd() { curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/cmd" -d "$1"; }
 mini() { curl_claudinho -s -m 5 "http://$IP/mini.json"; }

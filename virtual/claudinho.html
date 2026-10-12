@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claudinho virtual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+  :root { --fundo:#1d1c1c; --cartao:#2a2828; --texto:#f2f3f4; --apagado:#a5a09d; --ouro:#d0ad6c;
+          --ok:#7bbf7b; --alerta:#d9a25a; --critico:#c96f6f; --trilho:#454343; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--fundo); color:var(--texto); font-family:"DM Sans", system-ui, sans-serif; }
+  body { display:flex; flex-direction:column; }
+  header { display:flex; align-items:center; gap:12px; padding:10px 16px; }
+  header h1 { font-size:18px; margin:0; font-weight:700; }
+  header .estado { font-size:13px; color:var(--apagado); display:flex; align-items:center; gap:6px; }
+  header .ponto { width:8px; height:8px; border-radius:50%; background:var(--apagado); }
+  header .ponto.ok { background:var(--ok); }
+  header .espaco { flex:1; }
+  header button { background:var(--cartao); color:var(--texto); border:1px solid var(--trilho); border-radius:8px;
+                  padding:6px 12px; font:inherit; font-size:13px; cursor:pointer; }
+  header button:hover { border-color:var(--ouro); }
+  main { flex:1; display:flex; min-height:0; }
+  #palco { flex:1; position:relative; min-width:0; }
+  #palco canvas { display:block; }
+  #plano { position:absolute; inset:0; display:none; align-items:center; justify-content:center; }
+  #plano canvas { width:min(90%, 640px); aspect-ratio:4/3; height:auto; image-rendering:pixelated;
+                  border-radius:10px; box-shadow:0 10px 40px #0008; }
+  aside { width:280px; padding:16px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
+  .cartao { background:var(--cartao); border-radius:12px; padding:14px; }
+  .cartao h2 { margin:0 0 8px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--apagado); font-weight:700; }
+  .linha { display:flex; justify-content:space-between; align-items:baseline; margin:10px 0 4px; font-size:14px; }
+  .linha b { font-size:20px; }
+  .barra { height:8px; border-radius:4px; background:var(--trilho); overflow:hidden; }
+  .barra i { display:block; height:100%; width:0; background:var(--ok); transition:width .4s, background .4s; }
+  .miudo { font-size:12px; color:var(--apagado); margin-top:4px; }
+  .aviso { font-size:12px; color:var(--apagado); line-height:1.5; }
+  .aviso a { color:var(--ouro); }
+  @media (max-width: 760px) {
+    main { flex-direction:column; }
+    #palco { min-height:60vh; }
+    aside { width:auto; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Claudinho</h1>
+  <span class="estado"><span class="ponto" id="ponto"></span><span id="conexao"></span></span>
+  <span class="espaco"></span>
+  <button id="vista"></button>
+</header>
+<main>
+  <div id="palco"><div id="plano"></div></div>
+  <aside>
+    <div class="cartao">
+      <h2 id="t-consumo"></h2>
+      <div class="linha"><span id="t-5h"></span><b id="v5">—</b></div>
+      <div class="barra"><i id="b5"></i></div>
+      <div class="miudo" id="r5"></div>
+      <div class="linha"><span id="t-7d"></span><b id="v7">—</b></div>
+      <div class="barra"><i id="b7"></i></div>
+      <div class="miudo" id="r7"></div>
+      <div class="linha"><span id="t-ctx"></span><b id="vc">—</b></div>
+      <div class="barra"><i id="bc"></i></div>
+    </div>
+    <div class="cartao">
+      <h2 id="t-sessao"></h2>
+      <div class="linha"><span id="t-modelo"></span><span id="vm">—</span></div>
+      <div class="linha"><span id="t-sessoes"></span><span id="vn">0</span></div>
+    </div>
+    <p class="aviso" id="t-aviso"></p>
+  </aside>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+"use strict";
+// ---------------------------------------------------------------- idioma
+const params = new URLSearchParams(location.search);
+// Servido pelo claudinho.sh virtual (127.0.0.1, com a chave de leitura no
+// endereco): ao vivo. Em qualquer outro lugar (GitHub Pages, arquivo): demonstracao.
+const LOCAL = ["127.0.0.1", "localhost"].includes(location.hostname);
+const CHAVE = new URLSearchParams(location.hash.slice(1)).get("k") || "";
+const DEMO = !LOCAL || !CHAVE || params.has("demo");
+// a demonstracao publica abre em ingles; ?lang=pt para portugues
+const PT = (params.get("lang") || (LOCAL ? navigator.language : "en") || "en").toLowerCase().startsWith("pt");
+const T = PT ? {
+  conectado: "ligado ao seu Claude Code", esperando: "esperando o Claude Code...", demo: "demonstração",
+  v2d: "Ver só a tela", v3d: "Ver em 3D", consumo: "Consumo do plano", h5: "Janela de 5 horas", d7: "Janela de 7 dias",
+  ctx: "Contexto da sessão", sessao: "Sessão", modelo: "Modelo", sessoes: "Sessões abertas", reseta: "renova em ",
+  aviso: 'Este é o Claudinho virtual: o mesmo rosto da placa, reagindo ao seu Claude Code de verdade, sem gastar tokens. Gostou? O de verdade fica na sua mesa: <a href="https://github.com/argeuthiesen/claudinho" target="_blank" rel="noopener">veja como montar</a>.',
+  avisoDemo: 'Demonstração com eventos de mentira. Com o plugin instalado, o Claudinho virtual reage ao seu Claude Code de verdade: <a href="https://github.com/argeuthiesen/claudinho" target="_blank" rel="noopener">veja como</a>.',
+  leg: { oi:"Oi! Sessão nova", pensando:"Pensando...", trabalhando:"Trabalhando...", desconfiado:"Hmm, quantos passos...",
+         empolgado:"Eba!", preocupado:"Xi, um bug?", susto:"Opa!", erro:"Ops, algo falhou", pronto:"Pronto!",
+         atencao:"Preciso de você!", compact:"Arrumando a memória...", commit:"Commit feito!", teste_ok:"Testes passaram!",
+         teste_falhou:"Testes falharam", janela:"Janela de uso nova!" },
+  agente: "agente %d", delegando: "delegando"
+} : {
+  conectado: "connected to your Claude Code", esperando: "waiting for Claude Code...", demo: "demo",
+  v2d: "Screen only", v3d: "3D view", consumo: "Plan usage", h5: "5-hour window", d7: "7-day window",
+  ctx: "Session context", sessao: "Session", modelo: "Model", sessoes: "Open sessions", reseta: "resets in ",
+  aviso: 'This is the virtual Claudinho: the same face as the board, reacting to your real Claude Code, spending no tokens. Like it? The real one sits on your desk: <a href="https://github.com/argeuthiesen/claudinho" target="_blank" rel="noopener">see how to build it</a>.',
+  avisoDemo: 'Demo with made-up events. With the plugin installed, the virtual Claudinho reacts to your real Claude Code: <a href="https://github.com/argeuthiesen/claudinho" target="_blank" rel="noopener">see how</a>.',
+  leg: { oi:"Hi! New session", pensando:"Thinking...", trabalhando:"Working...", desconfiado:"Hmm, so many steps...",
+         empolgado:"Yay!", preocupado:"Uh oh, a bug?", susto:"Whoa!", erro:"Oops, something failed", pronto:"Done!",
+         atencao:"I need you!", compact:"Tidying up memory...", commit:"Committed!", teste_ok:"Tests passed!",
+         teste_falhou:"Tests failed", janela:"Fresh usage window!" },
+  agente: "agent %d", delegando: "delegating"
+};
+document.documentElement.lang = PT ? "pt-BR" : "en";
+for (const [id, k] of [["t-consumo","consumo"],["t-5h","h5"],["t-7d","d7"],["t-ctx","ctx"],["t-sessao","sessao"],["t-modelo","modelo"],["t-sessoes","sessoes"]])
+  document.getElementById(id).textContent = T[k];
+
+// ---------------------------------------------------------------- rosto (porte do firmware)
+// Grade de 40 x 30 celulas de 8 px, numa tela de 320 x 240: igual a placa.
+const CEL = 8, OLHO_ESQ_X = 6, OLHO_DIR_X = 34, OLHO_Y = 11;
+const COR = { olho:"#1e1c1c", rosto:"#f0691e", zzz:"#8a4410", bravo:"#8c0e0e", azul:"#4a8fd9" };
+const C = { DORMINDO:0, NEUTRO:1, PENSANDO:2, TRABALHANDO:3, ESPERANDO:4, TERMINOU:5, FELIZ:6, EMPOLGADO:7,
+            PREOCUPADO:8, SUSTO:9, ZONZO:10, CANSADO:11, SUANDO:12, BRAVO:13, TRISTE:14, DESCONFIADO:15 };
+const B = { NENHUMA:0, SORRISO:1, ABERTA:2, O:3, O_PEQ:4, TRISTE:5, BRAVA:6, ONDA:7, RETA:8 };
+
+const tela = document.createElement("canvas"); tela.width = 320; tela.height = 240;
+const g = tela.getContext("2d");
+function preenche(x, y, w, h, cor) { g.fillStyle = cor; g.fillRect(x, y, w, h); }
+function celula(cx, cy, w, h, cor) { preenche(cx * CEL, cy * CEL, w * CEL, h * CEL, cor); }
+
+function novoOlho() { return { w:5, h:11, dx:0, dy:0, palpebra:0, fundo:0, domo:false, diag:0, diagN:0, xis:false, chev:0 }; }
+function recorte(o, r) {
+  let deBaixo = o.h - 1 - r, arred = 0;
+  if (o.w >= 10) { if (r == 0 || deBaixo == 0) arred = 2; else if (r == 1 || deBaixo == 1) arred = 1; }
+  else if (o.w >= 7) { if (r == 0 || deBaixo == 0) arred = 1; }
+  let ext = arred, int = arred;
+  if (o.domo) { const meio = o.h >> 1; if (r < meio) { const c = meio - r; ext = Math.max(ext, c); int = Math.max(int, c); } }
+  if (o.diag != 0 && r < o.diagN) { const c = o.diagN - r; if (o.diag > 0) ext = Math.max(ext, c); else int = Math.max(int, c); }
+  return [ext, int];
+}
+function desenhaOlho(o, centroX, esq, cor) {
+  const x0 = centroX + o.dx - (o.w >> 1), y0 = OLHO_Y + o.dy - (o.h >> 1);
+  const retangulo = o.chev == 0 && !o.xis && o.diag == 0 && !o.domo && o.w < 7;
+  if (o.chev == 1) {
+    const n = o.h | 1, meio = n >> 1, oy = y0 + ((o.h - n) >> 1), esp = o.w >= 5 ? 2 : 1;
+    for (let r = 0; r < n; r++) { const passo = Math.abs(r - meio); celula(esq ? (x0 + o.w - esp - passo) : (x0 + passo), oy + r, esp, 1, cor); }
+  } else if (o.chev == 2) {
+    const n = o.w | 1, meio = n >> 1, ox = x0 + ((o.w - n) >> 1);
+    for (let c = 0; c < n; c++) celula(ox + c, y0 + 1 + Math.abs(c - meio), 1, 2, cor);
+  } else if (o.xis) {
+    const n = Math.min(o.w, o.h) - 1, ox = x0 + ((o.w - n) >> 1), oy = y0 + ((o.h - n) >> 1);
+    if (o.fundo == 99) { celula(ox + (n >> 1), oy, 1, n, cor); celula(ox, oy + (n >> 1), n, 1, cor); }
+    else for (let k = 0; k < n; k++) { celula(ox + k, oy + k, 1, 1, cor); celula(ox + n - 1 - k, oy + k, 1, 1, cor); }
+  } else if (retangulo) {
+    const alt = o.h - o.palpebra - o.fundo;
+    if (alt > 0) celula(x0, y0 + o.palpebra, o.w, alt, cor);
+  } else {
+    for (let r = 0; r < o.h; r++) {
+      if (r < o.palpebra || r >= o.h - o.fundo) continue;
+      const [ce, ci] = recorte(o, r), e = esq ? ce : ci, d = esq ? ci : ce, larg = o.w - e - d;
+      if (larg > 0) celula(x0 + e, y0 + r, larg, 1, cor);
+    }
+  }
+}
+function desenhaBoca(b) {
+  const y = 21, c = COR.olho;
+  switch (b) {
+    case B.SORRISO: celula(15,y,1,1,c); celula(25,y,1,1,c); celula(16,y+1,1,1,c); celula(24,y+1,1,1,c); celula(17,y+2,7,1,c); break;
+    case B.ABERTA:  celula(15,y,11,1,c); celula(16,y+1,9,2,c); celula(17,y+3,7,1,c); break;
+    case B.O:       celula(18,y,5,4,c); celula(19,y+1,3,2,COR.rosto); break;
+    case B.O_PEQ:   celula(19,y+1,3,2,c); break;
+    case B.TRISTE:  celula(17,y,7,1,c); celula(16,y+1,1,1,c); celula(24,y+1,1,1,c); celula(15,y+2,1,1,c); celula(25,y+2,1,1,c); break;
+    case B.BRAVA:   celula(23,y,3,1,c); celula(19,y+1,4,1,c); celula(15,y+2,4,1,c); break;
+    case B.ONDA:    celula(15,y,2,1,c); celula(19,y,2,1,c); celula(23,y,2,1,c); celula(17,y+1,2,1,c); celula(21,y+1,2,1,c); celula(25,y+1,1,1,c); break;
+    case B.RETA:    celula(16,y+1,9,1,c); break;
+  }
+}
+function zeta(x, y, u, cor) {
+  preenche(x, y, 5*u, u, cor);
+  for (let k = 0; k < 3; k++) preenche(x + (3-k)*u, y + (k+1)*u, u, u, cor);
+  preenche(x, y + 4*u, 5*u, u, cor);
+}
+function interrogacao(x, y, c) { celula(x+1,y,3,1,c); celula(x,y+1,1,1,c); celula(x+4,y+1,1,2,c); celula(x+3,y+3,1,1,c); celula(x+2,y+4,1,1,c); celula(x+2,y+6,1,1,c); }
+function exclamacao(x, y, c) { celula(x,y,2,5,c); celula(x,y+6,2,1,c); }
+function extras(c, fase) {
+  switch (c) {
+    case C.DORMINDO: { const n = (fase >> 2) % 4;
+      if (n >= 1) zeta(112, 76, 4, COR.zzz); if (n >= 2) zeta(140, 40, 6, COR.zzz); if (n >= 3) zeta(176, 0, 8, COR.zzz); } break;
+    case C.PENSANDO: { const n = (fase >> 1) % 4; for (let k = 0; k < n; k++) celula(17 + k*3, 4, 1, 1, COR.olho); } break;
+    case C.ESPERANDO: if (((fase >> 1) % 2) == 0) interrogacao(18, 2, COR.olho); break;
+    case C.SUSTO: exclamacao(19, 1, COR.olho); break;
+    case C.SUANDO: { const q = fase % 6; celula(38,2+q,1,2,COR.azul); celula(37,4+q,3,2,COR.azul); celula(38,6+q,1,1,COR.azul); } break;
+    case C.TRISTE: { const q = fase % 8; celula(5,18+q,2,2,COR.azul); celula(5,20+q,1,1,COR.azul); } break;
+  }
+}
+function expressao(c, fase) {
+  const e = novoOlho(), d = novoOlho(), x = { e, d, boca:B.NENHUMA, cor:COR.olho };
+  const quica = ((fase >> 1) & 1) ? -1 : 0;
+  switch (c) {
+    case C.DORMINDO:    e.palpebra = d.palpebra = 10; e.dy = d.dy = 2; break;
+    case C.PENSANDO:    e.dx = d.dx = 2; e.dy = d.dy = -2; d.palpebra = 4; e.palpebra = 1; break;
+    case C.TRABALHANDO: { const dx = (fase & 1) ? 3 : -3; e.dx = d.dx = dx; e.h = d.h = 7; e.dy = d.dy = 2; } break;
+    case C.ESPERANDO:   e.w = d.w = 6; e.h = d.h = 14; x.boca = B.O_PEQ; break;
+    case C.SUSTO:       e.w = d.w = 8; e.h = d.h = 16; e.dy = d.dy = fase < 2 ? -2 : 0; x.boca = B.O; break;
+    case C.TERMINOU:    d.chev = 1; d.h = 11; break;
+    case C.FELIZ:       e.chev = d.chev = 2; e.w = d.w = 7; e.dy = d.dy = quica; x.boca = B.SORRISO; break;
+    case C.EMPOLGADO:   e.chev = d.chev = 1; e.h = d.h = 13; e.dy = d.dy = quica; x.boca = B.ABERTA; break;
+    case C.BRAVO:       e.diag = d.diag = -1; e.diagN = d.diagN = 5; e.dx = 1; d.dx = -1;
+                        { const tr = fase < 6 ? ((fase & 1) ? 1 : -1) : 0; e.dx += tr; d.dx += tr; }
+                        x.cor = COR.bravo; x.boca = B.BRAVA; break;
+    case C.PREOCUPADO:  e.diag = d.diag = 1; e.diagN = d.diagN = 5; e.dy = d.dy = 2; x.boca = B.TRISTE; break;
+    case C.TRISTE:      e.h = d.h = 7; e.dy = d.dy = 4; e.dx = -1; d.dx = 1; x.boca = B.TRISTE; break;
+    case C.DESCONFIADO: d.palpebra = 5; e.w = 6; e.h = 12; e.dx = d.dx = -2; x.boca = B.RETA; break;
+    case C.ZONZO:       e.xis = d.xis = true; e.w = d.w = 7; e.h = d.h = 7; e.fundo = d.fundo = (fase & 1) ? 99 : 0; x.boca = B.ONDA; break;
+    case C.CANSADO:     e.palpebra = d.palpebra = 5; e.dy = d.dy = 1; break;
+    case C.SUANDO:      e.palpebra = d.palpebra = 5; e.diag = d.diag = 1; e.diagN = d.diagN = 2; e.dy = d.dy = 1; x.boca = B.ONDA; break;
+  }
+  return x;
+}
+const ANIMADA = new Set([C.TRABALHANDO, C.DORMINDO, C.PENSANDO, C.ESPERANDO, C.SUSTO, C.FELIZ, C.EMPOLGADO, C.BRAVO, C.ZONZO, C.SUANDO, C.TRISTE]);
+const PISCA = new Set([C.NEUTRO, C.CANSADO, C.ESPERANDO, C.PREOCUPADO, C.DESCONFIADO, C.PENSANDO]);
+
+// ---------------------------------------------------------------- cenas (porte do firmware)
+// Enquanto o Claude usa ferramentas: editor (Edit/Write), terminal (Bash),
+// chuva do Matrix (Read/Grep) ou organograma (Agent). Tudo de mentira: o hook
+// manda so a categoria. Cada cena fica pelo menos 8 s; 12 s sem ferramenta,
+// volta ao rosto. Desenho incremental, como na placa.
+const S = { NENHUMA:-1, CODANDO:0, TERMINAL:1, LENDO:2, AGENTE:3 };
+const MONO_W = 7, MONO_LH = 17, CENA_MIN_MS = 8000, CENA_FIM_MS = 12000;
+const FUNDO = "#363435", OURO = "#d0ad6c", TEXTO = "#f2f3f4", APAGADO = "#a5a09d";
+const rgb = (r, gg, b) => `rgb(${r},${gg},${b})`;
+const sorteia = (a, b) => b === undefined ? Math.floor(Math.random() * a) : a + Math.floor(Math.random() * (b - a));
+let pagina = 0, paginaDesde = 0, cenaAtual = S.NENHUMA, cenaDesde = 0, cenaProx = 0;
+function escreve(x, y, w, h, mono, cor, fundo, alin, t) {
+  if (fundo) preenche(x, y, w, h, fundo);
+  g.fillStyle = cor; g.textBaseline = "middle";
+  g.font = mono ? `${MONO_W / 0.6}px 'JetBrains Mono', monospace` : "16px 'DM Sans', sans-serif";
+  g.textAlign = alin == 1 ? "center" : alin == 2 ? "right" : "left";
+  g.fillText(t, alin == 1 ? x + w / 2 : alin == 2 ? x + w : x, y + h / 2 + 1);
+}
+function cenaDe(a) { return { codando:S.CODANDO, terminal:S.TERMINAL, lendo:S.LENDO, agente:S.AGENTE }[a] ?? S.NENHUMA; }
+
+// ---- mini Clawd (pixel de 4): corpo 10x7, bracinhos, 4 perninhas
+let miniP = 4, miniX = 0, miniY = 0, miniFundo = "#000";
+const MINI_W = () => 14 * miniP, MINI_H = () => 9 * miniP;
+function miniCel(cx, cy, w, h, c) { preenche(miniX + cx * miniP, miniY + cy * miniP, w * miniP, h * miniP, c); }
+function miniClawd(x, y, fundo) {
+  miniX = x; miniY = y; miniFundo = fundo; const r = COR.rosto;
+  preenche(x, y, MINI_W(), MINI_H(), fundo);
+  miniCel(2, 0, 10, 7, r); miniCel(0, 3, 2, 2, r); miniCel(12, 3, 2, 2, r);
+  miniCel(3, 7, 1, 2, r); miniCel(5, 7, 1, 2, r); miniCel(8, 7, 1, 2, r); miniCel(10, 7, 1, 2, r);
+  miniCel(4, 2, 1, 3, COR.olho); miniCel(9, 2, 1, 3, COR.olho);
+}
+function miniBracos(sobe) {
+  const r = COR.rosto;
+  miniCel(0, 2, 2, 3, miniFundo); miniCel(12, 2, 2, 3, miniFundo);
+  miniCel(0, (sobe & 1) ? 2 : 3, 2, 2, r); miniCel(12, (sobe & 2) ? 2 : 3, 2, 2, r);
+}
+function miniOlhos(dx) { miniCel(3, 2, 8, 3, COR.rosto); miniCel(4 + dx, 2, 1, 3, COR.olho); miniCel(9 + dx, 2, 1, 3, COR.olho); }
+const cantoMini = fundo => miniClawd(320 - MINI_W() - 4, 240 - MINI_H() - 2, fundo);
+
+// ---- editor: codigo de mentira, com cores de sintaxe, digitado e rolando
+const CK = "\x01", CF = "\x02", CS = "\x03", CC = "\x04", CN = "\x05", CP = "\x06", CT = "\x07";
+const CODIGO = [
+  CC + "// acorda o Claudinho", CT + "void " + CF + "acorda" + CP + "() {", CT + "  int " + CP + "n = " + CN + "42" + CP + ";",
+  CK + "  if " + CP + "(n > " + CN + "0" + CP + ") {", CP + "    tela." + CF + "pisca" + CP + "(" + CN + "3" + CP + ");",
+  CF + "    fala" + CP + "(" + CS + "'oi!'" + CP + ");", CP + "  }",
+  CK + "  for " + CP + "(" + CT + "int " + CP + "i = " + CN + "0" + CP + "; i < n; i++)", CP + "    olho[i] = " + CK + "true" + CP + ";",
+  CP + "}", "", CC + "// quanto custa? nada.", CT + "int " + CF + "tokens" + CP + "() {", CK + "  return " + CN + "0" + CP + ";", CP + "}", "",
+  CT + "bool " + CF + "feliz" + CP + "(" + CT + "int " + CP + "humor) {", CK + "  while " + CP + "(humor < " + CN + "10" + CP + ")",
+  CP + "    humor += " + CF + "cafe" + CP + "();", CK + "  return true" + CP + ";", CP + "}", "",
+  CC + "/* TODO: dominar o mundo */", CT + "void " + CF + "loop" + CP + "() {", CF + "  acorda" + CP + "();",
+  CF + "  delay" + CP + "(" + CN + "10" + CP + ");", CP + "}", ""];
+const ED_TOPO = 22, ED_X = 30, ED_LINHAS = 12, ED_FUNDO = rgb(30, 30, 30), ED_PRE = "code claudinho.ino";
+let edTopo = 0, edCol = 0, edEspera = 0, edPre = 0;
+function edCor(c) { return [null, rgb(86,156,214), rgb(220,220,170), rgb(206,145,120), rgb(106,153,85), rgb(181,206,168), rgb(212,212,212), rgb(78,201,176)][c] || rgb(212,212,212); }
+const edTam = li => CODIGO[li % CODIGO.length].replace(/[\x01-\x07]/g, "").length;
+const edY = row => ED_TOPO + row * MONO_LH;
+const edLarg = row => edY(row) + 16 > miniY ? miniX - 2 : 320;
+function edLinha(row, li, ate) {
+  const y = edY(row); let col = 0, cor = edCor(6), seg = "";
+  preenche(0, y, edLarg(row), 16, ED_FUNDO);
+  escreve(0, y, 24, 16, true, rgb(110, 110, 110), null, 2, String(li % 1000 + 1));
+  const sai = () => { if (seg) { escreve(ED_X + (col - seg.length) * MONO_W, y, seg.length * MONO_W, 16, true, cor, null, 0, seg); seg = ""; } };
+  for (const ch of CODIGO[li % CODIGO.length]) {
+    const c = ch.charCodeAt(0);
+    if (c < 8) { sai(); cor = edCor(c); continue; }
+    if (ate >= 0 && col >= ate) break;
+    seg += ch; col++;
+  }
+  sai();
+}
+const edCursor = () => preenche(ED_X + edCol * MONO_W, edY(ED_LINHAS - 1) + 1, MONO_W, 14, rgb(230, 230, 230));
+function edInicio() { preenche(0, 0, 320, 240, "#000"); escreve(6, 20, MONO_W, 16, true, rgb(150, 255, 170), null, 0, "$"); edPre = 0; }
+function edAbre() {
+  preenche(0, 0, 320, 240, ED_FUNDO);
+  preenche(0, 0, 320, 20, rgb(45, 45, 45)); preenche(0, 0, 112, 20, ED_FUNDO); preenche(0, 18, 112, 2, COR.rosto);
+  escreve(6, 2, 104, 16, true, rgb(220, 220, 220), null, 0, "claudinho.ino");
+  cantoMini(ED_FUNDO);
+  edTopo = (edTopo + 5) % CODIGO.length;
+  for (let r = 0; r < ED_LINHAS - 1; r++) edLinha(r, edTopo + r, -1);
+  edCol = 0; edEspera = 0; edCursor();
+}
+function edPasso() {
+  const agora = agoraMs();
+  if (edPre >= 0) {
+    const n = ED_PRE.length;
+    if (edPre < n) { edPre++; escreve(6 + 2 * MONO_W, 20, edPre * MONO_W, 16, true, rgb(60, 220, 90), "#000", 0, ED_PRE.slice(0, edPre)); cenaProx = agora + 35 + sorteia(40); }
+    else if (edPre++ == n) cenaProx = agora + 350;
+    else { edPre = -1; edAbre(); cenaProx = agora + 200; }
+    return;
+  }
+  const li = edTopo + ED_LINHAS - 1, tam = edTam(li);
+  if (edCol < tam) { edCol++; edLinha(ED_LINHAS - 1, li, edCol); edCursor(); miniBracos(1 + (edCol & 1)); cenaProx = agora + 60 + sorteia(80); return; }
+  if (edEspera++ < 4) { miniBracos(0); cenaProx = agora + 120; return; }
+  edTopo++; edEspera = 0; edCol = 0;
+  for (let r = 0; r < ED_LINHAS - 1; r++) edLinha(r, edTopo + r, -1);
+  preenche(0, edY(ED_LINHAS - 1), edLarg(ED_LINHAS - 1), 16, ED_FUNDO);
+  edCursor(); cenaProx = agora + 150;
+}
+
+// ---- terminal: comandos digitados e respostas rolando
+const TERM = ["$git status", "On branch main", "nothing to commit, tree clean", "$make", "Compiling claudinho.ino ...",
+  "Linking firmware.bin", "Build OK (63% flash)", "$ping -c 2 claudinho.local", "64 bytes: time=3.1 ms", "64 bytes: time=2.8 ms",
+  "$./testes.sh", "rosto ......... ok", "painel ........ ok", "velha ......... ok", "12 passed, 0 failed", "$clear",
+  "$make upload", "Uploading 1246409 bytes", "[##########] 100%", "Done. Claudinho acordou.", "$uptime", "up 42 days, load 0.01", "$clear"];
+const TE_TOPO = 24, TE_X = 6, TE_LINHAS = 12, TE_FUNDO = rgb(8, 8, 8), TE_VERDE = rgb(60, 220, 90), TE_CLARO = rgb(150, 255, 170);
+let teLinha = 0, teCol = -1, teVis = [];
+const teY = row => TE_TOPO + row * MONO_LH;
+const teLarg = row => teY(row) + 16 > miniY ? miniX - 2 : 320;
+function teDesenha(row, i, ate) {
+  const t = TERM[i], y = teY(row);
+  preenche(0, y, teLarg(row), 16, TE_FUNDO);
+  if (t[0] == "$") {
+    escreve(TE_X, y, MONO_W, 16, true, TE_CLARO, null, 0, "$");
+    let b = t.slice(1); if (ate >= 0) b = b.slice(0, ate);
+    if (b) escreve(TE_X + 2 * MONO_W, y, b.length * MONO_W, 16, true, TE_VERDE, null, 0, b);
+    if (ate >= 0) preenche(TE_X + (2 + b.length) * MONO_W, y + 1, MONO_W, 14, TE_VERDE);
+  } else if (t) escreve(TE_X, y, t.length * MONO_W, 16, true, TE_VERDE, null, 0, t);
+}
+function teLimpa() { preenche(0, 20, 320, 220, TE_FUNDO); teVis = []; cantoMini(TE_FUNDO); }
+function teInicio() {
+  preenche(0, 0, 320, 240, TE_FUNDO); preenche(0, 0, 320, 20, rgb(40, 40, 40));
+  for (const [x, c] of [[11, rgb(237,106,94)], [25, rgb(245,191,79)], [39, rgb(98,197,84)]]) { g.fillStyle = c; g.beginPath(); g.arc(x, 10, 4, 0, 7); g.fill(); }
+  escreve(100, 2, 120, 16, true, rgb(200, 200, 200), null, 1, ">_ bash");
+  teLimpa(); teCol = -1;
+}
+function teNova(i) {
+  if (teVis.length == TE_LINHAS) { teVis.shift(); teVis.forEach((v, r) => teDesenha(r, v, -1)); }
+  teVis.push(i); return teVis.length - 1;
+}
+function tePasso() {
+  const agora = agoraMs(), t = TERM[teLinha];
+  if (t[0] != "$") { teDesenha(teNova(teLinha), teLinha, -1); teLinha = (teLinha + 1) % TERM.length; teCol = -1; cenaProx = agora + 120 + sorteia(200); return; }
+  if (teCol < 0) { teCol = 0; teDesenha(teNova(teLinha), teLinha, 0); cenaProx = agora + 500; return; }
+  if (teCol < t.length - 1) { teCol++; teDesenha(teVis.length - 1, teLinha, teCol); miniBracos(1 + (teCol & 1)); cenaProx = agora + 50 + sorteia(90); return; }
+  miniBracos(0); teDesenha(teVis.length - 1, teLinha, -1);
+  if (t == "$clear") teLimpa();
+  teLinha = (teLinha + 1) % TERM.length; teCol = -1; cenaProx = agora + 400;
+}
+
+// ---- chuva do Matrix: 20 colunas, cabeca clara, rastro verde, a ponta some
+const MX_COLS = 20, MX_LIN = 15, MX_DX = 16, MX_POR_VEZ = 6, MX_CHARS = "0123456789ABCDEFZ$#@*+=<>:;!?";
+let mx = [], mxVez = 0, mxOlhar = 0, mxOlharEm = 0;
+const mxNova = c => { mx[c] = { cab:-sorteia(1, 14), tam:sorteia(5, 12), vel:sorteia(1, 4), acc:0 }; };
+const mxLivre = (c, r) => r >= 0 && r < MX_LIN && !(c * MX_DX + MX_DX > miniX && r * 16 + 16 > miniY);
+function mxLetra(c, r, cor) { if (mxLivre(c, r)) escreve(c * MX_DX + 4, r * 16, MX_DX - 4, 16, true, cor, "#000", 0, MX_CHARS[sorteia(MX_CHARS.length)]); }
+function mxInicio() {
+  preenche(0, 0, 320, 240, "#000"); cantoMini("#000");
+  for (let c = 0; c < MX_COLS; c++) { mxNova(c); mx[c].cab = sorteia(-6, 10); }
+  mxVez = 0; mxOlhar = 0; mxOlharEm = agoraMs();
+}
+function mxPasso() {
+  let feitos = 0;
+  for (let k = 0; k < MX_COLS && feitos < MX_POR_VEZ; k++) {
+    const c = (mxVez + k) % MX_COLS;
+    if (++mx[c].acc < mx[c].vel) continue;
+    mx[c].acc = 0; feitos++;
+    const h = ++mx[c].cab;
+    mxLetra(c, h - 1, rgb(0, 190, 60)); mxLetra(c, h, rgb(210, 255, 210));
+    const cauda = h - mx[c].tam;
+    if (mxLivre(c, cauda)) preenche(c * MX_DX, cauda * 16, MX_DX, 16, "#000");
+    if (cauda >= MX_LIN) mxNova(c);
+  }
+  mxVez = (mxVez + MX_POR_VEZ) % MX_COLS;
+  if (agoraMs() - mxOlharEm > 700) { mxOlharEm = agoraMs(); mxOlhar = mxOlhar <= 0 ? 1 : -1; miniOlhos(mxOlhar); }
+  cenaProx = agoraMs() + 40;
+}
+
+// ---- organograma: o Claude em cima, os agentes surgindo embaixo
+const AG_CX = [52, 160, 268], AG_Y = 126, AG_BLOCO = "#424041";
+let agN = 0, agPuloAte = 0, agPontos = 0;
+function agCaixa(i) {
+  const cx = AG_CX[i];
+  preenche(cx - 1, 98, 3, AG_Y - 98, OURO);
+  preenche(cx - 46, AG_Y, 92, 44, OURO); preenche(cx - 44, AG_Y + 2, 88, 40, AG_BLOCO);
+  escreve(cx - 44, AG_Y + 6, 88, 16, false, TEXTO, AG_BLOCO, 1, T.agente.replace("%d", agN > 3 && i == 2 ? agN : i + 1));
+}
+function agMini(dy) { preenche(132, 12, MINI_W(), MINI_H() + 8, FUNDO); miniClawd(132, 16 + dy, FUNDO); }
+function novoAgente() {
+  agN++;
+  if (agN == 1) preenche(52, 96, 219, 3, OURO);
+  agCaixa(Math.min(agN, 3) - 1);
+  agMini(-4); agPuloAte = agoraMs() + 300;
+}
+function agInicio() {
+  preenche(0, 0, 320, 240, FUNDO); agMini(0);
+  escreve(0, 56, 320, 18, false, TEXTO, null, 1, "Claude");
+  preenche(159, 76, 3, 20, OURO);
+  escreve(0, 204, 320, 20, false, OURO, null, 1, T.delegando);
+  agN = 0; agPuloAte = 0; novoAgente();
+}
+function agPasso() {
+  if (agPuloAte && agoraMs() >= agPuloAte) { agPuloAte = 0; agMini(0); }
+  agPontos = (agPontos + 1) % 4;
+  for (let i = 0; i < Math.min(agN, 3); i++) escreve(AG_CX[i] - 44, AG_Y + 24, 88, 16, false, APAGADO, AG_BLOCO, 1, ".".repeat(agPontos));
+  cenaProx = agoraMs() + 350;
+}
+
+// ---- controle
+function mudaPagina(p) { pagina = p; paginaDesde = agoraMs(); if (p == 0) caraNaTela = -1; else cenaInicio(); }
+function cenaInicio() {
+  cenaProx = agoraMs(); miniP = 4;
+  [edInicio, teInicio, mxInicio, agInicio][cenaAtual]();
+}
+function abreCena(s) { cenaAtual = s; cenaDesde = agoraMs(); mudaPagina(10); }
+function cuidaCena() {
+  if (agoraMs() - paginaDesde > CENA_FIM_MS) { mudaPagina(0); return; }
+  if (agoraMs() < cenaProx) return;
+  [edPasso, tePasso, mxPasso, agPasso][cenaAtual]();
+}
+function cenaPorFerramenta(acao) {
+  const s = cenaDe(acao);
+  if (pagina == 10) {
+    paginaDesde = agoraMs();
+    poeCara(C.TRABALHANDO, 120000);
+    if (s == S.AGENTE && cenaAtual == S.AGENTE) novoAgente();
+    else if (s != S.NENHUMA && s != cenaAtual && agoraMs() - cenaDesde >= CENA_MIN_MS) abreCena(s);
+    return true;
+  }
+  if (s == S.NENHUMA) return false;
+  poeCara(C.TRABALHANDO, 120000); abreCena(s);
+  return true;
+}
+
+// ---------------------------------------------------------------- estado (o mesmo da placa)
+const dados = { ok:false, h5:-1, h5r:0, d7:-1, d7r:0, ctx:-1, mod:"", n:0, at:0 };
+const evento = { cara:C.NEUTRO, ate:0 };
+let legenda = null, legendaAte = 0, celebraAte = 0, ferramentasSeguidas = 0;
+const agoraMs = () => performance.now();
+function congelado() { return dados.ok && dados.at && Date.now() / 1000 - dados.at > 180; }
+function caraBase() {
+  if (!dados.ok || congelado() || dados.n == 0) return C.DORMINDO;
+  if (dados.h5 >= 90) return C.SUANDO;
+  if (dados.h5 >= 75) return C.CANSADO;
+  return C.NEUTRO;
+}
+function caraDesejada() {
+  if (evento.ate && agoraMs() < evento.ate) return evento.cara;
+  if (evento.ate && (evento.cara == C.DESCONFIADO || evento.cara == C.BRAVO)) { evento.cara = C.TRABALHANDO; evento.ate = agoraMs() + 120000; return C.TRABALHANDO; }
+  return caraBase();
+}
+function poeCara(c, dur) { evento.cara = c; evento.ate = agoraMs() + dur; }
+function poeLegenda(k, dur = 5000) { legenda = T.leg[k]; legendaAte = agoraMs() + dur; }
+const celebrando = () => celebraAte && agoraMs() < celebraAte;
+
+function trataEvento(tipo, humor, acao) {
+  if (tipo != "ferramenta" && tipo != "erro") ferramentasSeguidas = 0;
+  if (pagina == 10 && tipo != "ferramenta") mudaPagina(0);       // qualquer outro evento: sai da cena e mostra a cara
+  if (tipo != "ferramenta" && tipo != "parou") celebraAte = 0;
+  switch (tipo) {
+    case "inicio": poeCara(C.FELIZ, 5000); poeLegenda("oi"); break;
+    case "prompt":
+      if (humor == "feliz") { poeCara(C.EMPOLGADO, 5000); poeLegenda("empolgado"); }
+      else if (humor == "preocupado") { poeCara(C.PREOCUPADO, 6000); poeLegenda("preocupado"); }
+      else if (humor == "susto") { poeCara(C.SUSTO, 5000); poeLegenda("susto"); }
+      else { poeCara(C.PENSANDO, 120000); poeLegenda("pensando"); }
+      break;
+    case "ferramenta":
+      ++ferramentasSeguidas;
+      if (celebrando()) break;
+      if (cenaPorFerramenta(acao || "")) break;                   // editor, terminal, Matrix ou organograma
+      if (ferramentasSeguidas == 5) { poeCara(C.DESCONFIADO, 4000); poeLegenda("desconfiado", 4000); }
+      else if (caraDesejada() != C.DESCONFIADO) { if (caraDesejada() != C.TRABALHANDO) poeLegenda("trabalhando"); poeCara(C.TRABALHANDO, 120000); }
+      break;
+    case "erro": poeCara(C.BRAVO, 3500); poeLegenda("erro", 3500); break;
+    case "parou": if (!celebrando()) { poeCara(C.TERMINOU, 5000); poeLegenda("pronto"); } break;
+    case "atencao": poeCara(C.ESPERANDO, 120000); poeLegenda("atencao", 8000); break;
+    case "compact": poeCara(C.ZONZO, 5000); poeLegenda("compact"); break;
+    case "commit": poeCara(C.EMPOLGADO, 5000); poeLegenda("commit"); celebraAte = agoraMs() + 5000; break;
+    case "teste_ok": poeCara(C.FELIZ, 4000); poeLegenda("teste_ok", 4000); celebraAte = agoraMs() + 4000; break;
+    case "teste_falhou": poeCara(C.PREOCUPADO, 5000); poeLegenda("teste_falhou"); break;
+    case "dormir": poeCara(C.DORMINDO, 20000); break;
+    case "fim": evento.ate = 0; break;
+  }
+}
+function recebeEvento(ev) {
+  if (typeof ev.n == "number") dados.n = ev.n;
+  if (ev.tipo != "fim") { dados.at = Date.now() / 1000; dados.ok = true; }
+  trataEvento(ev.tipo, ev.humor || "", ev.acao || "");
+  painel();
+}
+function mescla(j, k) {
+  if (!j || j.usado_pct == null) return;
+  const np = Math.round(j.usado_pct), nr = j.reseta_em || 0, agora = Date.now() / 1000;
+  if (nr < dados[k + "r"] && dados[k + "r"] > agora) return;
+  if (nr == dados[k + "r"] && np < dados[k]) return;
+  if (k == "h5" && dados.h5r && nr > dados.h5r && dados.h5r < agora && dados.n > 0) { poeCara(C.FELIZ, 5000); poeLegenda("janela"); }
+  dados[k] = np; dados[k + "r"] = nr;
+}
+function recebeEstado(e) {
+  const l = e.limites || {};
+  mescla(l.cinco_horas, "h5"); mescla(l.sete_dias, "d7");
+  if (e.contexto && e.contexto.usado_pct != null) dados.ctx = Math.round(e.contexto.usado_pct);
+  if (e.modelo) dados.mod = e.modelo;
+  if (typeof e.n == "number") dados.n = e.n;
+  dados.at = e.visto || Date.now() / 1000; dados.ok = true;
+  painel();
+}
+
+// ---------------------------------------------------------------- painel ao lado
+function faixa(p) { return p >= 90 ? "var(--critico)" : p >= 75 ? "var(--alerta)" : "var(--ok)"; }
+function falta(ts) {
+  const s = ts - Date.now() / 1000; if (!ts || s <= 0) return "";
+  const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+  return T.reseta + (d ? `${d}d ${h}h` : h ? `${h}h ${String(m).padStart(2, "0")}min` : `${m}min`);
+}
+function barra(v, b, p) {
+  document.getElementById(v).textContent = p >= 0 ? p + "%" : "—";
+  const i = document.getElementById(b); i.style.width = Math.max(0, Math.min(100, p)) + "%"; i.style.background = faixa(p);
+}
+function painel() {
+  barra("v5", "b5", dados.h5); barra("v7", "b7", dados.d7); barra("vc", "bc", dados.ctx);
+  document.getElementById("r5").textContent = falta(dados.h5r);
+  document.getElementById("r7").textContent = falta(dados.d7r);
+  document.getElementById("vm").textContent = dados.mod || "—";
+  document.getElementById("vn").textContent = dados.n;
+}
+setInterval(painel, 30000);
+
+// ---------------------------------------------------------------- desenho a cada quadro
+let caraNaTela = -1, fase = 0, ultimaFase = 0, proximaPiscada = 0, quadroPiscada = -1, piscadaEm = 0,
+    proximoOlhar = 0, olharAte = 0, olharDx = 0, dormindoDesde = 0, brilho = 1;
+function quadro() {
+  const agora = agoraMs(), c = caraDesejada();
+  if (c != caraNaTela) {
+    caraNaTela = c; fase = 0; ultimaFase = agora;
+    proximaPiscada = agora + 2500 + Math.random() * 3000; quadroPiscada = -1;
+    proximoOlhar = agora + 4000 + Math.random() * 5000; olharAte = 0;
+    dormindoDesde = c == C.DORMINDO ? agora : 0;
+  }
+  if (agora - ultimaFase >= 250) { ultimaFase = agora; fase++; }
+  const x = expressao(c, ANIMADA.has(c) ? fase : 0);
+  if (c == C.NEUTRO && quadroPiscada < 0) {
+    if (!olharAte && agora >= proximoOlhar) { olharAte = agora + 700; olharDx = Math.random() < .5 ? 2 : -2; }
+    else if (olharAte && agora >= olharAte) { olharAte = 0; proximoOlhar = agora + 4000 + Math.random() * 6000; }
+    if (olharAte) x.e.dx = x.d.dx = olharDx;
+  }
+  if (PISCA.has(c)) {
+    const dur = c == C.CANSADO ? 220 : 45;
+    if (quadroPiscada < 0 && agora >= proximaPiscada) { quadroPiscada = 0; piscadaEm = agora; }
+    if (quadroPiscada >= 0) {
+      if (agora - piscadaEm >= dur) { piscadaEm = agora; quadroPiscada++; }
+      if (quadroPiscada > 3) { quadroPiscada = -1; proximaPiscada = agora + (c == C.CANSADO ? 1500 : 2500) + Math.random() * 4000; }
+      else { const PALP = [x.e.h * 4 / 10 | 0, x.e.h - 1, x.e.h * 4 / 10 | 0, 0], pp = PALP[quadroPiscada];
+             x.e.palpebra = Math.max(x.e.palpebra, pp); x.d.palpebra = Math.max(x.d.palpebra, pp); }
+    }
+  }
+  preenche(0, 0, 320, 240, COR.rosto);
+  desenhaOlho(x.e, OLHO_ESQ_X, true, x.cor);
+  desenhaOlho(x.d, OLHO_DIR_X, false, x.cor);
+  desenhaBoca(x.boca);
+  extras(c, fase);
+  if (legenda && agora < legendaAte) {
+    g.fillStyle = COR.olho; g.font = "700 24px 'DM Sans', sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillText(legenda, 160, 217);
+  }
+  // dormindo ha mais de 20 s: tela a 15 %, como a placa
+  const alvo = dormindoDesde && agora - dormindoDesde > 20000 ? 0.15 : 1;
+  brilho += (alvo - brilho) * 0.08;
+  if (brilho < 0.99) { g.fillStyle = `rgba(0,0,0,${1 - brilho})`; g.fillRect(0, 0, 320, 240); }
+  if (textura) textura.needsUpdate = true;
+}
+
+// ---------------------------------------------------------------- 3D
+let textura = null, modo3d = params.get("v") != "2d" && !!window.THREE;
+const palco = document.getElementById("palco"), plano = document.getElementById("plano");
+plano.appendChild(tela);
+let renderer, cena, camera, controles, mascote, corpo;
+function monta3d() {
+  renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  palco.appendChild(renderer.domElement);
+  cena = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(30, 1, 1, 2000);
+  camera.position.set(120, 110, 250);
+  controles = new THREE.OrbitControls(camera, renderer.domElement);
+  controles.target.set(0, 45, 18); controles.enableDamping = true; controles.enablePan = false;
+  controles.minDistance = 120; controles.maxDistance = 600; controles.autoRotate = false;
+  cena.add(new THREE.HemisphereLight(0xffffff, 0x404040, 0.55));
+  const sol = new THREE.DirectionalLight(0xffffff, 0.75); sol.position.set(120, 200, 180); cena.add(sol);
+  const contra = new THREE.DirectionalLight(0xffd9b0, 0.35); contra.position.set(-150, 80, -120); cena.add(contra);
+
+  mascote = new THREE.Group(); cena.add(mascote);
+  corpo = new THREE.Group(); mascote.add(corpo);
+  // Na base ele fica deitado 30 graus para tras: os bolsos das pernas sao
+  // inclinados e tem 27,4 mm, a profundidade da caixa. O canto de baixo e de
+  // tras das pernas apoia no fundo do bolso (y 5,9; z 32,3 no mundo).
+  corpo.rotation.x = -30 * Math.PI / 180;
+  corpo.position.set(0, 5.9, 32.3);
+  const laranja = new THREE.MeshStandardMaterial({ color:new THREE.Color(0xf0691e).convertSRGBToLinear(), roughness:0.7, metalness:0 });
+  const preto = new THREE.MeshStandardMaterial({ color:new THREE.Color(0x202020).convertSRGBToLinear(), roughness:0.8, metalness:0,
+                                                  transparent:params.has("raio"), opacity:params.has("raio") ? 0.35 : 1 });
+  const carrega = new THREE.STLLoader();
+  // As pecas vem do STL na posicao de impressao; aqui elas sao montadas:
+  // corpo como impresso (costas em z = 0, pernas em y = 0), moldura virada de
+  // frente sobre ele e a base deitada embaixo das pernas.
+  carrega.load("modelo/corpo.stl", geo => { geo.translate(-150.1, -85.7, -4.4); geo.computeVertexNormals(); corpo.add(new THREE.Mesh(geo, laranja)); });
+  carrega.load("modelo/moldura.stl", geo => {
+    geo.translate(-326.4, -85.7, -4.4); geo.rotateY(Math.PI); geo.computeVertexNormals();
+    const m = new THREE.Mesh(geo, laranja); m.position.z = 27.4; corpo.add(m);   // o pino do braco da moldura entra no braco oco do corpo
+  });
+  carrega.load("modelo/base.stl", geo => {
+    geo.translate(-492.05, -66.4, 0); geo.rotateX(-Math.PI / 2); geo.computeVertexNormals();
+    const m = new THREE.Mesh(geo, preto); m.position.set(0, 0, 31.2); mascote.add(m);
+  });
+  textura = new THREE.CanvasTexture(tela);
+  textura.magFilter = THREE.NearestFilter; textura.minFilter = THREE.LinearFilter; textura.encoding = THREE.sRGBEncoding;
+  const visor = new THREE.Mesh(new THREE.PlaneGeometry(55.5, 41.2), new THREE.MeshBasicMaterial({ map:textura, toneMapped:false }));
+  visor.position.set(0, 48.9, 25.3); corpo.add(visor);
+  const sombra = new THREE.Mesh(new THREE.CircleGeometry(110, 48), new THREE.MeshBasicMaterial({ color:0x000000, transparent:true, opacity:0.25 }));
+  sombra.rotation.x = -Math.PI / 2; sombra.position.set(0, -0.2, 0); cena.add(sombra);
+  if (params.get("cam") == "lado") { camera.position.set(400, 40, 0); controles.target.set(0, 40, 0); }
+  addEventListener("resize", ajusta); ajusta();
+}
+function ajusta() {
+  if (!renderer) return;
+  const w = palco.clientWidth, h = palco.clientHeight;
+  renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+function trocaVista() {
+  modo3d = !modo3d && !!window.THREE;
+  if (modo3d && !renderer) {
+    try { monta3d(); }
+    catch (err) { console.warn("sem 3D:", err); modo3d = false; renderer = null; palco.querySelector("canvas:not(#plano canvas)")?.remove(); }
+  }
+  if (renderer) renderer.domElement.style.display = modo3d ? "block" : "none";
+  plano.style.display = modo3d ? "none" : "flex";
+  document.getElementById("vista").textContent = modo3d ? T.v2d : T.v3d;
+  ajusta();
+}
+document.getElementById("vista").onclick = trocaVista;
+modo3d = !modo3d; trocaVista();
+
+function laco(t) {
+  if (pagina == 0) quadro();
+  else { cuidaCena(); if (pagina == 0) quadro(); else if (textura) textura.needsUpdate = true; }
+  if (modo3d && renderer) {
+    if (mascote) mascote.position.y = Math.sin(t / 1400) * 0.6;   // respira
+    controles.update(); renderer.render(cena, camera);
+  }
+  requestAnimationFrame(laco);
+}
+requestAnimationFrame(laco);
+
+// ---------------------------------------------------------------- conexao (ou demonstracao)
+const ponto = document.getElementById("ponto"), conexao = document.getElementById("conexao");
+function demonstracao() {
+  conexao.textContent = T.demo; document.getElementById("t-aviso").innerHTML = T.avisoDemo;
+  Object.assign(dados, { ok:true, n:1, h5:42, d7:18, ctx:23, mod:"Opus", at:Date.now() / 1000,
+                         h5r:Date.now() / 1000 + 2.4 * 3600, d7r:Date.now() / 1000 + 4.2 * 86400 });
+  painel();
+  const roteiro = [["inicio",3],["prompt",3],["ferramenta",4,"","codando"],["ferramenta",5,"","codando"],["ferramenta",4,"","terminal"],
+                   ["ferramenta",5,"","terminal"],["commit",5],["ferramenta",5,"","lendo"],["ferramenta",5,"","lendo"],["ferramenta",3,"","agente"],
+                   ["ferramenta",3,"","agente"],["ferramenta",4,"","agente"],["teste_ok",5],["atencao",7],["prompt",2,"feliz"],["erro",4],
+                   ["teste_falhou",5],["compact",5],["parou",8]];
+  let i = 0;
+  (function proximo() {
+    const [tipo, s, humor, acao] = roteiro[i++ % roteiro.length];
+    dados.at = Date.now() / 1000; trataEvento(tipo, humor || "", acao || "");
+    if (tipo == "parou") { dados.ctx = Math.min(95, dados.ctx + 7); dados.h5 = Math.min(99, dados.h5 + 3); painel(); }
+    setTimeout(proximo, s * 1000);
+  })();
+}
+if (DEMO) demonstracao();
+else {
+  document.getElementById("t-aviso").innerHTML = T.aviso;
+  conexao.textContent = T.esperando;
+  const fonte = new EventSource("eventos?k=" + encodeURIComponent(CHAVE));
+  fonte.addEventListener("open", () => { ponto.classList.add("ok"); conexao.textContent = T.conectado; });
+  fonte.addEventListener("error", () => { ponto.classList.remove("ok"); conexao.textContent = T.esperando; });
+  fonte.addEventListener("evento", m => recebeEvento(JSON.parse(m.data)));
+  fonte.addEventListener("estado", m => recebeEstado(JSON.parse(m.data)));
+}
+painel();
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 ---
 name: configurar
-description: Configura o Claudinho (mascote do Claude Code: placa única E32R28T ou ESP32 + display Nextion) do zero ou depois de trocar de rede - acha a placa no USB, grava o firmware, configura o Wi-Fi, grava a tela do Nextion (versão clássica), liga a status line e testa. Use também para diagnosticar quando o Claudinho não reage, para atualizar o firmware e para ligar uma impressora 3D Bambu Lab (painel e alertas da impressão).
+description: Configura o Claudinho (mascote do Claude Code: placa única E32R28T, ESP32 + display Nextion, ou o Claudinho virtual no navegador, sem placa) do zero ou depois de trocar de rede - acha a placa no USB, grava o firmware, configura o Wi-Fi, grava a tela do Nextion (versão clássica), liga a status line e testa. Use também para diagnosticar quando o Claudinho não reage, para atualizar o firmware e para ligar uma impressora 3D Bambu Lab (painel e alertas da impressão).
 ---
 
 # Configurar o Claudinho
@@ -94,14 +94,19 @@ não é obrigatório.
 bash "$R/scripts/claudinho.sh" info
 ```
 
-Se responder um JSON com `"versao"`, o Claudinho está na rede: pule para o que a
+Se responder um JSON com `"versao":"virtual"`, é o **Claudinho virtual** (seção
+própria, no fim). Se responder um JSON com `"versao"`, o Claudinho está na rede: pule para o que a
 pessoa pediu (diagnóstico → passo 7; atualizar → `claudinho.sh atualizar`;
 trocar tela → passo 5). Se disser "ainda não configurado" ou não responder, siga
 do passo 1.
 
 ## 1. Hardware
 
-**Existem duas versões.** Pergunte qual a pessoa tem:
+**Existem duas versões.** Pergunte qual a pessoa tem. Se ela **ainda não tem
+placa** (ou quer ver antes de comprar), ofereça o **Claudinho virtual**: o
+mesmo rosto numa aba do navegador, reagindo ao Claude Code dela de verdade.
+Vá para a seção "Claudinho virtual (sem placa)" e volte aqui quando a placa
+chegar.
 
 - **E32R28T** (placa única: ESP32 com tela de 2,8" embutida, da LCDWiki).
   Não tem fios para ligar: é só plugar no USB. **Pule para o passo 2.** Nessa
@@ -380,10 +385,30 @@ alterado; tudo volta como estava). Um toque na tela para; ou
 `claudinho.sh demo parar`. Usa o idioma da tela; para um vídeo em outro
 idioma, troque antes com `claudinho.sh idioma`.
 
+## Claudinho virtual (sem placa)
+
+Para quem ainda não tem a placa: um servidorzinho local (Python, só em
+127.0.0.1, nada sai do computador) faz o papel da placa e o navegador mostra
+o Claudinho em 3D (a caixa impressa, com a tela viva) ou só a tela. Reage aos
+mesmos eventos, sem gastar tokens. Ligue a status line (passo 6) e rode:
+
+```bash
+bash "$R/scripts/claudinho.sh" virtual
+```
+
+Ele abre o navegador sozinho (o endereço aparece na saída). Diga à pessoa que
+ele reage a partir da próxima ação do Claude, e que **depois de reiniciar o
+computador** é preciso rodar de novo (ou pedir "liga o Claudinho virtual").
+Quando a placa chegar: `claudinho.sh virtual parar` e siga do passo 1; o
+`wifi.sh` grava o endereço da placa por cima.
+
+Quem só quer **ver**, sem instalar nada: a demonstração online, em
+https://argeuthiesen.github.io/claudinho/ (eventos de mentira).
+
 ## Referência rápida
 
-`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | idioma [código] | demo [parar] | som [humor|liga|desliga|volume N] | desligar | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft]`
+`claudinho.sh info | log | cara <tipo> [humor] | cor [R G B [salvar]] | velha | genius | bambu IP|desligar | painel | idioma [código] | demo [parar] | som [humor|liga|desliga|volume N] | desligar | alerta [tipo] | cena <tipo> | reiniciar | consumo [s] | atualizar [bin] | tela [tft] | virtual [parar]`
 
 `atualizar` e `tela` pedem um toque na tela do Claudinho (avise a pessoa antes).
-Tipos de cara: inicio, prompt, ferramenta, erro, parou, atencao, compact, fim, dormir.
+Tipos de cara: inicio, prompt, ferramenta, erro, parou, atencao, compact, commit, teste_ok, teste_falhou, fim, dormir.
 Humor (com prompt): feliz, preocupado, susto.

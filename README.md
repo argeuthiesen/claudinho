@@ -37,7 +37,22 @@ the 5-hour and 7-day windows.
   (started, paused and why, finished, failed...) that stay until you tap.
   Tested on the P2S. See the [manual](docs/manual.md#bambu-lab-printer-optional).
 
-**[Hardware](#which-version) · [Installation](#installation) · [User manual](docs/manual.md)**
+**[Try it](#try-it-before-you-build) · [Hardware](#which-version) · [Installation](#installation) · [User manual](docs/manual.md)**
+
+## Try it before you build
+
+<a href="https://argeuthiesen.github.io/claudinho/"><img src="docs/img/virtual-3d.png" alt="The virtual Claudinho: the 3D case with the face running, next to the plan usage" width="640"></a>
+
+- **See it online, nothing to install:** the
+  [live demo](https://argeuthiesen.github.io/claudinho/) shows the 3D case
+  with the face running, on made-up events.
+- **With your own Claude Code, no board yet:** install the plugin
+  ([Installation](#installation), steps 1 to 3) and ask Claude *"turn on the
+  virtual Claudinho"* (or run `claudinho.sh virtual`). A small local server
+  takes the board's place and Claudinho shows up in a browser tab, reacting
+  to your real sessions, with your real plan usage, spending no tokens. It
+  listens on `127.0.0.1` only: nothing leaves your computer. When the board
+  arrives, `claudinho.sh virtual parar` and carry on with the setup.
 
 ## Which version?
 
@@ -640,6 +655,8 @@ your Anthropic account.
 - `scripts/`: flashing, serial, hooks, status line and `claudinho.sh`.
 - `skills/configurar/`: the skill that runs the setup.
 - `hooks/hooks.json`: the Claude Code events Claudinho listens to.
+- `virtual/`: the virtual Claudinho (local server and the browser page; the
+  case's 3D files there are not MIT, see `virtual/modelo/LICENSE.md`).
 - Versions: the plugin (`.claude-plugin/plugin.json`) and the firmware
   (`firmware/claudinho/config.h`) move together when possible, but are
   versioned separately: `claudinho.sh info` shows the firmware version on the

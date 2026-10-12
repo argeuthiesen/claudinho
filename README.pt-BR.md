@@ -38,7 +38,22 @@ já foi usado nas janelas de 5 horas e de 7 dias.
   alertas (começou, pausou e por quê, terminou, falhou...) que ficam até você
   tocar. Testado na P2S. Veja o [manual](docs/manual.pt-BR.md#impressora-bambu-lab-opcional).
 
-**[Hardware](#qual-versão) · [Instalação](#instalação) · [Manual de uso](docs/manual.pt-BR.md)**
+**[Experimente](#experimente-antes-de-montar) · [Hardware](#qual-versão) · [Instalação](#instalação) · [Manual de uso](docs/manual.pt-BR.md)**
+
+## Experimente antes de montar
+
+<a href="https://argeuthiesen.github.io/claudinho/?lang=pt"><img src="docs/img/virtual-3d.png" alt="O Claudinho virtual: a caixa em 3D com o rosto funcionando, ao lado do consumo do plano" width="640"></a>
+
+- **Veja online, sem instalar nada:** a
+  [demonstração](https://argeuthiesen.github.io/claudinho/?lang=pt) mostra a
+  caixa em 3D com o rosto funcionando, com eventos de mentira.
+- **Com o seu Claude Code, ainda sem placa:** instale o plugin
+  ([Instalação](#instalação), passos 1 a 3) e peça ao Claude *"liga o
+  Claudinho virtual"* (ou rode `claudinho.sh virtual`). Um servidorzinho
+  local faz o papel da placa e o Claudinho aparece numa aba do navegador,
+  reagindo às suas sessões de verdade, com o seu consumo de verdade, sem
+  gastar tokens. Ele só escuta em `127.0.0.1`: nada sai do seu computador.
+  Quando a placa chegar, `claudinho.sh virtual parar` e siga a configuração.
 
 ## Qual versão?
 
@@ -636,6 +651,8 @@ conta da Anthropic.
 - `scripts/`: gravação, serial, hooks, status line e o `claudinho.sh`.
 - `skills/configurar/`: a skill que conduz a configuração.
 - `hooks/hooks.json`: os eventos do Claude Code que o Claudinho escuta.
+- `virtual/`: o Claudinho virtual (servidor local e a página do navegador; os
+  arquivos 3D da caixa ali não são MIT, veja `virtual/modelo/LICENSE.md`).
 - Versões: o plugin (`.claude-plugin/plugin.json`) e o firmware
   (`firmware/claudinho/config.h`) andam juntos quando dá, mas são contadas
   separadamente: o `claudinho.sh info` mostra a do firmware na placa.

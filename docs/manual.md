@@ -227,6 +227,21 @@ away for a few days, `claudinho.sh desligar` turns off the screen and puts the
 board to deep sleep, using almost nothing; press **BOOT** (or RESET) to turn it
 back on.
 
+## Virtual Claudinho (no board)
+
+No board yet? `claudinho.sh virtual` (or ask Claude "turn on the virtual
+Claudinho") starts a small local server that takes the board's place and
+opens Claudinho in a browser tab: the 3D case with the face running, or just
+the screen ("Screen only" button), with the plan usage beside it. Drag to
+turn it around, scroll to zoom. It reacts to the same events as the board,
+spends no tokens and listens on `127.0.0.1` only.
+
+- After restarting the computer, run it again.
+- `claudinho.sh virtual parar` turns it off and points the plugin back to
+  the board, if there was one.
+- Just want to look? The [online demo](https://argeuthiesen.github.io/claudinho/)
+  runs on made-up events, nothing to install.
+
 ## Demo mode
 
 Want to film Claudinho or show it to someone? Run `claudinho.sh demo` (or ask
