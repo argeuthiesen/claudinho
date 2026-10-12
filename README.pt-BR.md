@@ -54,6 +54,7 @@ já foi usado nas janelas de 5 horas e de 7 dias.
   reagindo às suas sessões de verdade, com o seu consumo de verdade, sem
   gastar tokens. Ele só escuta em `127.0.0.1`: nada sai do seu computador.
   Quando a placa chegar, `claudinho.sh virtual parar` e siga a configuração.
+  Testado no WSL2 (Windows 11); veja [Ambientes testados](#ambientes-testados).
 - **Ainda não tem no virtual:** a impressora Bambu Lab. A demonstração mostra
   o painel e os alertas da impressora com dados de mentira, mas por enquanto
   só a placa conversa com uma impressora de verdade. Os jogos também ficam só
@@ -427,6 +428,7 @@ reagir").
 **Testado de ponta a ponta:** WSL2 no Windows 11. Placa única: E32R28T (tela
 ST7789), com alto-falante e bateria. Versão clássica: ESP32-C3 Super Mini com
 Nextion NX3224F024_011. Módulo da impressora: Bambu Lab P2S com AMS.
+Claudinho virtual: WSL2 no Windows 11, com a página no navegador do Windows.
 
 **Escrito para funcionar, ainda sem teste real:** Linux nativo, macOS,
 Windows com Git Bash, ESP32-S3 DevKitC-1, outras impressoras Bambu com acesso

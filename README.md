@@ -53,6 +53,7 @@ the 5-hour and 7-day windows.
   to your real sessions, with your real plan usage, spending no tokens. It
   listens on `127.0.0.1` only: nothing leaves your computer. When the board
   arrives, `claudinho.sh virtual parar` and carry on with the setup.
+  Tested on WSL2 (Windows 11); see [Tested environments](#tested-environments).
 - **Not yet in the virtual one:** the Bambu Lab printer. The demo shows the
   printer panel and alerts with made-up data, but only the board talks to a
   real printer for now. The games stay on the board too.
@@ -427,7 +428,8 @@ logged since it started (or just tell Claude "Claudinho stopped reacting").
 
 **Tested end to end:** WSL2 on Windows 11. Single board: E32R28T (ST7789
 screen), with speaker and battery. Classic version: ESP32-C3 Super Mini with
-Nextion NX3224F024_011. Printer module: Bambu Lab P2S with AMS.
+Nextion NX3224F024_011. Printer module: Bambu Lab P2S with AMS. Virtual
+Claudinho: WSL2 on Windows 11, with the page in the Windows browser.
 
 **Written to work, not yet tested on real hardware:** native Linux, macOS,
 Windows with Git Bash, ESP32-S3 DevKitC-1, other Bambu printers with local
