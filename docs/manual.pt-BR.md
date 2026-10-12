@@ -193,7 +193,8 @@ da placa).
 
 Na E32R28T com um alto-falante pequeno, o Claudinho **fala um idioma de
 robô**, de bipes e assobios, inventado na hora: nenhuma fala é gravada, então
-nenhuma sai igual, e o humor muda a entonação. Ele fala ao acordar, quando o
+nenhuma sai igual, e o humor muda a entonação. Ele fala ao acordar, quando
+você abre uma sessão do Claude Code (oi) e fecha a última (tchau), quando o
 Claude precisa de você (uma pergunta), num erro (bravo), quando o Claude
 termina (um "pronto!" rápido) e ao ir dormir, e chama a cada 15 segundos
 enquanto a tela de atualização espera o seu toque. Logo depois de ligar ele
@@ -206,7 +207,11 @@ fica quieto.
   `pensando`, `zonzo`...): ouve uma fala daquele humor.
 
 **Bateria:** o cartão de consumo mostra um ícone de bateria ao lado do
-relógio. Para guardar por uns dias, o `claudinho.sh desligar` apaga a tela e
+relógio, com um **raio** dentro enquanto carrega. O pino de estado do
+carregador não chega ao ESP32, então a placa deduz pela tensão: ao plugar os
+5 V ela pula uns 100 mV de uma vez, e ao tirar cai o mesmo tanto. O raio
+aparece uns segundos depois de plugar; se a placa foi ligada já na tomada,
+leva uns 10 minutos (a subida é lenta). Para guardar por uns dias, o `claudinho.sh desligar` apaga a tela e
 põe a placa em sono profundo, gastando quase nada; aperte **BOOT** (ou RESET)
 para ligar de novo.
 

@@ -110,7 +110,8 @@ languages), and the setup skill recognizes the board on its own.
   Use a **USB-A to USB-C** cable and charger.
 - **Battery:** the 5 V on that pin also charges the battery (the board's
   TP4054 charger is fed from the same +5 V rail). Unplug it and the board
-  switches to the battery automatically.
+  switches to the battery automatically. While it charges, a lightning bolt
+  shows inside the battery icon on screen.
 
 ![Single board: everyday power](docs/en/power-e32.svg)
 
@@ -135,6 +136,7 @@ languages), and the setup skill recognizes the board on its own.
 - **Case:** on [MakerWorld](https://makerworld.com/models/3365275-claudinho), same model as the classic one;
   pick the **E32R28T** print profile (0.2 mm layers, 3 walls, 10% infill).
   The battery sits behind the board and the USB-C breakout fits in the back.
+  The SketchUp source of both cases is in the model's files, for remixing.
 
 <p>
   <img src="docs/img/e32-pecas.jpg" alt="All the parts before assembly: printed case, board, battery, speaker, USB-C breakout" height="200">
@@ -257,7 +259,7 @@ inside the plugin folder. After a marketplace install, the paths are:
 
 - **`<plugin>`** (the plugin itself, with the scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<version>/`, for example
-  `.../claudinho/1.13.0/`. If there's more than one version folder, use the
+  `.../claudinho/1.14.0/`. If there's more than one version folder, use the
   newest. (If you cloned this repository, `<plugin>` is its root.)
 - **`<plugin-data>`** (the board's IP and secret):
   `~/.claude/plugins/data/claudinho-claudinho/`. The scripts find it on their

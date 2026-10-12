@@ -196,6 +196,7 @@ code from the board).
 On the E32R28T with a small speaker, Claudinho **speaks a robot language** of
 beeps and whistles, made up on the spot: no phrase is recorded, so no two are
 alike, and the mood changes the intonation. It speaks when it wakes up, when
+you open a Claude Code session (hello) and close the last one (goodbye), when
 Claude needs you (a question), on an error (grumpy), when Claude finishes (a
 quick "done!") and when it goes to sleep, and it calls out every 15 seconds
 while the update screen waits for your tap. It stays quiet right after being
@@ -207,7 +208,12 @@ turned on.
 - `claudinho.sh som feliz` (or `pergunta`, `sono`, `bravo`, `pronto`,
   `pensando`, `zonzo`...): hear a phrase in that mood.
 
-**Battery:** the usage card shows a battery icon next to the clock. To put it
+**Battery:** the usage card shows a battery icon next to the clock, with a
+**lightning bolt** inside while it charges. The charger's status pin doesn't
+reach the ESP32, so the board figures it out from the voltage: plugging in
+the 5 V makes it jump about 100 mV at once, and unplugging drops it the same
+amount. The bolt shows up a few seconds after plugging in; if the board was
+turned on already plugged in, it takes about 10 minutes (a slow rise). To put it
 away for a few days, `claudinho.sh desligar` turns off the screen and puts the
 board to deep sleep, using almost nothing; press **BOOT** (or RESET) to turn it
 back on.

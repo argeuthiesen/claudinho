@@ -112,7 +112,8 @@ demonstração, idiomas), e a skill de configuração reconhece a placa sozinha.
   entrega energia para eles. Use cabo e carregador **USB-A para USB-C**.
 - **Bateria:** os 5 V nesse pino também carregam a bateria (o carregador
   TP4054 da placa é alimentado pela mesma linha de +5 V). Desligou da
-  tomada, a placa passa para a bateria sozinha.
+  tomada, a placa passa para a bateria sozinha. Enquanto carrega, aparece um
+  raio dentro do ícone da bateria na tela.
 
 ![Placa única: alimentação no dia a dia](docs/pt/alimentacao-e32.svg)
 
@@ -137,7 +138,8 @@ demonstração, idiomas), e a skill de configuração reconhece a placa sozinha.
 - **Caixa:** no [MakerWorld](https://makerworld.com/models/3365275-claudinho), no mesmo modelo da clássica;
   escolha o perfil de impressão **E32R28T** (camada de 0,2 mm, 3 paredes,
   10% de preenchimento). A bateria fica atrás da placa e o USB-C fêmea encaixa
-  no fundo.
+  no fundo. O arquivo do SketchUp das duas caixas está nos arquivos do modelo,
+  para quem quiser fazer remix.
 
 <p>
   <img src="docs/img/e32-pecas.jpg" alt="Todas as peças antes da montagem: caixa impressa, placa, bateria, alto-falante, USB-C fêmea" height="200">
@@ -259,7 +261,7 @@ pasta do plugin. Depois de instalar pelo marketplace, os caminhos são:
 
 - **`<plugin>`** (o plugin em si, com os scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<versão>/`, por exemplo
-  `.../claudinho/1.13.0/`. Se houver mais de uma pasta de versão, use a mais
+  `.../claudinho/1.14.0/`. Se houver mais de uma pasta de versão, use a mais
   nova. (Se você clonou este repositório, `<plugin>` é a raiz dele.)
 - **`<dados-do-plugin>`** (o IP e o segredo da placa):
   `~/.claude/plugins/data/claudinho-claudinho/`. Os scripts acham essa pasta

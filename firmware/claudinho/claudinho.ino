@@ -644,9 +644,50 @@ int bateriaPct(int mv) {
   for (int i = 1; i < 9; i++) if (mv <= MV[i]) return PCT[i - 1] + (PCT[i] - PCT[i - 1]) * (mv - MV[i - 1]) / (MV[i] - MV[i - 1]);
   return 100;
 }
+// Carregando? O pino de estado do carregador (TP4054) nao chega ao ESP32, entao
+// a placa deduz pela tensao: ao plugar os 5 V, a leitura pula uns 100 mV na
+// hora (a corrente de carga passa pela resistencia interna da bateria); ao
+// tirar, cai o mesmo tanto. Medido na placa: 4134 -> 4030 -> 4126 mV. Depois
+// de ligar, ou sem pulo para ver, vale a tendencia de 10 min: subindo = carregando.
+// Carregando, a leitura fica inflada pelo pulo: o percentual desconta ele.
+bool batCarregando = false;
+int batPulo = 100;                        // mV que a leitura sobe com o carregador (o ultimo pulo medido)
+int batMvAgora = 0;                       // ultima leitura (media de 3 amostras)
+void cuidaBateria() {
+  static unsigned long ult = 0, tendDesde = 0; static int am[6], n = 0, tendMv = 0; static float media = 0; static bool viuPulo = false;
+  if (millis() - ult < 2000) return;
+  ult = millis();
+  int mv = bateriaMv();
+  if (mv < 2500) { batCarregando = false; batMvAgora = mv; n = 0; return; }   // sem bateria
+  if (n == 6) { memmove(am, am + 1, 5 * sizeof(int)); n = 5; }
+  am[n++] = mv;
+  media = media ? media + (mv - media) * 0.05f : mv;   // media lenta, para a tendencia
+  int ini = n >= 3 ? (am[0] + am[1] + am[2]) / 3 : mv, fim = n >= 3 ? (am[n - 3] + am[n - 2] + am[n - 1]) / 3 : mv;
+  batMvAgora = fim;
+  if (n == 6) {
+    int d = fim - ini;
+    if (d >= 60 && !batCarregando)  { batCarregando = true;  batPulo = constrain(d, 60, 200); viuPulo = true; n = 0; tendDesde = 0; registra("bateria: carregador ligado (+%d mV)", d); }
+    else if (d <= -60 && batCarregando) { batCarregando = false; batPulo = constrain(-d, 60, 200); viuPulo = true; n = 0; tendDesde = 0; registra("bateria: carregador desligado (%d mV)", d); }
+  }
+  // Tendencia de 10 min: na tomada a tensao nunca cai, na bateria nunca sobe.
+  // E devagar (medido: +8 mV em 6 min carregando a 85 %), por isso a janela longa.
+  // Pega o que o pulo nao mostra (ligou ja na tomada; tirou com a bateria cheia).
+  {
+    if (!tendDesde) { tendDesde = millis(); tendMv = (int)media; }
+    else if (millis() - tendDesde > 600000) {
+      int d = (int)media - tendMv;
+      bool antes = batCarregando;
+      if (d >= 6) batCarregando = true; else if (d <= -6) batCarregando = false;
+      if (!viuPulo && fim >= 4190) batCarregando = true;   // logo depois de ligar: acima disso, so na tomada
+      if (batCarregando != antes) registra("bateria: %s (tendencia %+d mV)", batCarregando ? "carregando" : "na bateria", d);
+      tendDesde = millis(); tendMv = (int)media;
+    }
+  }
+}
+int bateriaMvReal() { int mv = batMvAgora ? batMvAgora : bateriaMv(); return batCarregando && mv < 4190 ? mv - batPulo : mv; }
 void desenhaBateria() {
-  int pct = bateriaPct(bateriaMv());
-  int nivel = pct < 0 ? -1 : (pct + 5) / 10;            // so redesenha quando muda de faixa de 10 %
+  int pct = bateriaPct(bateriaMvReal());
+  int nivel = pct < 0 ? -1 : (pct + 5) / 10 + (batCarregando ? 100 : 0);   // redesenha ao mudar de faixa de 10 % ou ao plugar/tirar
   if (nivel == batNaTela) return;
   batNaTela = nivel;
   const int x = 206, y = 7, w = 24, h = 12;
@@ -656,10 +697,20 @@ void desenhaBateria() {
   preenche(x, y, w, h, COR_TEXTO); preenche(x + 1, y + 1, w - 2, h - 2, COR_FUNDO);   // contorno
   preenche(x + w, y + 3, 2, h - 6, COR_TEXTO);                                         // polo
   preenche(x + 2, y + 2, max(1, (w - 4) * pct / 100), h - 4, c);
+  if (batCarregando) {                    // raio no meio, com borda escura para aparecer sobre qualquer cor
+    const int X[] = {x + 14, x + 9, x + 15, x + 10}, Y[] = {y + 1, y + 6, y + 6, y + 11};
+    for (int i = 0; i < 3; i++) {
+      for (int o = -1; o <= 1; o += 2) linha(X[i] + o, Y[i], X[i + 1] + o, Y[i + 1], COR_FUNDO);
+      linha(X[i], Y[i], X[i + 1], Y[i + 1], COR_OURO);
+    }
+  }
 }
 #else
 int bateriaMv() { return 0; }
 int bateriaPct(int) { return -1; }
+bool batCarregando = false;
+int bateriaMvReal() { return 0; }
+void cuidaBateria() {}
 void desenhaBateria() {}
 #endif
 
@@ -829,21 +880,33 @@ bool tocaArquivo(const char* nome) {
 void somAcordar() { if (!tocaArquivo("/acordar.wav")) fala(H_FELIZ); }
 void somDormir()  { if (!tocaArquivo("/dormir.wav")) fala(H_SONO); }
 // Chamado quando a cara muda: acordou ou foi dormir.
+unsigned long somOiEm = 0, somTchauEm = 0;                 // ultimo "oi"/"tchau" (para nao repetir)
 void somDaCara(Cara antes, Cara depois) {
   if (millis() < 15000) return;                            // ligou agora: sem barulho
-  if (antes == C_DORMINDO && depois != C_DORMINDO) { registra("som: acordou"); somAcordar(); }
-  else if (depois == C_DORMINDO && antes != C_DORMINDO) { registra("som: dormiu"); somDormir(); }
+  if (antes == C_DORMINDO && depois != C_DORMINDO) { registra("som: acordou"); somAcordar(); somOiEm = millis(); }
+  else if (depois == C_DORMINDO && antes != C_DORMINDO && (!somTchauEm || millis() - somTchauEm > 600000)) { registra("som: dormiu"); somDormir(); }
 }
-// Eventos do Claude Code que falam: esperando voce, erro, terminou.
+// Eventos do Claude Code que falam: esperando voce, erro, terminou,
+// abriu uma sessao (oi) e fechou a ultima (tchau).
 // A placa responde ao PC primeiro e fala logo depois, no loop.
+#define SOM_OI -2
+#define SOM_TCHAU -3
 int somPendente = -1;
 void somDoEvento(const char* tipo) {
   if (millis() < 15000 || demo) return;
-  if (!strcmp(tipo, "atencao")) somPendente = H_PERGUNTA;
+  if (!strcmp(tipo, "inicio")) { if (millis() - somOiEm > 3000) somPendente = SOM_OI; }   // se acordou agora, ja disse oi
+  else if (!strcmp(tipo, "fim")) { if (dados.n == 0) somPendente = SOM_TCHAU; }
+  else if (!strcmp(tipo, "atencao")) somPendente = H_PERGUNTA;
   else if (!strcmp(tipo, "erro")) somPendente = H_BRAVO;
   else if (!strcmp(tipo, "parou")) somPendente = H_PRONTO;
 }
-void cuidaSomE32() { if (somPendente >= 0) { int h = somPendente; somPendente = -1; fala(h); } }
+void cuidaSomE32() {
+  if (somPendente == -1) return;
+  int h = somPendente; somPendente = -1;
+  if (h == SOM_OI) { registra("som: oi"); somAcordar(); somOiEm = millis(); }
+  else if (h == SOM_TCHAU) { registra("som: tchau"); somDormir(); somTchauEm = millis(); }
+  else fala(h);
+}
 #else
 void fala(int) {}
 void somAcordar() {}
@@ -2531,12 +2594,12 @@ void webRaiz() {
 }
 void webMini() {
   if (!autorizado()) { web.send(401, "text/plain", "segredo invalido\n"); return; }
-  char buf[560], lista[80] = "";
+  char buf[600], lista[80] = "";
   for (int i = 0; i < I_N; i++) { if (i) strlcat(lista, ",", sizeof lista); strlcat(lista, IDIOMA_COD[i], sizeof lista); }
-  snprintf(buf, sizeof buf, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,\"ctx\":%d,\"n\":%d,\"mod\":\"%s\",\"at\":%ld,\"now\":%ld,\"local\":%s,\"rssi\":%d,\"manut\":\"%s\",\"bambu\":%s,\"bcon\":%s,\"best\":\"%s\",\"bpct\":%d,\"idioma\":\"%s\",\"idiomas\":\"%s\",\"bat_mv\":%d,\"bat_pct\":%d}\n",
+  snprintf(buf, sizeof buf, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,\"ctx\":%d,\"n\":%d,\"mod\":\"%s\",\"at\":%ld,\"now\":%ld,\"local\":%s,\"rssi\":%d,\"manut\":\"%s\",\"bambu\":%s,\"bcon\":%s,\"best\":\"%s\",\"bpct\":%d,\"idioma\":\"%s\",\"idiomas\":\"%s\",\"bat_mv\":%d,\"bat_pct\":%d,\"bat_carga\":%s}\n",
            VERSAO, dados.h5, dados.h5r, dados.d7, dados.d7r, dados.ctx, dados.n, dados.mod, dados.at, (long)time(nullptr), localRecente() ? "true" : "false", (int)WiFi.RSSI(),
            manutPedidaEm ? "pedida" : manutLiberada() ? "liberada" : "",
-           bambuLigado() ? "true" : "false", bConectado ? "true" : "false", bi.estado, bi.pct, IDIOMA_COD[idioma], lista, bateriaMv(), bateriaPct(bateriaMv()));
+           bambuLigado() ? "true" : "false", bConectado ? "true" : "false", bi.estado, bi.pct, IDIOMA_COD[idioma], lista, bateriaMv(), bateriaPct(bateriaMvReal()), batCarregando ? "true" : "false");
   web.send(200, "application/json", buf);
 }
 
@@ -2988,6 +3051,7 @@ void loop() {
   cuidaBambu();
   cuidaCena();
   cuidaSom();
+  cuidaBateria();
   cuidaDemo();
   cuidaAlertaAnim();
 
