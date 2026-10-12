@@ -51,13 +51,14 @@ Claudinho runs on two kinds of hardware. For a new build, go with the
 | Soldering | 2 wires (the case's USB-C power input) | 4 wires |
 | Voice and battery | optional speaker and battery (charger on the board) | no (powered by a USB power supply) |
 | Screen updates | part of the firmware | separate Nextion screen file (`.tft`) |
-| 3D-printed case | being modeled right now, coming to MakerWorld soon | [on MakerWorld](https://makerworld.com/models/3365275-claudinho) |
+| 3D-printed case | [on MakerWorld](https://makerworld.com/models/3365275-claudinho) (E32R28T profile) | [on MakerWorld](https://makerworld.com/models/3365275-claudinho) (classic profile) |
 
 ## Single board (recommended): E32R28T
 
 <p>
-  <img src="docs/img/e32r28t-montagem-frente.jpg" alt="E32R28T running Claudinho, with speaker and battery" width="49%">
-  <img src="docs/img/e32r28t-montagem-verso.jpg" alt="Back of the E32R28T: speaker and battery plugged into their connectors" width="49%">
+  <img src="docs/img/e32-caixa-frente.jpg" alt="Claudinho on the E32R28T, in its 3D-printed case" width="32%">
+  <img src="docs/img/e32-caixa-verso.jpg" alt="Back of the case: speaker grille and the USB-C power input" width="32%">
+  <img src="docs/img/e32-caixa-lado.jpg" alt="Side view of the case on its base" width="32%">
 </p>
 
 The **E32R28T** (LCDWiki "2.8inch ESP32-32E Display") is an ESP32 with a 2.8"
@@ -92,6 +93,7 @@ languages), and the setup skill recognizes the board on its own.
 | 5 V USB power supply with a USB-A port, **at least 1 A** | powers Claudinho and charges the battery (a regular phone charger), with a USB-A to USB-C cable into the case |
 | USB-C female breakout (bare, VBUS and GND) | the power input on the case (see [Power](#power)) |
 | 4-pin 1.25 mm cable | from the UART connector to the case's USB-C; comes with the board |
+| 3D-printed case | [on MakerWorld](https://makerworld.com/models/3365275-claudinho), E32R28T profile |
 
 ### Power
 
@@ -130,8 +132,16 @@ languages), and the setup skill recognizes the board on its own.
   without pressing buttons. The screen may blink: that's normal.
 - **ILI9341 or ST7789?** The board's spec sheet says ILI9341, but the screen
   is an ST7789. The firmware already knows.
-- **Case:** its own case is being modeled right now and will be on MakerWorld
-  soon. For now it's for people who don't mind a bare board.
+- **Case:** on [MakerWorld](https://makerworld.com/models/3365275-claudinho), same model as the classic one;
+  pick the **E32R28T** print profile (0.2 mm layers, 3 walls, 10% infill).
+  The battery sits behind the board and the USB-C breakout fits in the back.
+
+<p>
+  <img src="docs/img/e32-pecas.jpg" alt="All the parts before assembly: printed case, board, battery, speaker, USB-C breakout" height="200">
+  <img src="docs/img/e32-bateria-na-caixa.jpg" alt="Battery placed inside the case" height="200">
+  <img src="docs/img/e32-caixa-por-dentro.jpg" alt="Inside of the case with the USB-C breakout wired" height="200">
+  <img src="docs/img/e32-imprimindo.jpg" alt="The case printing" height="200">
+</p>
 
 ## Warning: at your own risk
 
@@ -408,9 +418,9 @@ worked on the first try: that's how it gets onto the tested list.
 
 ## Classic version (ESP32-C3 + Nextion)
 
-The first version, the one in the video and the one the
-[MakerWorld case](https://makerworld.com/models/3365275-claudinho) was made
-for. It stays fully supported.
+The first version, the one in the video. Its case is the classic print
+profile of the [MakerWorld model](https://makerworld.com/models/3365275-claudinho).
+It stays fully supported.
 
 ### Parts
 
@@ -682,7 +692,7 @@ needed, just because it's cool.
 ## Authorship
 
 The case's 3D model was not made by AI: it's 100% mine, modeled by hand in
-SketchUp (the classic version's case is on [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
+SketchUp (both cases are on [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
 
 On the software side, the concepts came from me. The heavy lifting
 (firmware, scripts, skill, tests and a good part of this text) was done by

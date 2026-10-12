@@ -52,13 +52,14 @@ O Claudinho roda em dois tipos de hardware. Para montar um novo, vá de
 | Solda | 2 fios (a entrada USB-C da caixa) | 4 fios |
 | Voz e bateria | alto-falante e bateria opcionais (carregador na placa) | não (alimentada por fonte USB) |
 | Atualizar a tela | faz parte do firmware | arquivo de tela do Nextion separado (`.tft`) |
-| Caixa impressa em 3D | sendo modelada agora, sai no MakerWorld em breve | [no MakerWorld](https://makerworld.com/models/3365275-claudinho) |
+| Caixa impressa em 3D | [no MakerWorld](https://makerworld.com/models/3365275-claudinho) (perfil E32R28T) | [no MakerWorld](https://makerworld.com/models/3365275-claudinho) (perfil clássico) |
 
 ## Placa única (recomendada): E32R28T
 
 <p>
-  <img src="docs/img/e32r28t-montagem-frente.jpg" alt="E32R28T rodando o Claudinho, com alto-falante e bateria" width="49%">
-  <img src="docs/img/e32r28t-montagem-verso.jpg" alt="Verso da E32R28T: alto-falante e bateria ligados nos conectores" width="49%">
+  <img src="docs/img/e32-caixa-frente.jpg" alt="Claudinho na E32R28T, na caixa impressa em 3D" width="32%">
+  <img src="docs/img/e32-caixa-verso.jpg" alt="Verso da caixa: furos do alto-falante e a entrada USB-C de energia" width="32%">
+  <img src="docs/img/e32-caixa-lado.jpg" alt="A caixa de lado, sobre a base" width="32%">
 </p>
 
 A **E32R28T** ("2.8inch ESP32-32E Display", da LCDWiki) é um ESP32 com tela
@@ -93,6 +94,7 @@ demonstração, idiomas), e a skill de configuração reconhece a placa sozinha.
 | Fonte USB 5 V com saída USB-A, **pelo menos 1 A** | alimenta o Claudinho e carrega a bateria (um carregador de celular comum), com cabo USB-A para USB-C na caixa |
 | Conector USB-C fêmea avulso (placa simples, com VBUS e GND) | a entrada de energia da caixa (veja [Alimentação](#alimentação)) |
 | Cabo de 4 pinos, 1,25 mm | do conector UART até o USB-C da caixa; vem com a placa |
+| Caixa impressa em 3D | [no MakerWorld](https://makerworld.com/models/3365275-claudinho), perfil E32R28T |
 
 ### Alimentação
 
@@ -132,8 +134,17 @@ demonstração, idiomas), e a skill de configuração reconhece a placa sozinha.
   botão. A tela pode piscar: é normal.
 - **ILI9341 ou ST7789?** A ficha da placa diz ILI9341, mas a tela é uma
   ST7789. O firmware já sabe disso.
-- **Caixa:** a caixa dela está sendo modelada agora e sai no MakerWorld em
-  breve. Por enquanto, é para quem não se importa com a placa sem caixa.
+- **Caixa:** no [MakerWorld](https://makerworld.com/models/3365275-claudinho), no mesmo modelo da clássica;
+  escolha o perfil de impressão **E32R28T** (camada de 0,2 mm, 3 paredes,
+  10% de preenchimento). A bateria fica atrás da placa e o USB-C fêmea encaixa
+  no fundo.
+
+<p>
+  <img src="docs/img/e32-pecas.jpg" alt="Todas as peças antes da montagem: caixa impressa, placa, bateria, alto-falante, USB-C fêmea" height="200">
+  <img src="docs/img/e32-bateria-na-caixa.jpg" alt="Bateria dentro da caixa" height="200">
+  <img src="docs/img/e32-caixa-por-dentro.jpg" alt="Por dentro da caixa, com o USB-C fêmea ligado" height="200">
+  <img src="docs/img/e32-imprimindo.jpg" alt="A caixa imprimindo" height="200">
+</p>
 
 ## Aviso: por sua conta e risco
 
@@ -405,8 +416,8 @@ funcionado de primeira: é assim que ele entra na lista de testados.
 
 ## Versão clássica (ESP32-C3 + Nextion)
 
-A primeira versão, a do vídeo e a da
-[caixa que está no MakerWorld](https://makerworld.com/models/3365275-claudinho).
+A primeira versão, a do vídeo. A caixa dela é o perfil clássico do
+[modelo no MakerWorld](https://makerworld.com/models/3365275-claudinho).
 Ela continua totalmente suportada.
 
 ### Peças
@@ -678,7 +689,7 @@ porque é legal.
 ## Autoria
 
 A modelagem 3D da caixa não foi feita por IA: é 100% minha, desenhada à
-mão no SketchUp (a caixa da versão clássica está no [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
+mão no SketchUp (as duas caixas estão no [MakerWorld](https://makerworld.com/models/3365275-claudinho)).
 
 No software, de mim saíram os conceitos. O trabalho braçal (firmware, scripts, skill,
 testes e boa parte deste texto) foi do Claude, trabalhando comigo no próprio
