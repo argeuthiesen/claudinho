@@ -2662,6 +2662,8 @@ void webEvento() {
 }
 
 void webRaiz() {
+  // navegador: vai para o painel (o #k= do endereco acompanha o redirecionamento)
+  if (web.header("Accept").indexOf("text/html") >= 0) { web.sendHeader("Location", "/painel"); web.send(302, "text/plain", ""); return; }
   web.send(200, "application/json", "{\"claudinho\":true,\"versao\":\"" VERSAO "\"}\n");
 }
 void webMini() {
@@ -2962,8 +2964,8 @@ void webTftDados() {
 void iniciaLocal() {
   configTzTime(FUSO, NTP_1, NTP_2);          // relogio sem servidor
   MDNS.begin("claudinho");                   // http://claudinho.local (onde houver mDNS)
-  const char* cabecalhos[] = {"Authorization"};
-  web.collectHeaders(cabecalhos, 1);
+  const char* cabecalhos[] = {"Authorization", "Accept"};
+  web.collectHeaders(cabecalhos, 2);
   web.on("/", HTTP_GET, webRaiz);
   web.on("/mini.json", HTTP_GET, webMini);
   web.on("/painel", HTTP_GET, webPainel);
