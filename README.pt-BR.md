@@ -54,6 +54,10 @@ já foi usado nas janelas de 5 horas e de 7 dias.
   reagindo às suas sessões de verdade, com o seu consumo de verdade, sem
   gastar tokens. Ele só escuta em `127.0.0.1`: nada sai do seu computador.
   Quando a placa chegar, `claudinho.sh virtual parar` e siga a configuração.
+- **Ainda não tem no virtual:** a impressora Bambu Lab. A demonstração mostra
+  o painel e os alertas da impressora com dados de mentira, mas por enquanto
+  só a placa conversa com uma impressora de verdade. Os jogos também ficam só
+  na placa.
 
 ## Qual versão?
 

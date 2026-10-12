@@ -53,6 +53,9 @@ the 5-hour and 7-day windows.
   to your real sessions, with your real plan usage, spending no tokens. It
   listens on `127.0.0.1` only: nothing leaves your computer. When the board
   arrives, `claudinho.sh virtual parar` and carry on with the setup.
+- **Not yet in the virtual one:** the Bambu Lab printer. The demo shows the
+  printer panel and alerts with made-up data, but only the board talks to a
+  real printer for now. The games stay on the board too.
 
 ## Which version?
 

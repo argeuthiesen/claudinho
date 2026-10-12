@@ -402,6 +402,10 @@ computador** é preciso rodar de novo (ou pedir "liga o Claudinho virtual").
 Quando a placa chegar: `claudinho.sh virtual parar` e siga do passo 1; o
 `wifi.sh` grava o endereço da placa por cima.
 
+O virtual **ainda não conversa com a impressora Bambu** (nem tem os jogos):
+se a pessoa pedir a impressora sem ter placa, explique que por enquanto isso
+é só na placa.
+
 Quem só quer **ver**, sem instalar nada: a demonstração online, em
 https://argeuthiesen.github.io/claudinho/ (eventos de mentira).
 

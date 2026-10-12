@@ -239,6 +239,9 @@ spends no tokens and listens on `127.0.0.1` only.
 - After restarting the computer, run it again.
 - `claudinho.sh virtual parar` turns it off and points the plugin back to
   the board, if there was one.
+- Not there yet: the Bambu Lab printer (panel and alerts) and the games.
+  Only the board connects to a real printer for now; the online demo shows
+  the printer screens with made-up data.
 - Just want to look? The [online demo](https://argeuthiesen.github.io/claudinho/)
   runs on made-up events, nothing to install.
 

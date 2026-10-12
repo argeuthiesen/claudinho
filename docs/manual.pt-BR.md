@@ -236,6 +236,9 @@ eventos da placa, não gasta tokens e só escuta em `127.0.0.1`.
 - Depois de reiniciar o computador, rode de novo.
 - `claudinho.sh virtual parar` desliga e aponta o plugin de volta para a
   placa, se havia uma.
+- Ainda não tem: a impressora Bambu Lab (painel e alertas) e os jogos. Por
+  enquanto só a placa conecta a uma impressora de verdade; a demonstração
+  online mostra as telas da impressora com dados de mentira.
 - Só quer olhar? A [demonstração online](https://argeuthiesen.github.io/claudinho/?lang=pt)
   roda com eventos de mentira, sem instalar nada.
 

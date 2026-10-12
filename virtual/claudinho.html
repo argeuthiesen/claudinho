@@ -98,7 +98,12 @@ const T = PT ? {
          empolgado:"Eba!", preocupado:"Xi, um bug?", susto:"Opa!", erro:"Ops, algo falhou", pronto:"Pronto!",
          atencao:"Preciso de você!", compact:"Arrumando a memória...", commit:"Commit feito!", teste_ok:"Testes passaram!",
          teste_falhou:"Testes falharam", janela:"Janela de uso nova!" },
-  agente: "agente %d", delegando: "delegando"
+  agente: "agente %d", delegando: "delegando",
+  imp: { tokens:"Tokens", impressora:"Impressora", manter:"Manter", imprimindo:"Imprimindo", ams:"AMS: umidade 27%  · 32°C",
+         impresso:"impresso", faltam:"faltam", camada:"camada de 212", bico:"Bico 220/220°", mesa:"Mesa 55/55°", camara:"Câmara 35°",
+         titulo:"IMPRESSORA 3D", as:"às 14:32", toque:"toque: li", comecou:"Começou", previsto:"previsto 2h31",
+         faltam5:"Faltam 5 min", quase:"quase pronta", trocou:"Trocou o filamento", pausada:"Pausada", semFil:"acabou o filamento",
+         terminou:"Terminou!", levou:"levou 2h31" }
 } : {
   conectado: "connected to your Claude Code", esperando: "waiting for Claude Code...", demo: "demo",
   v2d: "Screen only", v3d: "3D view", consumo: "Plan usage", h5: "5-hour window", d7: "7-day window",
@@ -109,7 +114,12 @@ const T = PT ? {
          empolgado:"Yay!", preocupado:"Uh oh, a bug?", susto:"Whoa!", erro:"Oops, something failed", pronto:"Done!",
          atencao:"I need you!", compact:"Tidying up memory...", commit:"Committed!", teste_ok:"Tests passed!",
          teste_falhou:"Tests failed", janela:"Fresh usage window!" },
-  agente: "agent %d", delegando: "delegating"
+  agente: "agent %d", delegando: "delegating",
+  imp: { tokens:"Tokens", impressora:"Printer", manter:"Keep", imprimindo:"Printing", ams:"AMS: humidity 27%  · 32°C",
+         impresso:"printed", faltam:"left", camada:"layer of 212", bico:"Nozzle 220/220°", mesa:"Bed 55/55°", camara:"Chamber 35°",
+         titulo:"3D PRINTER", as:"at 2:32 pm", toque:"tap: got it", comecou:"Started", previsto:"expected 2h31",
+         faltam5:"5 min left", quase:"almost done", trocou:"Filament changed", pausada:"Paused", semFil:"out of filament",
+         terminou:"Finished!", levou:"took 2h31" }
 };
 document.documentElement.lang = PT ? "pt-BR" : "en";
 for (const [id, k] of [["t-consumo","consumo"],["t-5h","h5"],["t-7d","d7"],["t-ctx","ctx"],["t-sessao","sessao"],["t-modelo","modelo"],["t-sessoes","sessoes"]])
@@ -230,7 +240,7 @@ const MONO_W = 7, MONO_LH = 17, CENA_MIN_MS = 8000, CENA_FIM_MS = 12000;
 const FUNDO = "#363435", OURO = "#d0ad6c", TEXTO = "#f2f3f4", APAGADO = "#a5a09d";
 const rgb = (r, gg, b) => `rgb(${r},${gg},${b})`;
 const sorteia = (a, b) => b === undefined ? Math.floor(Math.random() * a) : a + Math.floor(Math.random() * (b - a));
-let pagina = 0, paginaDesde = 0, cenaAtual = S.NENHUMA, cenaDesde = 0, cenaProx = 0;
+let pagina = 0, paginaDesde = 0, paginaDur = 0, cenaAtual = S.NENHUMA, cenaDesde = 0, cenaProx = 0;
 function escreve(x, y, w, h, mono, cor, fundo, alin, t) {
   if (fundo) preenche(x, y, w, h, fundo);
   g.fillStyle = cor; g.textBaseline = "middle";
@@ -443,6 +453,79 @@ function cenaPorFerramenta(acao) {
   return true;
 }
 
+// ---------------------------------------------------------------- impressora (so na demonstracao)
+// A placa conversa com uma impressora Bambu Lab pela rede; o Claudinho virtual
+// ainda nao. Aqui o painel e os alertas aparecem so na demonstracao, com dados
+// de mentira, iguais aos do "claudinho.sh demo" da placa.
+const OK_ = "#7bbf7b", ALERTA_ = "#d9a25a", CRITICO_ = "#c96f6f", BLOCO_ = "#424041", TRILHO_ = "#555354", AZUL_ = "#4a8fd9", BRANCO_ = "#fff4e6";
+const fonteP = (peso, px) => `${peso} ${px}px 'DM Sans', sans-serif`;
+function texto(x, y, w, h, fonte, cor, alin, t) {
+  g.font = fonte; g.fillStyle = cor; g.textBaseline = "middle";
+  g.textAlign = alin == 1 ? "center" : alin == 2 ? "right" : "left";
+  g.fillText(t, alin == 1 ? x + w / 2 : alin == 2 ? x + w : x, y + h / 2 + 1, w);
+}
+function botoes(atual) {                  // Tokens | Impressora | Manter, como na placa
+  const nomes = [T.imp.tokens, T.imp.impressora, T.imp.manter], w = (308 - 12) / 3;
+  nomes.forEach((n, i) => {
+    const x = 6 + i * (w + 6);
+    preenche(x, 186, w, 50, i == atual ? OURO : BLOCO_); preenche(x + 1, 187, w - 2, 48, BLOCO_);
+    texto(x + 1, 202, w - 2, 18, fonteP(400, 16), TEXTO, 1, n);
+  });
+}
+function painelImpressora() {
+  preenche(0, 0, 320, 240, FUNDO);
+  texto(12, 2, 184, 30, fonteP(700, 24), TEXTO, 0, "Bambu Lab P2S");
+  texto(196, 6, 112, 20, fonteP(400, 16), OK_, 2, T.imp.imprimindo);
+  texto(12, 30, 296, 20, fonteP(400, 16), APAGADO, 0, T.imp.ams);
+  [[T.imp.impresso, "48%"], [T.imp.faltam, "1h12"], [T.imp.camada, "96"]].forEach(([r, v], i) => {
+    texto(4 + i * 104, 48, 104, 18, fonteP(400, 16), APAGADO, 1, r);
+    texto(4 + i * 104, 64, 104, 36, fonteP(400, 32), TEXTO, 1, v);
+  });
+  preenche(12, 101, 296, 9, TRILHO_); preenche(12, 101, 296 * 0.48, 9, "#898989");   // na cor do filamento do slot 2
+  texto(12, 113, 100, 20, fonteP(400, 14), TEXTO, 0, T.imp.bico);
+  texto(116, 113, 92, 20, fonteP(400, 14), TEXTO, 1, T.imp.mesa);
+  texto(212, 113, 96, 20, fonteP(400, 14), TEXTO, 2, T.imp.camara);
+  [["#f98c36", "PLA"], ["#898989", "PLA"], ["#c1c1c1", "PETG"], ["#3f6fd9", "PLA"]].forEach(([c, t], i) => {
+    const x = 12 + i * 76, y = 140;
+    if (i == 1) preenche(x - 3, y - 3, 70, 44, BRANCO_);
+    preenche(x, y, 64, 38, c);
+    texto(x, y + 10, 64, 18, fonteP(400, 16), i == 2 ? COR.olho : BRANCO_, 1, t);
+  });
+  botoes(1);
+}
+let alerta = null, alFase = 0, alProx = 0;
+function desenhaAlerta() {
+  const a = alerta;
+  preenche(0, 0, 320, 240, FUNDO);
+  texto(12, 6, 170, 28, fonteP(700, 21), TEXTO, 0, T.imp.titulo);
+  texto(190, 10, 118, 20, fonteP(400, 14), APAGADO, 2, "Bambu Lab P2S");
+  preenche(0, 38, 320, 3, a.cor);
+  const grande = a.titulo.length <= 12;
+  texto(0, grande ? 46 : 54, 320, grande ? 54 : 38, grande ? fonteP(700, 48) : fonteP(400, 32), a.cor, 1, a.titulo);
+  if (a.amostra) { preenche(16, 126, 34, 30, BRANCO_); preenche(18, 128, 30, 26, a.amostra); texto(58, 126, 254, 30, fonteP(700, 24), TEXTO, 0, a.l2); }
+  else texto(8, 130, 304, 30, fonteP(700, 24), TEXTO, 1, a.l2);
+  texto(110, 178, 200, 20, fonteP(400, 16), APAGADO, 1, T.imp.as);
+  texto(110, 200, 200, 20, fonteP(400, 16), OURO, 1, T.imp.toque);
+  alFase = 0; alProx = 0; alertaMini();
+}
+const alertaBom = () => alerta && (alerta.cor == OK_ || alerta.cor == OURO);
+function alertaMini() {                   // pula nas boas, abana os bracos nas outras
+  miniP = 6;
+  const dy = alertaBom() && (alFase & 1) ? -6 : 0;
+  preenche(18, 178, 14 * miniP, 9 * miniP + 6, FUNDO);
+  miniClawd(18, 184 + dy, FUNDO);
+  if (alertaBom()) { if (dy) miniBracos(3); } else miniBracos(1 + (alFase & 1));
+}
+function cuidaImpressora() {
+  if (agoraMs() - paginaDesde > paginaDur) { mudaPagina(0); return; }
+  if (pagina == 8 && agoraMs() >= alProx) { alProx = agoraMs() + (alertaBom() ? 350 : 280); alFase++; alertaMini(); }
+}
+function mostraImpressora(o) {            // {painel:true} ou {alerta:{cor,titulo,l2,amostra}}
+  paginaDur = o.dur || 5000;
+  if (o.painel) { pagina = 9; paginaDesde = agoraMs(); painelImpressora(); }
+  else { alerta = o.alerta; pagina = 8; paginaDesde = agoraMs(); desenhaAlerta(); }
+}
+
 // ---------------------------------------------------------------- estado (o mesmo da placa)
 const dados = { ok:false, h5:-1, h5r:0, d7:-1, d7r:0, ctx:-1, mod:"", n:0, at:0 };
 const evento = { cara:C.NEUTRO, ate:0 };
@@ -466,7 +549,7 @@ const celebrando = () => celebraAte && agoraMs() < celebraAte;
 
 function trataEvento(tipo, humor, acao) {
   if (tipo != "ferramenta" && tipo != "erro") ferramentasSeguidas = 0;
-  if (pagina == 10 && tipo != "ferramenta") mudaPagina(0);       // qualquer outro evento: sai da cena e mostra a cara
+  if ((pagina == 10 && tipo != "ferramenta") || pagina == 8 || pagina == 9) mudaPagina(0);   // sai da cena (ou da impressora) e mostra a cara
   if (tipo != "ferramenta" && tipo != "parou") celebraAte = 0;
   switch (tipo) {
     case "inicio": poeCara(C.FELIZ, 5000); poeLegenda("oi"); break;
@@ -655,7 +738,7 @@ modo3d = !modo3d; trocaVista();
 
 function laco(t) {
   if (pagina == 0) quadro();
-  else { cuidaCena(); if (pagina == 0) quadro(); else if (textura) textura.needsUpdate = true; }
+  else { if (pagina == 10) cuidaCena(); else cuidaImpressora(); if (pagina == 0) quadro(); else if (textura) textura.needsUpdate = true; }
   if (modo3d && renderer) {
     if (mascote) mascote.position.y = Math.sin(t / 1400) * 0.6;   // respira
     controles.update(); renderer.render(cena, camera);
@@ -674,11 +757,18 @@ function demonstracao() {
   // cada cena fica uns 5 s e sai com um evento que nao e ferramenta (como na placa)
   const roteiro = [["inicio",3],["prompt",3],["ferramenta",5,"","codando"],["commit",5],["ferramenta",5,"","terminal"],
                    ["teste_ok",4],["prompt",2],["ferramenta",5,"","lendo"],["atencao",6],["prompt",2,"feliz"],
-                   ["ferramenta",2,"","agente"],["ferramenta",3,"","agente"],["erro",4],["teste_falhou",5],["compact",5],["parou",8]];
+                   ["ferramenta",2,"","agente"],["ferramenta",3,"","agente"],["erro",4],["teste_falhou",5],["compact",5],["parou",6],
+                   ["painel",5],["alerta",4,{cor:OK_,titulo:"comecou",l2:"previsto"}],["alerta",4,{cor:OURO,titulo:"faltam5",l2:"quase"}],
+                   ["alerta",4,{cor:AZUL_,titulo:"trocou",l2:"slot 2 > slot 4  PLA",amostra:"#3f6fd9"}],
+                   ["alerta",4,{cor:CRITICO_,titulo:"pausada",l2:"semFil"}],["alerta",5,{cor:OK_,titulo:"terminou",l2:"levou"}]];
   let i = 0;
   (function proximo() {
     const [tipo, s, humor, acao] = roteiro[i++ % roteiro.length];
-    dados.at = Date.now() / 1000; trataEvento(tipo, humor || "", acao || "");
+    dados.at = Date.now() / 1000;
+    if (tipo == "painel") mostraImpressora({ painel:true, dur:s * 1000 + 600 });
+    else if (tipo == "alerta") mostraImpressora({ dur:s * 1000 + 600, alerta:{ cor:humor.cor, titulo:T.imp[humor.titulo],
+                                                   l2:T.imp[humor.l2] || humor.l2, amostra:humor.amostra } });
+    else trataEvento(tipo, humor || "", acao || "");
     if (tipo == "parou") { dados.ctx = Math.min(95, dados.ctx + 7); dados.h5 = Math.min(99, dados.h5 + 3); painel(); }
     setTimeout(proximo, s * 1000);
   })();
