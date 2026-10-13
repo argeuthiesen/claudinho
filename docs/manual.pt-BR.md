@@ -64,9 +64,13 @@ codando` (`terminal`, `lendo`, `agente`).
 
 - **Tocando na tela** aparece o cartão de consumo: janelas de 5 horas e de 7
   dias, quando cada uma renova, quantos terminais estão abertos e o IP da
-  placa. No alto, o **ctx** é quanto do contexto da conversa atual já foi usado
-  (cinza; amarelo a partir de 75 %; vermelho a partir de 90 %, quando o Claude
-  Code está para compactar). Depois de 15 segundos ele volta ao rosto (ou toque fora dos botões).
+  placa, e quanto do **contexto** da conversa atual já foi usado. Na placa
+  única são **três anéis** lado a lado (5 horas, 7 dias e contexto), com o
+  número no meio; na versão clássica, duas barras e o **ctx** no alto. Cores:
+  5 h e 7 d ficam amarelos a partir de 75 % e vermelhos a partir de 90 %; o
+  contexto fica amarelo a partir de 70 % e vermelho a partir de 85 %, porque o
+  Claude Code compacta a conversa um pouco antes de encher. Depois de 15
+  segundos ele volta ao rosto (ou toque fora dos botões).
 - **Os botões de baixo** (no cartão de consumo e no painel da impressora):
   - **Tokens** e **Impressora** alternam entre as duas telas; uma moldura
     dourada fina marca a atual. Sem impressora configurada, só aparece

@@ -204,6 +204,21 @@ struct BlocoJanela {
   void limpa() { rotulo.limpa(); pct.limpa(); reseta.limpa(); resta.limpa(); barra.limpa(); }
 };
 BlocoJanela b5h(22), b7d(96);
+#ifdef PLACA_E32R28T
+// Tela 1 na E32R28T: tres aneis (ver anelJanela)
+struct Anel {
+  int cx;
+  int pct = -2; uint16_t cor = 0; char txt[8] = "", l2[24] = "";
+  Campo num, rotulo, linha2;
+  Anel(int x) : cx(x),
+    num    {x - 30, 62, 60, 26, FONTE_M, 1, COR_FUNDO},    // cabe dentro do furo do anel (raio 34)
+    rotulo {x - 52, 124, 104, 18, FONTE_P, 1, COR_FUNDO},
+    linha2 {x - 52, 143, 104, 18, FONTE_P, 1, COR_FUNDO} {}
+  void esquece() { pct = -2; cor = 0; txt[0] = l2[0] = 0; num.limpa(); rotulo.limpa(); linha2.limpa(); }
+};
+static const int ANEL_Y = 75, ANEL_R1 = 44, ANEL_R0 = 34;
+Anel aneis[3] = {Anel(56), Anel(160), Anel(264)};
+#endif
 
 // ---------------------------------------------------------------- nextion
 // O Nextion tem buffer de 1 KB e desenha mais devagar do que 115200 baud
@@ -649,9 +664,13 @@ void desenhaMoldura() {
     escreve(0, 196, 320, 20, FONTE_P,  COR_APAGADO, COR_FUNDO, 1, tx(T_MANUT_OU_BOOT));
   } else {
     limpaTela(COR_FUNDO);
+#ifdef PLACA_E32R28T
+    for (Anel& a : aneis) a.esquece();
+#else
     preenche(6, b5h.y, 308, 72, COR_BLOCO);
     preenche(6, b7d.y, 308, 72, COR_BLOCO);
     b5h.limpa(); b7d.limpa();
+#endif
     desenhaBotoes();
   }
 }
@@ -957,7 +976,11 @@ void desenhaCabecalho() {
   snprintf(t, sizeof t, "CLAUDE CODE");
   cTitulo.mostra(t, COR_OURO);
   // ctx: quanto do contexto da conversa (do ultimo terminal que mandou numeros) ja foi usado
+#ifdef PLACA_E32R28T
+  if (false) {                           // na E32 o contexto tem anel proprio
+#else
   if (dados.ok && dados.ctx > 0) {
+#endif
     snprintf(t, sizeof t, tx(T_USO_CTX), dados.ctx);
     cCtx.mostra(t, dados.ctx >= 90 ? COR_CRITICO : dados.ctx >= 75 ? COR_ALERTA : COR_APAGADO);
   } else cCtx.mostra("", COR_APAGADO);
@@ -1008,11 +1031,56 @@ void desenhaJanela(BlocoJanela& b, const char* nome, int pct, long reseta, bool 
   b.barra.mostra(dados.ok ? pct : 0, corPct(pct));
 }
 
+#ifdef PLACA_E32R28T
+// ---- E32R28T: o consumo em tres aneis (5 horas, 7 dias e o contexto da
+// sessao), lado a lado, com o numero no meio. A placa desenha arcos direto;
+// no Nextion seguem as barras. O contexto ganha cor antes dos 100 %, porque o
+// Claude Code compacta a conversa um pouco antes de encher.
+
+void anelArco(int cx, int pct, uint16_t cor) {
+  e32.fillArc(cx, ANEL_Y, ANEL_R0, ANEL_R1, 0, 360, (uint16_t)COR_TRILHO);
+  if (pct <= 0) return;
+  float fim = -90 + 3.6f * constrain(pct, 0, 100);
+  e32.fillArc(cx, ANEL_Y, ANEL_R0, ANEL_R1, -90, fim, cor);
+}
+// pct < 0: sem dado. l2: a linha de baixo (quanto falta para renovar...).
+void mostraAnel(Anel& a, const char* rotulo, int pct, uint16_t cor, const char* l2, uint16_t corL2, bool pisca) {
+  char t[8]; if (pct >= 0) snprintf(t, sizeof t, "%d%%", pct); else strcpy(t, "--");
+  if (pct != a.pct || cor != a.cor) {             // o arco so redesenha quando muda
+    anelArco(a.cx, pct, cor); a.pct = pct; a.cor = cor; a.txt[0] = 0;
+  }
+  uint16_t corNum = pct < 0 ? COR_APAGADO : (pisca && (millis() / 1000) % 2 ? COR_FUNDO : COR_TEXTO);
+  if (strcmp(t, a.txt) || pisca) { a.num.mostra(t, corNum); strlcpy(a.txt, t, sizeof a.txt); }
+  a.rotulo.mostra(rotulo, COR_APAGADO);
+  if (strcmp(l2, a.l2)) { a.linha2.mostra(l2, corL2); strlcpy(a.l2, l2, sizeof a.l2); }
+}
+void anelJanela(Anel& a, const char* rotulo, int pct, long reseta) {
+  char t[24] = "";
+  bool vencida = reseta > 0 && relogioValido() && (long)time(nullptr) >= reseta;
+  if (!dados.ok) { mostraAnel(a, rotulo, -1, COR_TRILHO, tx(T_USO_AGUARDANDO), COR_APAGADO, false); return; }
+  if (vencida) { mostraAnel(a, rotulo, 0, COR_OURO, tx(T_USO_RENOVOU), COR_OK, false); return; }
+  if (reseta > 0 && relogioValido()) restanteStr(reseta, t, sizeof t);
+  else if (pct == 0) strlcpy(t, tx(T_USO_JANELA_LIVRE), sizeof t);
+  bool pisca = consumo.naTela && consumo.telaIntensa && pct >= 90;
+  mostraAnel(a, rotulo, pct, corPct(pct), t, COR_TEXTO, pisca);
+}
+#endif
+
 void desenha() {
   if (pagina == 0 || pagina >= 2) return;   // olhos, manutencao ou paleta: nada a atualizar
   desenhaCabecalho();
+#ifdef PLACA_E32R28T
+  anelJanela(aneis[0], tx(T_USO_ANEL_5H), dados.h5, dados.h5r);
+  anelJanela(aneis[1], tx(T_USO_ANEL_7D), dados.d7, dados.d7r);
+  {
+    int c = dados.ok && dados.ctx >= 0 ? dados.ctx : -1;
+    uint16_t cor = c >= 85 ? COR_CRITICO : c >= 70 ? COR_ALERTA : COR_OURO;
+    mostraAnel(aneis[2], tx(T_USO_ANEL_CTX), c, c < 0 ? COR_TRILHO : cor, tx(T_USO_ANEL_SESSAO), COR_APAGADO, false);
+  }
+#else
   desenhaJanela(b5h, tx(T_USO_SESSAO_5H), dados.h5, dados.h5r, false);
   desenhaJanela(b7d, tx(T_USO_SEMANA_7D), dados.d7, dados.d7r, true);
+#endif
   desenhaRodape();
 }
 

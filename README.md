@@ -282,7 +282,7 @@ inside the plugin folder. After a marketplace install, the paths are:
 
 - **`<plugin>`** (the plugin itself, with the scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<version>/`, for example
-  `.../claudinho/1.17.4/`. If there's more than one version folder, use the
+  `.../claudinho/1.18.0/`. If there's more than one version folder, use the
   newest. (If you cloned this repository, `<plugin>` is its root.)
 - **`<plugin-data>`** (the board's IP and secret):
   `~/.claude/plugins/data/claudinho-claudinho/`. The scripts find it on their

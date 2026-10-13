@@ -62,10 +62,14 @@ face. Tap to see the usage card. To try one: `claudinho.sh cena codando`
 ## Plan usage
 
 - **Tap the screen** to see the usage card: 5-hour and 7-day windows, when
-  each one resets, how many terminals are open and the board's IP. At the top,
-  **ctx** is how full the current conversation's context is (gray, yellow from
-  75%, red from 90%, when Claude Code is about to compact it). After 15
-  seconds it goes back to the face (or tap outside the buttons).
+  each one resets, how many terminals are open and the board's IP, plus how
+  full the current conversation's **context** is. On the single board they
+  are **three rings** side by side (5 hours, 7 days, context) with the number
+  in the middle; on the classic version, two bars plus **ctx** at the top.
+  Colors: 5 h and 7 d turn yellow from 75% and red from 90%; context turns
+  yellow from 70% and red from 85%, because Claude Code compacts the
+  conversation a bit before it's full. After 15 seconds it goes back to the
+  face (or tap outside the buttons).
 - **The buttons at the bottom** (on the usage card and on the printer
   panel):
   - **Tokens** and **Printer** switch between the two screens;

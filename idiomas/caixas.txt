@@ -136,3 +136,4 @@ hms.procure_wiki        m24 608
 # HMS: category = alert title (r32, 320); message = detail, up to 2 lines (m24, 2 x 304)
 hms.cat.*               r32 320
 hms.*                   m24 608
+uso.anel_*              p16 100

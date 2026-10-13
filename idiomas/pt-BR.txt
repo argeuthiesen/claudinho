@@ -47,6 +47,10 @@ uso.aguardando = aguardando
 uso.sessao_5h = SESSAO  5 HORAS
 uso.semana_7d = SEMANA  7 DIAS
 uso.ctx = ctx %d%%
+uso.anel_5h = 5 horas
+uso.anel_7d = 7 dias
+uso.anel_ctx = contexto
+uso.anel_sessao = desta sessão
 
 botao.tokens = Tokens
 botao.impressora = Impressora
