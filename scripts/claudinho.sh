@@ -138,7 +138,8 @@ case "${1:-}" in
   log)  curl_claudinho -s -m 5 "http://$IP/log" ;;
   cara)
     palavra "${2:-x}" && palavra "${3:-}" || uso
-    curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/evento" -d "{\"tipo\":\"$2\",\"humor\":\"${3:-}\",\"sessao\":\"teste\"}" ;;
+    # sem sessao: um teste nao conta como sessao aberta (senao o Claudinho nao dorme)
+    curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/evento" -d "{\"tipo\":\"$2\",\"humor\":\"${3:-}\"}" ;;
   cor)
     if [ -z "${2:-}" ]; then cmd '{"paleta":true}'; echo "escolha a cor na tela do Claudinho"; exit; fi
     for v in "${2:-}" "${3:-}" "${4:-}"; do num "$v" && [ "$v" -le 255 ] || uso; done
