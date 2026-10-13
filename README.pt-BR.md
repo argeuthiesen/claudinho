@@ -285,7 +285,7 @@ pasta do plugin. Depois de instalar pelo marketplace, os caminhos são:
 
 - **`<plugin>`** (o plugin em si, com os scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<versão>/`, por exemplo
-  `.../claudinho/1.17.2/`. Se houver mais de uma pasta de versão, use a mais
+  `.../claudinho/1.17.3/`. Se houver mais de uma pasta de versão, use a mais
   nova. (Se você clonou este repositório, `<plugin>` é a raiz dele.)
 - **`<dados-do-plugin>`** (o IP e o segredo da placa):
   `~/.claude/plugins/data/claudinho-claudinho/`. Os scripts acham essa pasta
@@ -429,6 +429,7 @@ Coisas que aprendemos no caminho (algumas do jeito difícil):
 | `PRECISA_BOOT` na gravação | Segure BOOT, tire e ponha o USB, solte BOOT, rode de novo. |
 | Não entra no Wi-Fi | Só redes de 2,4 GHz. Confira a senha rodando a skill de novo. |
 | Parou de reagir | O IP mudou: rode `/claudinho:configurar` (reserve o IP no roteador). |
+| Perdeu alguns eventos | Veja o `eventos.log` em `<dados-do-plugin>`: uma linha por evento que os hooks mandaram, com a resposta da placa (`200` = recebeu; `000` = não chegou à placa). Sem linha nenhuma, o Claude Code não rodou aquele hook. |
 | Os números do plano não aparecem | Eles só aparecem depois da primeira resposta do Claude na sessão. Acabou de instalar ou atualizar o plugin? Reinicie o Claude Code. |
 | `atualizar` ou `tela` falham no meio | Wi-Fi perdendo pacotes. Não estraga nada: repita. Se insistir, `claudinho.sh reiniciar` e tente de novo; na versão clássica, confira a fonte (1 A ou mais). |
 | Tela com lixo ou branca (versão clássica) | `claudinho.sh tela` de novo, depois `claudinho.sh reiniciar`. |

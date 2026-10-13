@@ -58,6 +58,10 @@ if [ "$tipo" = prompt ]; then
 fi
 # tipo, humor, acao e sessao sao palavras fixas ou hexadecimal: nao precisam de escape.
 # Segredo e corpo vao pela entrada padrao do curl (-K -), fora da linha de comando.
-{ printf 'header = "Authorization: Bearer %s"\nheader = "Content-Type: application/json"\ndata = "{\\"tipo\\":\\"%s\\",\\"humor\\":\\"%s\\",\\"acao\\":\\"%s\\",\\"sessao\\":\\"%s\\"}"\n' \
-    "$TOKEN" "$tipo" "$humor" "$acao" "$sessao" | curl -s -m 2 -o /dev/null -X POST "http://$IP/evento" -K - ; } >/dev/null 2>&1 &
+# Registro curto (eventos.log na pasta de dados, ultimas 200 linhas): hora, tipo
+# e a resposta da placa. Nada do prompt. Serve para o "ele nao reagiu".
+{ r=$(printf 'header = "Authorization: Bearer %s"\nheader = "Content-Type: application/json"\ndata = "{\\"tipo\\":\\"%s\\",\\"humor\\":\\"%s\\",\\"acao\\":\\"%s\\",\\"sessao\\":\\"%s\\"}"\n' \
+    "$TOKEN" "$tipo" "$humor" "$acao" "$sessao" | curl -s -m 2 -o /dev/null -w '%{http_code}' -X POST "http://$IP/evento" -K - )
+  L="$DADOS/eventos.log"; printf '%s %s %s\n' "$(date '+%m-%d %H:%M:%S')" "$tipo" "${r:-000}" >> "$L"
+  [ "$(wc -l < "$L")" -gt 400 ] && tail -n 200 "$L" > "$L.tmp" && mv "$L.tmp" "$L"; } >/dev/null 2>&1 &
 exit 0

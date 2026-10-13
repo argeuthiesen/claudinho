@@ -282,7 +282,7 @@ inside the plugin folder. After a marketplace install, the paths are:
 
 - **`<plugin>`** (the plugin itself, with the scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<version>/`, for example
-  `.../claudinho/1.17.2/`. If there's more than one version folder, use the
+  `.../claudinho/1.17.3/`. If there's more than one version folder, use the
   newest. (If you cloned this repository, `<plugin>` is its root.)
 - **`<plugin-data>`** (the board's IP and secret):
   `~/.claude/plugins/data/claudinho-claudinho/`. The scripts find it on their
@@ -431,6 +431,7 @@ Things we learned along the way (some the hard way):
 | `PRECISA_BOOT` while flashing | Hold BOOT, unplug and replug the USB, release BOOT, run it again. |
 | Won't join Wi-Fi | 2.4 GHz networks only. Check the password by running the skill again. |
 | Stopped reacting | The IP changed: run `/claudinho:configurar` (reserve the IP on your router). |
+| Missed some events | Look at `eventos.log` in `<plugin-data>`: one line per event the hooks sent, with the board's answer (`200` = got it; `000` = didn't reach the board). No line at all means Claude Code didn't run that hook. |
 | No plan numbers | They only show up after Claude's first response in a session. Just installed or updated the plugin? Restart Claude Code. |
 | `atualizar` or `tela` fail halfway | Wi-Fi dropping packets. Nothing breaks: try again. If it keeps happening, `claudinho.sh reiniciar` and try again; on the classic version, check the power supply (1 A or more). |
 | Garbled or blank screen (classic version) | Run `claudinho.sh tela` again, then `claudinho.sh reiniciar`. |
