@@ -49,6 +49,7 @@
   <h1>Claudinho</h1>
   <span class="estado"><span class="ponto" id="ponto"></span><span id="conexao"></span></span>
   <span class="espaco"></span>
+  <button id="uso"></button>
   <button id="vista"></button>
 </header>
 <main>
@@ -91,7 +92,8 @@ const PT = (params.get("lang") || (LOCAL ? navigator.language : "en") || "en").t
 const T = PT ? {
   conectado: "ligado ao seu Claude Code", esperando: "esperando o Claude Code...", demo: "demonstração",
   v2d: "Ver só a tela", v3d: "Ver em 3D", consumo: "Consumo do plano", h5: "Janela de 5 horas", d7: "Janela de 7 dias",
-  ctx: "Contexto da sessão", sessao: "Sessão", modelo: "Modelo", sessoes: "Sessões abertas", reseta: "renova em ",
+  ctx: "Contexto da sessão", sessao: "Sessão", verUso: "Ver consumo",
+  anel: { h5:"5 horas", d7:"7 dias", ctx:"contexto", sessao:"desta sessão", aguardando:"aguardando", livre:"janela livre", renovou:"renovou!" }, modelo: "Modelo", sessoes: "Sessões abertas", reseta: "renova em ",
   aviso: 'Este é o Claudinho virtual: o mesmo rosto da placa, reagindo ao seu Claude Code de verdade, sem gastar tokens. Gostou? O de verdade fica na sua mesa: <a href="https://github.com/argeuthiesen/claudinho" target="_blank" rel="noopener">veja como montar</a>.',
   avisoDemo: 'Demonstração com eventos de mentira. Com o plugin instalado, o Claudinho virtual reage ao seu Claude Code de verdade: <a href="https://github.com/argeuthiesen/claudinho" target="_blank" rel="noopener">veja como</a>.',
   leg: { oi:"Oi! Sessão nova", pensando:"Pensando...", trabalhando:"Trabalhando...", desconfiado:"Hmm, quantos passos...",
@@ -107,7 +109,8 @@ const T = PT ? {
 } : {
   conectado: "connected to your Claude Code", esperando: "waiting for Claude Code...", demo: "demo",
   v2d: "Screen only", v3d: "3D view", consumo: "Plan usage", h5: "5-hour window", d7: "7-day window",
-  ctx: "Session context", sessao: "Session", modelo: "Model", sessoes: "Open sessions", reseta: "resets in ",
+  ctx: "Session context", sessao: "Session", verUso: "Show usage",
+  anel: { h5:"5 hours", d7:"7 days", ctx:"context", sessao:"this session", aguardando:"waiting", livre:"window is free", renovou:"renewed!" }, modelo: "Model", sessoes: "Open sessions", reseta: "resets in ",
   aviso: 'This is the virtual Claudinho: the same face as the board, reacting to your real Claude Code, spending no tokens. Like it? The real one sits on your desk: <a href="https://github.com/argeuthiesen/claudinho" target="_blank" rel="noopener">see how to build it</a>.',
   avisoDemo: 'Demo with made-up events. With the plugin installed, the virtual Claudinho reacts to your real Claude Code: <a href="https://github.com/argeuthiesen/claudinho" target="_blank" rel="noopener">see how</a>.',
   leg: { oi:"Hi! New session", pensando:"Thinking...", trabalhando:"Working...", desconfiado:"Hmm, so many steps...",
@@ -528,6 +531,60 @@ function mostraImpressora(o) {            // {painel:true} ou {alerta:{cor,titul
   else { alerta = o.alerta; pagina = 8; paginaDesde = agoraMs(); desenhaAlerta(); }
 }
 
+// ---------------------------------------------------------------- consumo na tela (tela 1 da placa)
+// Tres aneis: 5 horas, 7 dias e o contexto da sessao. Abre com um clique na
+// tela ou no botao e, sozinha, quando o consumo cruza uma faixa (50/75/90 %).
+const USO_MS = 10000;
+const corPct = p => p >= 90 ? CRITICO_ : p >= 75 ? ALERTA_ : OURO;
+function curto(ts) {
+  const s = ts - Date.now() / 1000; if (!ts || s <= 0) return "";
+  const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+  return d ? `${d}d ${h}h` : h ? `${h}h ${String(m).padStart(2, "0")}min` : `${m}min`;
+}
+function anel(cx, rotulo, pct, cor, l2, corL2) {
+  const y = 75;
+  g.lineWidth = 10; g.lineCap = "butt";
+  g.strokeStyle = TRILHO_; g.beginPath(); g.arc(cx, y, 39, 0, 2 * Math.PI); g.stroke();
+  if (pct > 0) { g.strokeStyle = cor; g.beginPath(); g.arc(cx, y, 39, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * Math.min(pct, 100) / 100); g.stroke(); }
+  texto(cx - 30, 62, 60, 26, fonteP(400, 24), pct < 0 ? APAGADO : TEXTO, 1, pct < 0 ? "--" : pct + "%");
+  texto(cx - 52, 124, 104, 18, fonteP(400, 16), APAGADO, 1, rotulo);
+  texto(cx - 52, 143, 104, 18, fonteP(400, 16), corL2, 1, l2);
+}
+function janela(cx, rotulo, pct, reseta) {
+  if (!dados.ok || pct < 0) return anel(cx, rotulo, -1, TRILHO_, T.anel.aguardando, APAGADO);
+  if (reseta && Date.now() / 1000 >= reseta) return anel(cx, rotulo, 0, OURO, T.anel.renovou, OK_);
+  anel(cx, rotulo, pct, corPct(pct), curto(reseta) || (pct == 0 ? T.anel.livre : ""), TEXTO);
+}
+let usoDesenhado = 0;
+function telaUso() {
+  preenche(0, 0, 320, 240, FUNDO);
+  texto(12, 6, 200, 22, fonteP(700, 18), OURO, 0, "CLAUDE CODE");
+  const d = new Date();
+  texto(220, 6, 88, 22, fonteP(400, 18), TEXTO, 2, `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`);
+  janela(56, T.anel.h5, dados.h5, dados.h5r);
+  janela(160, T.anel.d7, dados.d7, dados.d7r);
+  const c = dados.ok && dados.ctx >= 0 ? dados.ctx : -1;
+  anel(264, T.anel.ctx, c, c >= 85 ? CRITICO_ : c >= 70 ? ALERTA_ : OURO, T.anel.sessao, APAGADO);
+  preenche(12, 178, 296, 1, TRILHO_);
+  texto(12, 192, 296, 22, fonteP(400, 16), APAGADO, 1, `${dados.mod || "—"}  ·  ${T.sessoes}: ${dados.n}`);
+  usoDesenhado = agoraMs();
+}
+function mostraUso(dur = USO_MS) { pagina = 1; paginaDesde = agoraMs(); paginaDur = dur; telaUso(); }
+function cuidaUso() {
+  if (agoraMs() - paginaDesde > paginaDur) { mudaPagina(0); return; }
+  if (agoraMs() - usoDesenhado > 1000) telaUso();
+}
+function alternaUso() { if (pagina == 1) mudaPagina(0); else mostraUso(); }
+const faixaDe = p => p >= 90 ? 90 : p >= 75 ? 75 : p >= 50 ? 50 : 0;
+let faixas = null, usoPendente = false;    // a primeira leitura nao faz alarde
+function confereFaixas() {
+  const f = [faixaDe(dados.h5), faixaDe(dados.d7), dados.ctx >= 85 ? 85 : dados.ctx >= 70 ? 70 : 0];
+  if (faixas && f.some((v, i) => v > faixas[i])) usoPendente = true;   // numa cena ou na impressora: fica para depois
+  faixas = f;
+  cuidaUsoPendente();
+}
+function cuidaUsoPendente() { if (usoPendente && (pagina == 0 || pagina == 1)) { usoPendente = false; mostraUso(); } }
+
 // ---------------------------------------------------------------- estado (o mesmo da placa)
 const dados = { ok:false, h5:-1, h5r:0, d7:-1, d7r:0, ctx:-1, mod:"", n:0, at:0 };
 const evento = { cara:C.NEUTRO, ate:0 };
@@ -551,7 +608,7 @@ const celebrando = () => celebraAte && agoraMs() < celebraAte;
 
 function trataEvento(tipo, humor, acao) {
   if (tipo != "ferramenta" && tipo != "erro") ferramentasSeguidas = 0;
-  if ((pagina == 10 && tipo != "ferramenta") || pagina == 8 || pagina == 9) mudaPagina(0);   // sai da cena (ou da impressora) e mostra a cara
+  if ((pagina == 10 && tipo != "ferramenta") || pagina == 1 || pagina == 8 || pagina == 9) mudaPagina(0);   // sai da cena (ou da impressora) e mostra a cara
   if (tipo != "ferramenta" && tipo != "parou") celebraAte = 0;
   switch (tipo) {
     case "inicio": poeCara(C.FELIZ, 5000); poeLegenda("oi"); break;
@@ -600,7 +657,7 @@ function recebeEstado(e) {
   if (e.modelo) dados.mod = e.modelo;
   if (typeof e.n == "number") dados.n = e.n;
   dados.at = e.visto || Date.now() / 1000; dados.ok = true;
-  painel();
+  painel(); confereFaixas();
 }
 
 // ---------------------------------------------------------------- painel ao lado
@@ -736,11 +793,30 @@ function trocaVista() {
   ajusta();
 }
 document.getElementById("vista").onclick = trocaVista;
+document.getElementById("uso").textContent = T.verUso;
+document.getElementById("uso").onclick = alternaUso;
+tela.addEventListener("click", alternaUso);              // na vista 2D, clicar na tela
+let apertou = null, dedos = 0;                           // no 3D: clique sem arrastar, com um dedo so
+palco.addEventListener("pointerdown", e => {
+  dedos++;
+  apertou = dedos == 1 ? { id:e.pointerId, x:e.clientX, y:e.clientY } : null;   // segundo dedo: e pinça, nao clique
+});
+palco.addEventListener("pointermove", e => {
+  if (apertou && e.pointerId == apertou.id && Math.hypot(e.clientX - apertou.x, e.clientY - apertou.y) >= 5) apertou = null;
+});
+const solta = e => {
+  dedos = Math.max(0, dedos - 1);
+  if (e.type == "pointerup" && modo3d && apertou && e.pointerId == apertou.id) alternaUso();
+  apertou = null;
+};
+palco.addEventListener("pointerup", solta);
+palco.addEventListener("pointercancel", solta);
 modo3d = !modo3d; trocaVista();
 
 function laco(t) {
+  cuidaUsoPendente();
   if (pagina == 0) quadro();
-  else { if (pagina == 10) cuidaCena(); else cuidaImpressora(); if (pagina == 0) quadro(); else if (textura) textura.needsUpdate = true; }
+  else { if (pagina == 10) cuidaCena(); else if (pagina == 1) cuidaUso(); else cuidaImpressora(); if (pagina == 0) quadro(); else if (textura) textura.needsUpdate = true; }
   if (modo3d && renderer) {
     if (mascote) mascote.position.y = Math.sin(t / 1400) * 0.6;   // respira
     controles.update(); renderer.render(cena, camera);
@@ -758,7 +834,7 @@ function demonstracao() {
   painel();
   // cada cena fica uns 5 s e sai com um evento que nao e ferramenta (como na placa)
   const roteiro = [["inicio",3],["prompt",3],["ferramenta",5,"","codando"],["commit",5],["ferramenta",5,"","terminal"],
-                   ["teste_ok",4],["prompt",2],["ferramenta",5,"","lendo"],["atencao",6],["prompt",2,"feliz"],
+                   ["teste_ok",4],["uso",5],["prompt",2],["ferramenta",5,"","lendo"],["atencao",6],["prompt",2,"feliz"],
                    ["ferramenta",2,"","agente"],["ferramenta",3,"","agente"],["erro",4],["teste_falhou",5],["compact",5],["parou",6],
                    ["painel",5],["alerta",4,{cor:OK_,titulo:"comecou",l2:"previsto"}],["alerta",4,{cor:OURO,titulo:"faltam5",l2:"quase"}],
                    ["alerta",4,{cor:AZUL_,titulo:"trocou",l2:"slot 2 > slot 4  PLA",amostra:"#3f6fd9"}],
@@ -767,7 +843,8 @@ function demonstracao() {
   (function proximo() {
     const [tipo, s, humor, acao] = roteiro[i++ % roteiro.length];
     dados.at = Date.now() / 1000;
-    if (tipo == "painel") mostraImpressora({ painel:true, dur:s * 1000 + 600 });
+    if (tipo == "uso") mostraUso(s * 1000 + 600);
+    else if (tipo == "painel") mostraImpressora({ painel:true, dur:s * 1000 + 600 });
     else if (tipo == "alerta") mostraImpressora({ dur:s * 1000 + 600, alerta:{ cor:humor.cor, titulo:T.imp[humor.titulo],
                                                    l2:T.imp[humor.l2] || humor.l2, amostra:humor.amostra } });
     else trataEvento(tipo, humor || "", acao || "");

@@ -4,6 +4,8 @@
 
 O mascote do Claude Code, vivo, na sua mesa.
 
+<p align="center"><a href="https://argeuthiesen.github.io/claudinho/?lang=pt"><img src="docs/img/claudinho-reage.gif" alt="Claudinho em 3D: acorda, pensa, digita código, termina, comemora um commit e mostra os anéis de consumo" width="480"></a><br><b><a href="https://argeuthiesen.github.io/claudinho/?lang=pt">▶ Demonstração ao vivo no navegador</a></b> · sem placa</p>
+
 https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
 
 *O vídeo mostra a versão clássica (ESP32-C3 + Nextion).*
@@ -285,7 +287,7 @@ pasta do plugin. Depois de instalar pelo marketplace, os caminhos são:
 
 - **`<plugin>`** (o plugin em si, com os scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<versão>/`, por exemplo
-  `.../claudinho/1.18.0/`. Se houver mais de uma pasta de versão, use a mais
+  `.../claudinho/1.18.1/`. Se houver mais de uma pasta de versão, use a mais
   nova. (Se você clonou este repositório, `<plugin>` é a raiz dele.)
 - **`<dados-do-plugin>`** (o IP e o segredo da placa):
   `~/.claude/plugins/data/claudinho-claudinho/`. Os scripts acham essa pasta

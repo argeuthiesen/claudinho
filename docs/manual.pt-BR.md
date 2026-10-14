@@ -254,6 +254,9 @@ funcionando, ou só a tela (botão "Ver só a tela"), com o consumo do plano ao
 lado. Arraste para girar, use a rodinha para aproximar. Ele reage aos mesmos
 eventos da placa, não gasta tokens e só escuta em `127.0.0.1`.
 
+- Clique na tela (ou no botão "Ver consumo") para ver os três anéis de
+  consumo, como um toque na placa. Ela também abre sozinha quando o consumo
+  cruza 50, 75 ou 90 %, e volta para o rosto depois de 10 s.
 - Depois de reiniciar o computador, rode de novo.
 - `claudinho.sh virtual parar` desliga e aponta o plugin de volta para a
   placa, se havia uma.

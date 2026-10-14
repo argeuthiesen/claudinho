@@ -4,6 +4,8 @@
 
 Claude Code's mascot, alive, on your desk.
 
+<p align="center"><a href="https://argeuthiesen.github.io/claudinho/"><img src="docs/img/claudinho-reage.gif" alt="Claudinho in 3D: it wakes up, thinks, types code, finishes, celebrates a commit and shows the usage rings" width="480"></a><br><b><a href="https://argeuthiesen.github.io/claudinho/">▶ Live demo in your browser</a></b> · no board needed</p>
+
 https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
 
 *The video shows the classic version (ESP32-C3 + Nextion).*
@@ -282,7 +284,7 @@ inside the plugin folder. After a marketplace install, the paths are:
 
 - **`<plugin>`** (the plugin itself, with the scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<version>/`, for example
-  `.../claudinho/1.18.0/`. If there's more than one version folder, use the
+  `.../claudinho/1.18.1/`. If there's more than one version folder, use the
   newest. (If you cloned this repository, `<plugin>` is its root.)
 - **`<plugin-data>`** (the board's IP and secret):
   `~/.claude/plugins/data/claudinho-claudinho/`. The scripts find it on their

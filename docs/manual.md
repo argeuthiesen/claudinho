@@ -256,6 +256,9 @@ the screen ("Screen only" button), with the plan usage beside it. Drag to
 turn it around, scroll to zoom. It reacts to the same events as the board,
 spends no tokens and listens on `127.0.0.1` only.
 
+- Click the screen (or the "Show usage" button) to see the three usage rings,
+  like a tap on the board. It also opens on its own when usage crosses 50, 75
+  or 90 %, and goes back to the face after 10 s.
 - After restarting the computer, run it again.
 - `claudinho.sh virtual parar` turns it off and points the plugin back to
   the board, if there was one.
