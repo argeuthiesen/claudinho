@@ -11,6 +11,10 @@ https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
 *The video shows the classic version (ESP32-C3 + Nextion).*
 
 Claudinho is a Claude Code plugin that gives Clawd a body: an ESP32 with a
+
+https://github.com/user-attachments/assets/a66e74d7-ef1a-491a-a30f-6afbe7c4e1d4
+
+
 touch screen (the single-board E32R28T, recommended, or the classic ESP32-C3 +
 Nextion) that reacts to what Claude is doing (thinking, using a tool,
 waiting for you, done, error) and shows how much of your plan you've used in
