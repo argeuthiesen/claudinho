@@ -47,8 +47,8 @@ perninhas) no canto:
 
 | O Claude está... | Cena |
 |---|---|
-| editando um arquivo | um editor de código: um terminal digita `code claudinho.ino`, e o código colorido vai sendo digitado e rolando |
-| rodando um comando | um terminal digitando comandos, com a saída rolando |
+| editando um arquivo | um editor de código: um terminal digita `code` e o nome de um arquivo, e o código colorido vai sendo digitado e rolando (cada vez um arquivo: Python, TypeScript, Go, SQL, C++) |
+| rodando um comando | um terminal digitando comandos, com a saída rolando: git, testes que falham e depois passam, builds, docker… cada vez numa ordem |
 | lendo ou procurando no código | a chuva do Matrix |
 | delegando para um subagente | um organograma: o Claude em cima, os agentes surgindo embaixo |
 
@@ -138,7 +138,7 @@ velha`). Quem joga contra você é o próprio Claudinho, rodando na placa, sem
 gastar token, e cada partida ele está com um humor: às vezes joga perfeito, às
 vezes vacila.
 
-- Você é o **X**: toque no quadrado. Ele responde logo depois, com o **O**.
+- Você é o **X**: toque no quadrado. Ele responde logo depois, com um **mini Clawd**.
 - No fim, ele risca a linha vencedora e reage: **triste** se você ganhou,
   **empolgado** se ele ganhou, **desconfiado** no empate. Depois começa outra
   partida sozinho, e quem começa alterna.

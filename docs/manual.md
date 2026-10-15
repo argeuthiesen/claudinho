@@ -46,8 +46,8 @@ scene, with a mini Claudinho (arms, legs and all) in the corner:
 
 | Claude is... | Scene |
 |---|---|
-| editing a file | a code editor: a terminal types `code claudinho.ino`, then colored code is typed line by line and scrolls |
-| running a command | a terminal typing commands, with output scrolling |
+| editing a file | a code editor: a terminal types `code` and a file name, then colored code is typed line by line and scrolls (a different file each time: Python, TypeScript, Go, SQL, C++) |
+| running a command | a terminal typing commands, with output scrolling: git, tests that fail and then pass, builds, docker… in a different order each time |
 | reading or searching the code | the Matrix rain |
 | delegating to a subagent | an org chart: Claude on top, agents appearing below |
 
@@ -139,7 +139,7 @@ velha`). Your opponent is Claudinho itself, running on the board, spending no
 tokens, and each game it's in a different mood: sometimes it plays perfectly,
 sometimes it slips.
 
-- You are **X**: tap a square. It answers right after with **O**.
+- You are **X**: tap a square. It answers right after with a **mini Clawd**.
 - At the end it strikes the winning line and reacts: **sad** if you won,
   **excited** if it won, **suspicious** on a draw. Then a new game starts on
   its own, and who goes first alternates.

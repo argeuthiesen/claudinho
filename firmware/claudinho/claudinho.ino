@@ -1255,7 +1255,7 @@ void toquePaleta(int tx, int ty) {
 
 // ---------------------------------------------------------------- jogo da velha
 // claudinho.sh velha (a skill chama quando a pessoa pede) abre o tabuleiro na
-// pagina 6. Voce e o X, o Claudinho e o O, e a jogada dele roda aqui mesmo
+// pagina 6. Voce e o X, o Claudinho joga com um mini Clawd, e a jogada dele roda aqui mesmo
 // (minimax), sem Claude nem token. Cada partida sorteia o quanto ele erra.
 // No fim: risca a linha, mostra o rosto reagindo com uma palavra, e comeca
 // outra partida sozinha (quem comeca alterna). Passatempo:
@@ -1264,7 +1264,7 @@ void toquePaleta(int tx, int ty) {
 static const unsigned long VELHA_ESPERA_MS = 120000, VELHA_PENSA_MS = 600, VELHA_TRIPLO_MS = 1500;
 static const unsigned long VELHA_RISCO_MS = 1200, VELHA_REACAO_MS = 3500;   // linha riscada, depois o rosto
 static const int VX = 55, VY = 15, VC = 70;          // tabuleiro 210 x 210, centralizado
-int vTab[9];                        // 0 livre, 1 voce (X), 2 Claudinho (O)
+int vTab[9];                        // 0 livre, 1 voce (X), 2 Claudinho (mini Clawd)
 int vResultado = 0;                 // 0 jogando; 1 voce ganhou, 2 Claudinho, 3 empate
 bool vVoceComeca = true, vReacaoNaTela = false, vAviso = false;
 float vErro = 0;                    // chance de o Claudinho jogar ao acaso, sorteada por partida
@@ -1298,13 +1298,19 @@ int vJogadaDele() {
 }
 
 void vCentro(int i, int& cx, int& cy) { cx = VX + (i % 3) * VC + VC / 2; cy = VY + (i / 3) * VC + VC / 2; }
+void vMiniClawd(int cx, int cy) {                              // a peca dele: o mesmo mini Clawd das cenas, em branco
+  const int u = 4, x = cx - 7 * u, y = cy - 9 * u / 2;          // 14 x 9 blocos de 4 px
+  auto cel = [&](int bx, int by, int w, int h, uint16_t c) { preenche(x + bx * u, y + by * u, w * u, h * u, c); };
+  cel(2, 0, 10, 7, COR_BRANCO); cel(0, 3, 2, 2, COR_BRANCO); cel(12, 3, 2, 2, COR_BRANCO);
+  for (int p : {3, 5, 8, 10}) cel(p, 7, 1, 2, COR_BRANCO);
+  cel(4, 2, 1, 3, COR_OLHO); cel(9, 2, 1, 3, COR_OLHO);
+}
 void vDesenhaPeca(int i) {
   int cx, cy; vCentro(i, cx, cy); const int r = 22;
   if (vTab[i] == 1) for (int d = -2; d <= 2; d++) {            // X preto grosso
     nexCmdf("line %d,%d,%d,%d,%u", cx - r + d, cy - r, cx + r + d, cy + r, COR_OLHO);
     nexCmdf("line %d,%d,%d,%d,%u", cx + r + d, cy - r, cx - r + d, cy + r, COR_OLHO);
-  } else if (vTab[i] == 2) for (int d = 0; d < 5; d++)         // O branco grosso
-    nexCmdf("cir %d,%d,%d,%u", cx, cy, r - d, COR_BRANCO);
+  } else if (vTab[i] == 2) vMiniClawd(cx, cy);
 }
 void vDesenhaAviso() {
   if (vAviso) { escreve(0, 90, VX, 18, FONTE_P, COR_CRITICO, corRosto(), 1, tx(T_VELHA_CLAUDE));
@@ -2042,48 +2048,16 @@ void miniOlhos(int dx) {             // -1 esquerda, 0 frente, 1 direita (lendo)
 }
 
 // ---- editor: codigo de mentira, com cores de sintaxe, digitado e rolando
-#define CK "\x01"   // palavra-chave
-#define CF "\x02"   // funcao
-#define CS "\x03"   // texto
-#define CC "\x04"   // comentario
-#define CN "\x05"   // numero
-#define CP "\x06"   // resto
-#define CT "\x07"   // tipo
-static const char* const CODIGO[] = {
-  CC "// acorda o Claudinho",
-  CT "void " CF "acorda" CP "() {",
-  CT "  int " CP "n = " CN "42" CP ";",
-  CK "  if " CP "(n > " CN "0" CP ") {",
-  CP "    tela." CF "pisca" CP "(" CN "3" CP ");",
-  CF "    fala" CP "(" CS "'oi!'" CP ");",
-  CP "  }",
-  CK "  for " CP "(" CT "int " CP "i = " CN "0" CP "; i < n; i++)",
-  CP "    olho[i] = " CK "true" CP ";",
-  CP "}",
-  "",
-  CC "// quanto custa? nada.",
-  CT "int " CF "tokens" CP "() {",
-  CK "  return " CN "0" CP ";",
-  CP "}",
-  "",
-  CT "bool " CF "feliz" CP "(" CT "int " CP "humor) {",
-  CK "  while " CP "(humor < " CN "10" CP ")",
-  CP "    humor += " CF "cafe" CP "();",
-  CK "  return true" CP ";",
-  CP "}",
-  "",
-  CC "/* TODO: dominar o mundo */",
-  CT "void " CF "loop" CP "() {",
-  CF "  acorda" CP "();",
-  CF "  delay" CP "(" CN "10" CP ");",
-  CP "}",
-  "",
-};
-static const int N_CODIGO = sizeof CODIGO / sizeof CODIGO[0];
+// Cada linha traz a cor de sintaxe em bytes 1 a 7 (ver edCor): 1 palavra-chave, 2 funcao,
+// 3 texto, 4 comentario, 5 numero, 6 resto, 7 tipo.
+#include "cenas.h"   // os roteiros (arquivos do editor e sessoes do terminal), gerados por scripts/gera-cenas.py
+int sorteiaOutro(int n, int antes) { if (antes < 0 || n < 2) return random(n); int k = random(n - 1); return k >= antes ? k + 1 : k; }
 static const int ED_TOPO = 22, ED_X = 30, ED_LINHAS = 12;
 static const uint16_t ED_FUNDO = RGB565(30, 30, 30);
 int edTopo = 0, edCol = 0, edEspera = 0, edPre = 0;   // edPre: letras ja digitadas do preambulo (-1 = no editor)
-static const char ED_PRE[] = "code claudinho.ino";
+int edArq = -1;                                       // arquivo aberto: cada cena sorteia outro
+char ED_PRE[24];                                      // "code <arquivo>"
+const char* edTexto(int li) { const Arquivo& a = ARQUIVOS[edArq]; return a.l[li % a.n]; }
 
 uint16_t edCor(char c) {
   switch (c) {
@@ -2096,7 +2070,7 @@ uint16_t edCor(char c) {
   }
   return RGB565(212, 212, 212);
 }
-int edTam(int li) { int n = 0; for (const char* p = CODIGO[li % N_CODIGO]; *p; p++) if (*p >= 8) n++; return n; }
+int edTam(int li) { int n = 0; for (const char* p = edTexto(li); *p; p++) if (*p >= 8) n++; return n; }
 int edY(int row) { return ED_TOPO + row * MONO_LH; }
 int edLarg(int row) { return (edY(row) + 16 > miniY) ? miniX - 2 : 320; }   // nao apaga o mini Clawd
 // Desenha os "ate" primeiros caracteres da linha li (-1 = todos), por pedacos da mesma cor.
@@ -2105,7 +2079,7 @@ void edLinha(int row, int li, int ate) {
   preenche(0, y, edLarg(row), 16, ED_FUNDO);
   char num[6]; snprintf(num, sizeof num, "%d", li % 1000 + 1);
   escreve(0, y, 24, 16, FONTE_MONO, RGB565(110, 110, 110), ED_FUNDO, 2, num);
-  for (const char* p = CODIGO[li % N_CODIGO]; ; p++) {
+  for (const char* p = edTexto(li); ; p++) {
     bool fim = !*p || (ate >= 0 && col >= ate && *p >= 8);
     if ((fim || *p < 8) && n) { seg[n] = 0; escreve(ED_X + (col - n) * MONO_W, y, n * MONO_W, 16, FONTE_MONO, cor, ED_FUNDO, 0, seg); n = 0; }
     if (fim) break;
@@ -2115,8 +2089,9 @@ void edLinha(int row, int li, int ate) {
   }
 }
 void edCursor() { preenche(ED_X + edCol * MONO_W, edY(ED_LINHAS - 1) + 1, MONO_W, 14, RGB565(230, 230, 230)); }
-// Preambulo: um terminal digita "code claudinho.ino" e o editor abre.
+// Preambulo: um terminal digita "code <arquivo>" e o editor abre.
 void edInicio() {
+  edArq = sorteiaOutro(N_ARQUIVOS, edArq); snprintf(ED_PRE, sizeof ED_PRE, "code %s", ARQUIVOS[edArq].nome);
   limpaTela(0);
   escreve(6, 20, MONO_W, 16, FONTE_MONO, RGB565(150, 255, 170), 0, 0, "$");
   edPre = 0;
@@ -2124,9 +2099,9 @@ void edInicio() {
 void edAbre() {
   limpaTela(ED_FUNDO);
   preenche(0, 0, 320, 20, RGB565(45, 45, 45)); preenche(0, 0, 112, 20, ED_FUNDO); preenche(0, 18, 112, 2, corRosto());
-  escreve(6, 2, 104, 16, FONTE_MONO, RGB565(220, 220, 220), ED_FUNDO, 0, "claudinho.ino");
+  escreve(6, 2, 104, 16, FONTE_MONO, RGB565(220, 220, 220), ED_FUNDO, 0, ARQUIVOS[edArq].nome);
   miniClawd(320 - MINI_W - 4, 240 - MINI_H - 2, ED_FUNDO);
-  edTopo = (edTopo + 5) % N_CODIGO;
+  edTopo = 0;                            // arquivo aberto do comeco
   for (int r = 0; r < ED_LINHAS - 1; r++) edLinha(r, edTopo + r, -1);
   edCol = 0; edEspera = 0; edCursor();
 }
@@ -2156,42 +2131,16 @@ void edPasso() {
   cenaProx = millis() + 150;
 }
 
-// ---- terminal: comandos digitados ('$' no comeco) e respostas rolando
-static const char* const TERM[] = {
-  "$git status",
-  "On branch main",
-  "nothing to commit, tree clean",
-  "$make",
-  "Compiling claudinho.ino ...",
-  "Linking firmware.bin",
-  "Build OK (63% flash)",
-  "$ping -c 2 claudinho.local",
-  "64 bytes: time=3.1 ms",
-  "64 bytes: time=2.8 ms",
-  "$./testes.sh",
-  "rosto ......... ok",
-  "painel ........ ok",
-  "velha ......... ok",
-  "12 passed, 0 failed",
-  "$clear",
-  "$make upload",
-  "Uploading 1246409 bytes",
-  "[##########] 100%",
-  "Done. Claudinho acordou.",
-  "$uptime",
-  "up 42 days, load 0.01",
-  "$clear",
-};
-static const int N_TERM = sizeof TERM / sizeof TERM[0];
+// ---- terminal: sessoes (cenas.h) sorteadas uma atras da outra; "$" no comeco e comando digitado
 static const int TE_TOPO = 24, TE_X = 6, TE_LINHAS = 12;
 static const uint16_t TE_FUNDO = RGB565(8, 8, 8), TE_VERDE = RGB565(60, 220, 90), TE_CLARO = RGB565(150, 255, 170);
-int teLinha = 0, teCol = 0, teVis[TE_LINHAS], teN = 0;
+int teSes = -1, teLinha = 0, teCol = 0, teN = 0; const char* teVis[TE_LINHAS];
 
 int teY(int row) { return TE_TOPO + row * MONO_LH; }
 int teLarg(int row) { return (teY(row) + 16 > miniY) ? miniX - 2 : 320; }
-// Desenha a linha i do roteiro na fileira row; comando mostra "$ " e so "ate" letras (-1 = inteiro).
-void teDesenha(int row, int i, int ate) {
-  const char* t = TERM[i]; int y = teY(row);
+// Desenha a linha t na fileira row; comando mostra "$ " e so "ate" letras (-1 = inteiro).
+void teDesenha(int row, const char* t, int ate) {
+  int y = teY(row);
   preenche(0, y, teLarg(row), 16, TE_FUNDO);
   if (t[0] == '$') {
     escreve(TE_X, y, MONO_W, 16, FONTE_MONO, TE_CLARO, TE_FUNDO, 0, "$");
@@ -2210,35 +2159,40 @@ void teInicio() {
   circulo(11, 10, 4, RGB565(237, 106, 94)); circulo(25, 10, 4, RGB565(245, 191, 79)); circulo(39, 10, 4, RGB565(98, 197, 84));
   escreve(100, 2, 120, 16, FONTE_MONO, RGB565(200, 200, 200), RGB565(40, 40, 40), 1, ">_ bash");
   teLimpa(); teCol = -1;
+  teSes = sorteiaOutro(N_SESSOES, teSes); teLinha = 0;
 }
 // Poe a linha i numa fileira nova (rola se precisar) e devolve a fileira.
-int teNova(int i) {
+int teNova(const char* t) {
   if (teN == TE_LINHAS) {
-    memmove(teVis, teVis + 1, sizeof(int) * (TE_LINHAS - 1)); teN--;
+    memmove(teVis, teVis + 1, sizeof(teVis[0]) * (TE_LINHAS - 1)); teN--;
     for (int r = 0; r < teN; r++) teDesenha(r, teVis[r], -1);
   }
-  teVis[teN] = i; return teN++;
+  teVis[teN] = t; return teN++;
+}
+// Proxima linha; no fim da sessao, sorteia outra e segue rolando.
+void teAvanca() {
+  teCol = -1;
+  if (++teLinha >= SESSOES[teSes].n) { teSes = sorteiaOutro(N_SESSOES, teSes); teLinha = 0; }
 }
 void tePasso() {
-  const char* t = TERM[teLinha];
+  const char* t = SESSOES[teSes].l[teLinha];
   if (t[0] != '$') {                                   // resposta: aparece inteira
-    teDesenha(teNova(teLinha), teLinha, -1);
-    teLinha = (teLinha + 1) % N_TERM; teCol = -1;
+    teDesenha(teNova(t), t, -1);
+    teAvanca();
     cenaProx = millis() + 120 + random(200);
     return;
   }
-  if (teCol < 0) { teCol = 0; teDesenha(teNova(teLinha), teLinha, 0); cenaProx = millis() + 500; return; }
+  if (teCol < 0) { teCol = 0; teDesenha(teNova(t), t, 0); cenaProx = millis() + 500; return; }
   int tam = strlen(t + 1);
   if (teCol < tam) {                                   // digitando o comando
-    teCol++; teDesenha(teN - 1, teLinha, teCol);
+    teCol++; teDesenha(teN - 1, t, teCol);
     miniBracos(1 + (teCol & 1));
     cenaProx = millis() + 50 + random(90);
     return;
   }
   miniBracos(0);
-  teDesenha(teN - 1, teLinha, -1);                     // Enter
-  if (!strcmp(t, "$clear")) teLimpa();
-  teLinha = (teLinha + 1) % N_TERM; teCol = -1;
+  teDesenha(teN - 1, t, -1);                           // Enter
+  teAvanca();
   cenaProx = millis() + 400;
 }
 
@@ -2430,7 +2384,7 @@ long demoPasso(int n) {
   static const int N_CARAS = sizeof CARAS / sizeof CARAS[0];
   demoSub = 0; demoDesde = millis(); demoTick = 0;
   int k = n;
-  if (k == 0) { demoCara(C_DORMINDO); return 4000; }
+  if (k == 0) { demoCara(C_DORMINDO); return 2500; }
   if (k == 1) { demoCara(C_FELIZ); fala(H_FELIZ); return 1600; }
   k -= 2;
   if (k < N_CARAS) {                                         // cada cara com a sua fala (a fala ja consome parte do tempo)
@@ -2441,15 +2395,15 @@ long demoPasso(int n) {
   }
   k -= N_CARAS;
   switch (k) {
-    case 0: demoUso(38, 61); abreTela(1); demoFixa(); return 2500;                       // consumo
+    case 0: demoUso(38, 61); abreTela(1); demoFixa(); return 2000;                       // consumo
     case 1: demoUso(76, 61); demoCara(C_CANSADO); fala(H_CANSADO); return 1000;         // cansado
     case 2: demoUso(92, 61); mudaPagina(1); demoFixa();                                 // limite: pisca
             consumo.naTela = true; consumo.telaIntensa = true; return 2500;
     case 3: demoCara(C_SUANDO); fala(H_NERVOSO); return 1000;
-    case 4: abreCena(S_CODANDO); demoFixa(); return 5000;                               // cenas
-    case 5: abreCena(S_TERMINAL); demoFixa(); return 5000;
-    case 6: abreCena(S_LENDO); demoFixa(); return 4000;
-    case 7: abreCena(S_AGENTE); demoFixa(); return 4500;
+    case 4: abreCena(S_CODANDO); demoFixa(); return 3500;                               // cenas
+    case 5: abreCena(S_TERMINAL); demoFixa(); return 3500;
+    case 6: abreCena(S_LENDO); demoFixa(); return 3000;
+    case 7: abreCena(S_AGENTE); demoFixa(); return 4000;
   }
   k -= 8;
   if (bambuLigado()) {                                                                  // impressora
@@ -2481,7 +2435,7 @@ long demoPasso(int n) {
             vVoceComeca = true; vAviso = false; vUltCasa = -1; vToques = 0;
             mudaPagina(6); demoFixa(); vNovaPartida(); vErro = 0; return 30000;
     case 5: gUltQ = -1; gToques = 0; mudaPagina(7); demoFixa(); gNovoJogo(); return 30000;   // Genius
-    case 6: mudaPagina(2); demoFixa(); return 2500;                                     // atualizacao
+    case 6: mudaPagina(2); demoFixa(); return 2000;                                     // atualizacao
     case 7: demoCara(C_DORMINDO); somDormir(); return 2500;
   }
   return -1;
@@ -2494,12 +2448,12 @@ void demoAnda() {
     if ((demoSub == 0 && t > 1500) || (demoSub == 1 && t > 3000)) { demoSub++; novoAgente(); }
     return;
   }
-  if (pagina == 6) {                                                 // velha: o "jogador" toca a melhor casa livre da lista
+  if (pagina == 6) {                                                 // velha: o "jogador" toca a melhor casa livre da lista (sem o circulo do toque: ficava em volta do X)
     if (vResultado) { if (vReacaoNaTela && millis() - vFimEm > VELHA_RISCO_MS + 1800) demoAte = millis(); return; }
-    if (vJogaEm || millis() - demoTick < 900) return;
+    if (vJogaEm || millis() - demoTick < 700) return;
     static const int ORDEM[9] = {4, 0, 8, 2, 6, 1, 3, 5, 7};
     for (int i : ORDEM) if (!vTab[i]) {
-      int x, y; vCentro(i, x, y); demoFantasma(x, y); delay(200);
+      int x, y; vCentro(i, x, y);
       toqueVelha(x, y); demoTick = millis(); demoFixa(); break;
     }
     return;

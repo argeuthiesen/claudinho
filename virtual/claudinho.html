@@ -248,6 +248,12 @@ function escreve(x, y, w, h, mono, cor, fundo, alin, t) {
   if (fundo) preenche(x, y, w, h, fundo);
   g.fillStyle = cor; g.textBaseline = "middle";
   g.font = mono ? `${MONO_W / 0.6}px 'JetBrains Mono', monospace` : "16px 'DM Sans', sans-serif";
+  if (mono) {                                     // letra por letra, como a placa: sem as ligaduras da fonte (=> e -> viravam setas)
+    g.textAlign = "left";
+    let cx = alin == 1 ? x + (w - t.length * MONO_W) / 2 : alin == 2 ? x + w - t.length * MONO_W : x;
+    for (const ch of t) { g.fillText(ch, cx, y + h / 2 + 1); cx += MONO_W; }
+    return;
+  }
   g.textAlign = alin == 1 ? "center" : alin == 2 ? "right" : "left";
   g.fillText(t, alin == 1 ? x + w / 2 : alin == 2 ? x + w : x, y + h / 2 + 1);
 }
@@ -273,21 +279,16 @@ function miniOlhos(dx) { miniCel(3, 2, 8, 3, COR.rosto); miniCel(4 + dx, 2, 1, 3
 const cantoMini = fundo => miniClawd(320 - MINI_W() - 4, 240 - MINI_H() - 2, fundo);
 
 // ---- editor: codigo de mentira, com cores de sintaxe, digitado e rolando
-const CK = "\x01", CF = "\x02", CS = "\x03", CC = "\x04", CN = "\x05", CP = "\x06", CT = "\x07";
-const CODIGO = [
-  CC + "// acorda o Claudinho", CT + "void " + CF + "acorda" + CP + "() {", CT + "  int " + CP + "n = " + CN + "42" + CP + ";",
-  CK + "  if " + CP + "(n > " + CN + "0" + CP + ") {", CP + "    tela." + CF + "pisca" + CP + "(" + CN + "3" + CP + ");",
-  CF + "    fala" + CP + "(" + CS + "'oi!'" + CP + ");", CP + "  }",
-  CK + "  for " + CP + "(" + CT + "int " + CP + "i = " + CN + "0" + CP + "; i < n; i++)", CP + "    olho[i] = " + CK + "true" + CP + ";",
-  CP + "}", "", CC + "// quanto custa? nada.", CT + "int " + CF + "tokens" + CP + "() {", CK + "  return " + CN + "0" + CP + ";", CP + "}", "",
-  CT + "bool " + CF + "feliz" + CP + "(" + CT + "int " + CP + "humor) {", CK + "  while " + CP + "(humor < " + CN + "10" + CP + ")",
-  CP + "    humor += " + CF + "cafe" + CP + "();", CK + "  return true" + CP + ";", CP + "}", "",
-  CC + "/* TODO: dominar o mundo */", CT + "void " + CF + "loop" + CP + "() {", CF + "  acorda" + CP + "();",
-  CF + "  delay" + CP + "(" + CN + "10" + CP + ");", CP + "}", ""];
-const ED_TOPO = 22, ED_X = 30, ED_LINHAS = 12, ED_FUNDO = rgb(30, 30, 30), ED_PRE = "code claudinho.ino";
-let edTopo = 0, edCol = 0, edEspera = 0, edPre = 0;
+// <cenas> gerado por scripts/gera-cenas.py; nao editar aqui
+const ARQUIVOS = [{"nome": "claudinho.ino", "l": ["\u0004// acorda o Claudinho", "\u0007void \u0002acorda\u0006() {", "\u0007  int \u0006n = \u000542\u0006;", "\u0001  if \u0006(n > \u00050\u0006) {", "\u0006    tela.\u0002pisca\u0006(\u00053\u0006);", "\u0002    fala\u0006(\u0003'oi!'\u0006);", "\u0006  }", "\u0001  for \u0006(\u0007int \u0006i = \u00050\u0006; i < n; i++)", "\u0006    olho[i] = \u0001true\u0006;", "\u0006}", "", "\u0004// quanto custa? nada.", "\u0007int \u0002tokens\u0006() {", "\u0001  return \u00050\u0006;", "\u0006}", "", "\u0007bool \u0002feliz\u0006(\u0007int \u0006humor) {", "\u0001  while \u0006(humor < \u000510\u0006)", "\u0006    humor += \u0002cafe\u0006();", "\u0001  return true\u0006;", "\u0006}", "", "\u0004/* TODO: dominar o mundo */", "\u0007void \u0002loop\u0006() {", "\u0002  acorda\u0006();", "\u0002  delay\u0006(\u000510\u0006);", "\u0006}", ""]}, {"nome": "auth.py", "l": ["\u0001import \u0006time", "\u0001from \u0006jwt \u0001import \u0006decode", "", "\u0006TTL = \u0005900  \u0004# 15 min", "", "\u0001def \u0002check\u0006(tok: \u0007str\u0006) -> \u0007dict\u0006:", "\u0001    try\u0006:", "\u0006        c = \u0002decode\u0006(tok, KEY)", "\u0001    except \u0007Expired\u0006:", "\u0001        raise \u0007AuthErr\u0006(\u0003\"expired\"\u0006)", "\u0001    if \u0006c[\u0003\"iat\"\u0006] + TTL < \u0002now\u0006():", "\u0001        raise \u0007AuthErr\u0006(\u0003\"stale\"\u0006)", "\u0001    return \u0006c", "", "\u0001def \u0002refresh\u0006(user):", "\u0006    tok = \u0002sign\u0006({\u0003\"sub\"\u0006: user.id})", "\u0006    cache.\u0002set\u0006(user.id, tok, TTL)", "\u0001    return \u0006tok", ""]}, {"nome": "useCart.ts", "l": ["\u0001import \u0006{ useState } \u0001from \u0003\"react\"", "", "\u0001export function \u0002useCart\u0006() {", "\u0001  const \u0006[items, setItems] =", "\u0002    useState\u0006<\u0007Item\u0006[]>([]);", "", "\u0001  const \u0002add\u0006 = (it: \u0007Item\u0006) =>", "\u0002    setItems\u0006(xs => [...xs, it]);", "", "\u0001  const \u0006total = items.\u0002reduce\u0006(", "\u0006    (s, x) => s + x.price, \u00050\u0006);", "", "\u0001  return \u0006{ items, add, total };", "\u0006}", ""]}, {"nome": "bucket.go", "l": ["\u0001package \u0006ratelimit", "", "\u0001import \u0003\"time\"", "", "\u0001type \u0007Bucket \u0001struct \u0006{", "\u0006  tokens \u0007int", "\u0006  last   \u0007time.Time", "\u0006}", "", "\u0001func \u0006(b *\u0007Bucket\u0006) \u0002Take\u0006() \u0007bool \u0006{", "\u0006  b.\u0002refill\u0006()", "\u0001  if \u0006b.tokens == \u00050 \u0006{", "\u0001    return false", "\u0006  }", "\u0006  b.tokens--", "\u0001  return true", "\u0006}", "", "\u0004// one token per second", "\u0001func \u0006(b *\u0007Bucket\u0006) \u0002refill\u0006() {", "\u0006  dt := time.\u0002Since\u0006(b.last)", "\u0006  b.tokens += \u0002int\u0006(dt.\u0002Seconds\u0006())", "\u0006  b.last = time.\u0002Now\u0006()", "\u0006}", ""]}, {"nome": "schema.sql", "l": ["\u0004-- users and their plans", "\u0001CREATE TABLE \u0006users (", "\u0006  id    \u0007SERIAL \u0001PRIMARY KEY\u0006,", "\u0006  email \u0007TEXT \u0001UNIQUE NOT NULL\u0006,", "\u0006  plan  \u0007TEXT \u0001DEFAULT \u0003'pro'", "\u0006);", "", "\u0001CREATE INDEX \u0006idx_email", "\u0001  ON \u0006users (email);", "", "\u0001SELECT \u0006plan, \u0002count\u0006(*)", "\u0001  FROM \u0006users", "\u0001 GROUP BY \u0006plan", "\u0001 ORDER BY \u00052 \u0001DESC\u0006;", ""]}];
+const SESSOES = [["$git status", "On branch main", "Changes not staged for commit:", "  modified:   src/api.ts", "  modified:   src/api.test.ts", "$git add -A", "$git commit -m \"fix: retry on 429\"", "[main 3f9c2ab] fix: retry on 429", " 2 files changed, 18 insertions(+)", "$git push", "To github.com:you/app.git", "   9be2c10..3f9c2ab  main -> main"], ["$npm test", "> app@2.3.1 test", "> vitest run", "", " PASS  src/cart.test.ts (12)", " PASS  src/auth.test.ts (8)", " FAIL  src/api.test.ts (1/4)", "   expected 200, received 429", "Tests  1 failed | 23 passed", "$npm test -- api", " PASS  src/api.test.ts (4)", "Tests  4 passed (4)"], ["$pytest -q", ".........F......", "FAILED test_auth.py::test_stale", "1 failed, 15 passed in 0.84s", "$pytest -q -k stale", ".", "1 passed in 0.11s"], ["$npm run build", "vite v5.4.8 building for prod...", "transforming...", "412 modules transformed.", "dist/index.html       0.46 kB", "dist/index.js       142.31 kB", "built in 3.21s"], ["$docker compose up -d", " Network app_default  Created", " Container app-db-1   Started", " Container app-api-1  Started", "$curl -s localhost:8000/health", "{\"status\":\"ok\",\"db\":\"up\"}"], ["$cargo build --release", "   Compiling serde v1.0.210", "   Compiling tokio v1.40.0", "   Compiling app v0.4.0", "    Finished release in 23.4s", "$./target/release/app -V", "app 0.4.0"], ["$grep -rn TODO src | wc -l", "17", "$git log --oneline -3", "3f9c2ab fix: retry on 429", "a1d07e4 feat: dark mode", "9be2c10 chore: bump deps"], ["$pio run -t upload", "Building .pio/build/esp32", "RAM:   [==        ]  20.6%", "Flash: [========  ]  82.5%", "Uploading 1622496 bytes", "Writing at 0x0019c000 (100 %)", "Hard resetting via RTS pin..."], ["$python -m venv .venv", "$pip install -r requirements.txt", "Collecting fastapi==0.115.0", "Collecting uvicorn==0.30.6", "Successfully installed 14 packages", "$uvicorn main:app --reload", "INFO:  Uvicorn running on :8000"]];
+// </cenas>
+const sorteiaOutro = (n, antes) => { if (antes < 0 || n < 2) return sorteia(n); const k = sorteia(n - 1); return k >= antes ? k + 1 : k; };
+const ED_TOPO = 22, ED_X = 30, ED_LINHAS = 12, ED_FUNDO = rgb(30, 30, 30);
+let edTopo = 0, edCol = 0, edEspera = 0, edPre = 0, edArq = -1, ED_PRE = "";
+const edTexto = li => { const a = ARQUIVOS[edArq].l; return a[li % a.length]; };
 function edCor(c) { return [null, rgb(86,156,214), rgb(220,220,170), rgb(206,145,120), rgb(106,153,85), rgb(181,206,168), rgb(212,212,212), rgb(78,201,176)][c] || rgb(212,212,212); }
-const edTam = li => CODIGO[li % CODIGO.length].replace(/[\x01-\x07]/g, "").length;
+const edTam = li => edTexto(li).replace(/[\x01-\x07]/g, "").length;
 const edY = row => ED_TOPO + row * MONO_LH;
 const edLarg = row => edY(row) + 16 > miniY ? miniX - 2 : 320;
 function edLinha(row, li, ate) {
@@ -295,7 +296,7 @@ function edLinha(row, li, ate) {
   preenche(0, y, edLarg(row), 16, ED_FUNDO);
   escreve(0, y, 24, 16, true, rgb(110, 110, 110), null, 2, String(li % 1000 + 1));
   const sai = () => { if (seg) { escreve(ED_X + (col - seg.length) * MONO_W, y, seg.length * MONO_W, 16, true, cor, null, 0, seg); seg = ""; } };
-  for (const ch of CODIGO[li % CODIGO.length]) {
+  for (const ch of edTexto(li)) {
     const c = ch.charCodeAt(0);
     if (c < 8) { sai(); cor = edCor(c); continue; }
     if (ate >= 0 && col >= ate) break;
@@ -304,13 +305,13 @@ function edLinha(row, li, ate) {
   sai();
 }
 const edCursor = () => preenche(ED_X + edCol * MONO_W, edY(ED_LINHAS - 1) + 1, MONO_W, 14, rgb(230, 230, 230));
-function edInicio() { preenche(0, 0, 320, 240, "#000"); escreve(6, 20, MONO_W, 16, true, rgb(150, 255, 170), null, 0, "$"); edPre = 0; }
+function edInicio() { edArq = sorteiaOutro(ARQUIVOS.length, edArq); ED_PRE = "code " + ARQUIVOS[edArq].nome; preenche(0, 0, 320, 240, "#000"); escreve(6, 20, MONO_W, 16, true, rgb(150, 255, 170), null, 0, "$"); edPre = 0; }
 function edAbre() {
   preenche(0, 0, 320, 240, ED_FUNDO);
   preenche(0, 0, 320, 20, rgb(45, 45, 45)); preenche(0, 0, 112, 20, ED_FUNDO); preenche(0, 18, 112, 2, COR.rosto);
-  escreve(6, 2, 104, 16, true, rgb(220, 220, 220), null, 0, "claudinho.ino");
+  escreve(6, 2, 104, 16, true, rgb(220, 220, 220), null, 0, ARQUIVOS[edArq].nome);
   cantoMini(ED_FUNDO);
-  edTopo = (edTopo + 5) % CODIGO.length;
+  edTopo = 0;
   for (let r = 0; r < ED_LINHAS - 1; r++) edLinha(r, edTopo + r, -1);
   edCol = 0; edEspera = 0; edCursor();
 }
@@ -332,17 +333,13 @@ function edPasso() {
   edCursor(); cenaProx = agora + 150;
 }
 
-// ---- terminal: comandos digitados e respostas rolando
-const TERM = ["$git status", "On branch main", "nothing to commit, tree clean", "$make", "Compiling claudinho.ino ...",
-  "Linking firmware.bin", "Build OK (63% flash)", "$ping -c 2 claudinho.local", "64 bytes: time=3.1 ms", "64 bytes: time=2.8 ms",
-  "$./testes.sh", "rosto ......... ok", "painel ........ ok", "velha ......... ok", "12 passed, 0 failed", "$clear",
-  "$make upload", "Uploading 1246409 bytes", "[##########] 100%", "Done. Claudinho acordou.", "$uptime", "up 42 days, load 0.01", "$clear"];
+// ---- terminal: sessoes sorteadas uma atras da outra; "$" no comeco e comando digitado
 const TE_TOPO = 24, TE_X = 6, TE_LINHAS = 12, TE_FUNDO = rgb(8, 8, 8), TE_VERDE = rgb(60, 220, 90), TE_CLARO = rgb(150, 255, 170);
-let teLinha = 0, teCol = -1, teVis = [];
+let teSes = -1, teLinha = 0, teCol = -1, teVis = [];
 const teY = row => TE_TOPO + row * MONO_LH;
 const teLarg = row => teY(row) + 16 > miniY ? miniX - 2 : 320;
-function teDesenha(row, i, ate) {
-  const t = TERM[i], y = teY(row);
+function teDesenha(row, t, ate) {
+  const y = teY(row);
   preenche(0, y, teLarg(row), 16, TE_FUNDO);
   if (t[0] == "$") {
     escreve(TE_X, y, MONO_W, 16, true, TE_CLARO, null, 0, "$");
@@ -357,19 +354,20 @@ function teInicio() {
   for (const [x, c] of [[11, rgb(237,106,94)], [25, rgb(245,191,79)], [39, rgb(98,197,84)]]) { g.fillStyle = c; g.beginPath(); g.arc(x, 10, 4, 0, 7); g.fill(); }
   escreve(100, 2, 120, 16, true, rgb(200, 200, 200), null, 1, ">_ bash");
   teLimpa(); teCol = -1;
+  teSes = sorteiaOutro(SESSOES.length, teSes); teLinha = 0;
 }
 function teNova(i) {
   if (teVis.length == TE_LINHAS) { teVis.shift(); teVis.forEach((v, r) => teDesenha(r, v, -1)); }
   teVis.push(i); return teVis.length - 1;
 }
+function teAvanca() { teCol = -1; if (++teLinha >= SESSOES[teSes].length) { teSes = sorteiaOutro(SESSOES.length, teSes); teLinha = 0; } }
 function tePasso() {
-  const agora = agoraMs(), t = TERM[teLinha];
-  if (t[0] != "$") { teDesenha(teNova(teLinha), teLinha, -1); teLinha = (teLinha + 1) % TERM.length; teCol = -1; cenaProx = agora + 120 + sorteia(200); return; }
-  if (teCol < 0) { teCol = 0; teDesenha(teNova(teLinha), teLinha, 0); cenaProx = agora + 500; return; }
-  if (teCol < t.length - 1) { teCol++; teDesenha(teVis.length - 1, teLinha, teCol); miniBracos(1 + (teCol & 1)); cenaProx = agora + 50 + sorteia(90); return; }
-  miniBracos(0); teDesenha(teVis.length - 1, teLinha, -1);
-  if (t == "$clear") teLimpa();
-  teLinha = (teLinha + 1) % TERM.length; teCol = -1; cenaProx = agora + 400;
+  const agora = agoraMs(), t = SESSOES[teSes][teLinha];
+  if (t[0] != "$") { teDesenha(teNova(t), t, -1); teAvanca(); cenaProx = agora + 120 + sorteia(200); return; }
+  if (teCol < 0) { teCol = 0; teDesenha(teNova(t), t, 0); cenaProx = agora + 500; return; }
+  if (teCol < t.length - 1) { teCol++; teDesenha(teVis.length - 1, t, teCol); miniBracos(1 + (teCol & 1)); cenaProx = agora + 50 + sorteia(90); return; }
+  miniBracos(0); teDesenha(teVis.length - 1, t, -1);
+  teAvanca(); cenaProx = agora + 400;
 }
 
 // ---- chuva do Matrix: 20 colunas, cabeca clara, rastro verde, a ponta some
