@@ -4,7 +4,7 @@
 
 O mascote do Claude Code, vivo, na sua mesa.
 
-<p align="center"><a href="https://argeuthiesen.github.io/claudinho/?lang=pt"><img src="docs/img/claudinho-reage.gif" alt="Claudinho em 3D: acorda, pensa, digita código, termina, comemora um commit e mostra os anéis de consumo" width="480"></a><br><b><a href="https://argeuthiesen.github.io/claudinho/?lang=pt">▶ Demonstração ao vivo no navegador</a></b> · sem placa</p>
+<p align="center"><a href="https://argeuthiesen.github.io/claudinho/?lang=pt"><img src="docs/img/claudinho-reage.gif" alt="Claudinho em 3D: acorda, pensa, digita código, termina, comemora um commit e mostra os anéis de consumo" width="480"></a><br><b><a href="https://argeuthiesen.github.io/claudinho/?lang=pt">▶ Demonstração ao vivo no navegador</a></b> · sem placa<br><b><a href="https://makerworld.com/models/3365275-claudinho">🖨️ Caixa para imprimir em 3D no MakerWorld</a></b></p>
 
 https://github.com/user-attachments/assets/a66e74d7-ef1a-491a-a30f-6afbe7c4e1d4
 

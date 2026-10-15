@@ -4,7 +4,7 @@
 
 Claude Code's mascot, alive, on your desk.
 
-<p align="center"><a href="https://argeuthiesen.github.io/claudinho/"><img src="docs/img/claudinho-reage.gif" alt="Claudinho in 3D: it wakes up, thinks, types code, finishes, celebrates a commit and shows the usage rings" width="480"></a><br><b><a href="https://argeuthiesen.github.io/claudinho/">▶ Live demo in your browser</a></b> · no board needed</p>
+<p align="center"><a href="https://argeuthiesen.github.io/claudinho/"><img src="docs/img/claudinho-reage.gif" alt="Claudinho in 3D: it wakes up, thinks, types code, finishes, celebrates a commit and shows the usage rings" width="480"></a><br><b><a href="https://argeuthiesen.github.io/claudinho/">▶ Live demo in your browser</a></b> · no board needed<br><b><a href="https://makerworld.com/models/3365275-claudinho">🖨️ 3D-printable case on MakerWorld</a></b></p>
 
 https://github.com/user-attachments/assets/a66e74d7-ef1a-491a-a30f-6afbe7c4e1d4
 
