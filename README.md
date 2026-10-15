@@ -6,15 +6,11 @@ Claude Code's mascot, alive, on your desk.
 
 <p align="center"><a href="https://argeuthiesen.github.io/claudinho/"><img src="docs/img/claudinho-reage.gif" alt="Claudinho in 3D: it wakes up, thinks, types code, finishes, celebrates a commit and shows the usage rings" width="480"></a><br><b><a href="https://argeuthiesen.github.io/claudinho/">▶ Live demo in your browser</a></b> · no board needed</p>
 
-https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
-
-*The video shows the classic version (ESP32-C3 + Nextion).*
-
-Claudinho is a Claude Code plugin that gives Clawd a body: an ESP32 with a
-
 https://github.com/user-attachments/assets/a66e74d7-ef1a-491a-a30f-6afbe7c4e1d4
 
+*The single-board version (E32R28T). The classic Nextion version has [its own video](#classic-version-esp32-c3--nextion).*
 
+Claudinho is a Claude Code plugin that gives Clawd a body: an ESP32 with a
 touch screen (the single-board E32R28T, recommended, or the classic ESP32-C3 +
 Nextion) that reacts to what Claude is doing (thinking, using a tool,
 waiting for you, done, error) and shows how much of your plan you've used in
@@ -75,7 +71,7 @@ Claudinho runs on two kinds of hardware. For a new build, go with the
 
 | | [Single board: E32R28T](#single-board-recommended-e32r28t) | [Classic: ESP32-C3 + Nextion](#classic-version-esp32-c3--nextion) |
 |---|---|---|
-| Status | **recommended** for new builds | fully supported (the one in the video) |
+| Status | **recommended** for new builds | fully supported (the first video) |
 | Hardware | one board: ESP32 with a 2.8" touch screen built in | ESP32-C3 Super Mini + Nextion 2.4" display |
 | Soldering | 2 wires (the case's USB-C power input) | 4 wires |
 | Voice and battery | optional speaker and battery (charger on the board) | no (powered by a USB power supply) |
@@ -461,9 +457,11 @@ worked on the first try: that's how it gets onto the tested list.
 
 ## Classic version (ESP32-C3 + Nextion)
 
-The first version, the one in the video. Its case is the classic print
+The first version. Its case is the classic print
 profile of the [MakerWorld model](https://makerworld.com/models/3365275-claudinho).
 It stays fully supported.
+
+https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
 
 ### Parts
 

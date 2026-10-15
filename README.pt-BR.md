@@ -6,9 +6,9 @@ O mascote do Claude Code, vivo, na sua mesa.
 
 <p align="center"><a href="https://argeuthiesen.github.io/claudinho/?lang=pt"><img src="docs/img/claudinho-reage.gif" alt="Claudinho em 3D: acorda, pensa, digita código, termina, comemora um commit e mostra os anéis de consumo" width="480"></a><br><b><a href="https://argeuthiesen.github.io/claudinho/?lang=pt">▶ Demonstração ao vivo no navegador</a></b> · sem placa</p>
 
-https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
+https://github.com/user-attachments/assets/a66e74d7-ef1a-491a-a30f-6afbe7c4e1d4
 
-*O vídeo mostra a versão clássica (ESP32-C3 + Nextion).*
+*A versão de placa única (E32R28T). A versão clássica, com Nextion, tem [o vídeo dela](#versão-clássica-esp32-c3--nextion).*
 
 Claudinho é um plugin do Claude Code que dá corpo ao Clawd: um ESP32 com tela
 de toque (a placa única E32R28T, recomendada, ou o clássico ESP32-C3 + Nextion)
@@ -73,7 +73,7 @@ O Claudinho roda em dois tipos de hardware. Para montar um novo, vá de
 
 | | [Placa única: E32R28T](#placa-única-recomendada-e32r28t) | [Clássica: ESP32-C3 + Nextion](#versão-clássica-esp32-c3--nextion) |
 |---|---|---|
-| Situação | **recomendada** para montar um novo | totalmente suportada (é a do vídeo) |
+| Situação | **recomendada** para montar um novo | totalmente suportada (é a do primeiro vídeo) |
 | Hardware | uma placa só: ESP32 com tela de toque de 2,8" embutida | ESP32-C3 Super Mini + display Nextion de 2,4" |
 | Solda | 2 fios (a entrada USB-C da caixa) | 4 fios |
 | Voz e bateria | alto-falante e bateria opcionais (carregador na placa) | não (alimentada por fonte USB) |
@@ -456,9 +456,11 @@ funcionado de primeira: é assim que ele entra na lista de testados.
 
 ## Versão clássica (ESP32-C3 + Nextion)
 
-A primeira versão, a do vídeo. A caixa dela é o perfil clássico do
+A primeira versão. A caixa dela é o perfil clássico do
 [modelo no MakerWorld](https://makerworld.com/models/3365275-claudinho).
 Ela continua totalmente suportada.
+
+https://github.com/user-attachments/assets/599573a4-2537-459c-81e3-0e593c2b9ad6
 
 ### Peças
 
