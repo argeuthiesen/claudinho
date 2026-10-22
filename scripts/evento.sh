@@ -12,8 +12,10 @@ tipo="$1"; IP=$(le_config CLAUDINHO_IP); TOKEN=$(le_config CLAUDINHO_TOKEN)
 
 # stdin: JSON do evento. session_id vira um hash curto (o id real nao sai do
 # PC); no prompt, o texto so serve para escolher o humor e nao e enviado.
-# Na ferramenta vai so a categoria (codando, terminal, lendo, agente, web),
-# para a cena na tela: nome de arquivo e comando nunca saem do PC.
+# Na ferramenta vai so a categoria (codando, terminal, lendo, agente, web,
+# conversa), para a cena na tela: nome de arquivo e comando nunca saem do PC.
+# conversa: o Claude chamando outra IA (o plugin do Codex, codex exec, gemini -p),
+# pelo comando ou pelo subagente codex:*.
 # Depois de um comando no terminal, o script olha aqui mesmo se era um
 # git commit ou um teste (e se passou) e manda so a palavra: commit,
 # teste_ok ou teste_falhou.
@@ -23,7 +25,27 @@ except Exception: d={}
 print(hashlib.sha1((d.get("session_id") or "").encode()).hexdigest()[:8])
 print((d.get("prompt") or "").lower().replace("\n"," "))
 f=d.get("tool_name") or ""
-print("codando" if f in ("Edit","Write","MultiEdit","NotebookEdit") else "terminal" if f in ("Bash","PowerShell") else
+ti=d.get("tool_input") or {}
+import re, os
+def outra_ia(cmd):   # o programa que roda (nao um texto qualquer no meio): node ...codex-companion.mjs, codex exec, gemini -p
+    import shlex
+    try:   # le como o shell: o que esta entre aspas e argumento, nao comando
+        lx=shlex.shlex(cmd.replace("\n", " ; "), posix=True, punctuation_chars=True); lx.whitespace_split=True; toks=list(lx)
+    except ValueError: toks=cmd.split()
+    segs=[[]]
+    for t in toks:
+        if t and set(t) <= set("();<>|&"): segs.append([])
+        else: segs[-1].append(t)
+    for w in segs:
+        while w and ("=" in w[0] or w[0] in ("sudo","env","exec","command","time","nohup")): w=w[1:]
+        if not w: continue
+        prog=os.path.basename(w[0])
+        if prog=="node" and any(t.endswith("codex-companion.mjs") for t in w[1:3]): return True
+        if prog=="codex" and ("exec" in w[1:] or "e" in w[1:]): return True
+        if prog=="gemini" and any(t in ("-p","--prompt") or t.startswith("--prompt=") for t in w[1:]): return True
+    return False
+if (f in ("Bash","PowerShell") and outra_ia(str(ti.get("command") or ""))) or (f in ("Agent","Task") and str(ti.get("subagent_type") or "").startswith("codex")): print("conversa")
+else: print("codando" if f in ("Edit","Write","MultiEdit","NotebookEdit") else "terminal" if f in ("Bash","PowerShell") else
       "lendo" if f in ("Read","Grep","Glob","LS") else "agente" if f in ("Agent","Task") else "web" if f in ("WebSearch","WebFetch") else "")
 import re
 cmd=str((d.get("tool_input") or {}).get("command") or "") if f in ("Bash","PowerShell") else ""

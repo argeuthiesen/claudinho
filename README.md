@@ -38,6 +38,13 @@ the 5-hour and 7-day windows.
   board serves on your network: current face, usage, Wi-Fi, battery, the
   last events, and harmless settings (sound, volume, face color, language,
   games, demo). Idea from [bserking's round-screen fork](https://github.com/bserking/claudinho_GC9A01).
+- **Claude and Codex talking.** If you use OpenAI's
+  [Codex plugin for Claude Code](https://github.com/openai/codex-plugin-cc)
+  (Claude asking GPT for a review or a second opinion), Claudinho plays a
+  scene of its own: Clawd and a little cloud with arms chatting in binary
+  speech bubbles while Codex works. It also catches `codex exec` and the
+  Gemini CLI (`gemini -p`). Same zero tokens: the hook only spots the command
+  on your computer.
 - **Optional: your Bambu Lab printer.** Claudinho can also connect straight
   to a Bambu 3D printer on your network and show a print panel plus alerts
   (started, paused and why, finished, failed...) that stay until you tap.
@@ -284,7 +291,7 @@ inside the plugin folder. After a marketplace install, the paths are:
 
 - **`<plugin>`** (the plugin itself, with the scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<version>/`, for example
-  `.../claudinho/1.18.2/`. If there's more than one version folder, use the
+  `.../claudinho/1.19.0/`. If there's more than one version folder, use the
   newest. (If you cloned this repository, `<plugin>` is its root.)
 - **`<plugin-data>`** (the board's IP and secret):
   `~/.claude/plugins/data/claudinho-claudinho/`. The scripts find it on their
@@ -333,7 +340,7 @@ claudinho.sh demo [parar]         # demo mode: a ~2 min tour of everything, for 
 claudinho.sh som [mood|liga|desliga|volume N]  # single board: try a voice (feliz, pergunta, sono...), on/off, volume
 claudinho.sh desligar             # single board: deep sleep, to save the battery (BOOT wakes it)
 claudinho.sh alerta [type]        # sample printer alert: bom, ruim, filamento, hms
-claudinho.sh cena <type>          # try a scene: codando (editing), terminal, lendo (reading), agente
+claudinho.sh cena <type>          # try a scene: codando (editing), terminal, lendo (reading), agente, conversa (chat)
 claudinho.sh atualizar [file.bin] # update firmware
 claudinho.sh tela [file.tft]      # update the Nextion screen (classic version)
 bash <plugin>/scripts/wifi.sh PORT "NETWORK"   # change Wi-Fi over USB (hidden password)
@@ -637,7 +644,7 @@ your Anthropic account.
 
 - **What goes over the network:** the event type (tool, done...), the mood
   (happy, worried, startled), the kind of tool (editing, terminal, reading,
-  agent: never the file name or the command), a short session code and the
+  agent, chat: never the file name or the command), a short session code and the
   plan numbers. Your prompt text never leaves the computer.
 - **No encryption on the local network.** It's plain HTTP, like most home
   gadgets. Someone able to spy on your network could discover the secret and
@@ -754,5 +761,8 @@ took sole credit for something we built together. ;)
 And, as a bonus, we also brought in Codex (GPT) to review the project's
 security. That makes two AIs on my side when the machines rise.
 
-Claude Code, Clawd and the Claude brand belong to Anthropic. This is a fan
-project with no official affiliation with Anthropic.
+Claude Code, Clawd and the Claude brand belong to Anthropic. OpenAI, ChatGPT,
+GPT and Codex are trademarks of OpenAI, and Gemini is a trademark of Google.
+This is a fan project with no official affiliation with Anthropic, OpenAI or
+Google. The cloud in the chat scene is our own pixel-art drawing, a fan nod to
+Codex.

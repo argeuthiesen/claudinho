@@ -16,7 +16,7 @@
 #   claudinho.sh idioma [codigo]      idioma da tela (sem codigo: mostra o atual e os disponiveis)
 #   claudinho.sh som [HUMOR|liga|desliga|volume N|lista|padrao|envia EVENTO arq.wav]  alto-falante (so a E32R28T)
 #   claudinho.sh demo [parar]         modo demonstracao: trailer de ~2 min para filmar (um toque interrompe)
-#   claudinho.sh cena <tipo>          testa uma cena: codando, terminal, lendo, agente
+#   claudinho.sh cena <tipo>          testa uma cena: codando, terminal, lendo, agente, conversa
 #   claudinho.sh alerta [bom|ruim|filamento|hms]  alerta de exemplo da impressora
 #   claudinho.sh virtual [parar]      Claudinho virtual: o mascote numa aba do navegador, sem placa
 #   claudinho.sh web                  painel web da placa no navegador (estado, consumo, ultimos eventos)
@@ -184,7 +184,7 @@ PY
     cmd "{\"idioma\":\"$2\"}" ;;
   alerta) case "${2:-bom}" in bom|ruim|filamento|hms) cmd "{\"alerta\":\"${2:-bom}\"}" ;; *) uso ;; esac ;;
   cena)
-    case "${2:-}" in codando|terminal|lendo|agente) ;; *) uso ;; esac
+    case "${2:-}" in codando|terminal|lendo|agente|conversa) ;; *) uso ;; esac
     curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/evento" -d "{\"tipo\":\"ferramenta\",\"acao\":\"$2\",\"forca\":true}" ;;   # sem sessao: teste nao conta como terminal aberto
   bambu)
     case "${2:-}" in

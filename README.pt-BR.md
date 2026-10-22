@@ -39,6 +39,13 @@ já foi usado nas janelas de 5 horas e de 7 dias.
   a placa serve na sua rede: a cara atual, o consumo, o Wi-Fi, a bateria, os
   últimos eventos e ajustes inofensivos (som, volume, cor do rosto, idioma,
   jogos, demonstração). Ideia do [fork de tela redonda do bserking](https://github.com/bserking/claudinho_GC9A01).
+- **Claude e Codex conversando.** Se você usa o
+  [plugin do Codex para o Claude Code](https://github.com/openai/codex-plugin-cc),
+  da OpenAI (o Claude pedindo ao GPT uma revisão ou uma segunda opinião), o
+  Claudinho mostra uma cena só para isso: o Clawd e uma nuvenzinha de
+  bracinhos conversando em balões de zeros e uns enquanto o Codex trabalha.
+  Também reconhece o `codex exec` e o Gemini CLI (`gemini -p`). Os mesmos
+  zero tokens: o hook só reconhece o comando no seu computador.
 - **Opcional: sua impressora Bambu Lab.** O Claudinho também conecta direto
   numa impressora 3D Bambu da sua rede e mostra um painel da impressão e
   alertas (começou, pausou e por quê, terminou, falhou...) que ficam até você
@@ -287,7 +294,7 @@ pasta do plugin. Depois de instalar pelo marketplace, os caminhos são:
 
 - **`<plugin>`** (o plugin em si, com os scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<versão>/`, por exemplo
-  `.../claudinho/1.18.2/`. Se houver mais de uma pasta de versão, use a mais
+  `.../claudinho/1.19.0/`. Se houver mais de uma pasta de versão, use a mais
   nova. (Se você clonou este repositório, `<plugin>` é a raiz dele.)
 - **`<dados-do-plugin>`** (o IP e o segredo da placa):
   `~/.claude/plugins/data/claudinho-claudinho/`. Os scripts acham essa pasta
@@ -336,7 +343,7 @@ claudinho.sh demo [parar]         # modo demonstração: um passeio de ~2 min po
 claudinho.sh som [humor|liga|desliga|volume N]  # placa única: ouve uma fala (feliz, pergunta, sono...), liga/desliga, volume
 claudinho.sh desligar             # placa única: sono profundo, para poupar a bateria (o BOOT acorda)
 claudinho.sh alerta [tipo]        # alerta de exemplo da impressora: bom, ruim, filamento, hms
-claudinho.sh cena <tipo>          # mostra uma cena: codando, terminal, lendo, agente
+claudinho.sh cena <tipo>          # mostra uma cena: codando, terminal, lendo, agente, conversa
 claudinho.sh atualizar [arquivo.bin]  # atualiza o firmware
 claudinho.sh tela [arquivo.tft]   # atualiza a tela do Nextion (versão clássica)
 bash <plugin>/scripts/wifi.sh PORTA "REDE"   # troca o Wi-Fi pela USB (senha escondida)
@@ -634,7 +641,7 @@ conta da Anthropic.
 
 - **O que vai pela rede:** o tipo de evento (ferramenta, terminou...), o
   humor (feliz, preocupado, susto), o tipo de ferramenta (editando, terminal,
-  lendo, agente: nunca o nome do arquivo nem o comando), um código curto da
+  lendo, agente, conversa: nunca o nome do arquivo nem o comando), um código curto da
   sessão e os números do plano. O texto dos seus prompts nunca sai do computador.
 - **Sem criptografia na rede local.** É HTTP simples, como a maioria dos
   gadgets caseiros. Quem conseguir espionar a sua rede pode descobrir o
@@ -753,5 +760,8 @@ E, de rebarba, ainda chamamos o Codex (o GPT) para revisar a segurança do
 projeto. Assim já são duas IAs do meu lado na hora da revolução das
 máquinas.
 
-O Claude Code, o Clawd e a marca Claude são da Anthropic. Este é um projeto
-de fã, sem ligação oficial com a Anthropic.
+O Claude Code, o Clawd e a marca Claude são da Anthropic. OpenAI, ChatGPT,
+GPT e Codex são marcas da OpenAI, e Gemini é marca do Google. Este é um
+projeto de fã, sem ligação oficial com a Anthropic, a OpenAI ou o Google. A
+nuvem da cena de conversa é um desenho nosso em pixel art, uma homenagem de
+fã ao Codex.

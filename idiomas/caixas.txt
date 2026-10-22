@@ -62,6 +62,7 @@ genius.placar           m24 320
 
 cena.agente             p16 88
 cena.delegando          p16 320
+cena.conversa           p16 320
 
 imp.aguardando          p16 112
 imp.sem_conexao         p16 112

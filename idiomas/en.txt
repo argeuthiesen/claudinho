@@ -88,6 +88,7 @@ genius.placar = Score: %d
 
 cena.agente = agent %d
 cena.delegando = delegating
+cena.conversa = asking for a second opinion
 
 imp.aguardando = Waiting...
 imp.sem_conexao = Disconnected

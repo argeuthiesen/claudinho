@@ -51,14 +51,17 @@ perninhas) no canto:
 | rodando um comando | um terminal digitando comandos, com a saída rolando: git, testes que falham e depois passam, builds, docker… cada vez numa ordem |
 | lendo ou procurando no código | a chuva do Matrix |
 | delegando para um subagente | um organograma: o Claude em cima, os agentes surgindo embaixo |
+| pedindo uma segunda opinião a outra IA: o [plugin do Codex](https://github.com/openai/codex-plugin-cc) da OpenAI (GPT), o `codex exec` ou o Gemini CLI (`gemini -p`) | uma conversa: o Claudinho e uma nuvenzinha de bracinhos se revezando em balões cheios de zeros e uns |
 
 É tudo de mentira, guardado na placa: o código e os comandos da tela são
 inventados. Do seu computador sai só a categoria (editando, terminal, lendo,
-agente); nome de arquivo e comando nunca saem. Cada cena fica pelo menos 8
-segundos, para a tela não piscar; 12 segundos sem ferramenta, volta ao rosto.
+agente, conversa); nome de arquivo e comando nunca saem. Cada cena fica pelo menos 8
+segundos, para a tela não piscar; 12 segundos sem ferramenta, volta ao rosto
+(a conversa espera o próximo evento, até 5 minutos, porque a outra IA costuma
+demorar num comando só).
 Qualquer outro evento (terminou, precisa de você, erro) volta ao rosto na
 hora. Tocar mostra o cartão de consumo. Para ver uma: `claudinho.sh cena
-codando` (`terminal`, `lendo`, `agente`).
+codando` (`terminal`, `lendo`, `agente`, `conversa`).
 
 ## O consumo do plano
 

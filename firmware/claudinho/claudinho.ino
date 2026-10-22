@@ -2000,18 +2000,22 @@ void abrePainel() {                                   // o automatico, a cada 5 
 // ---------------------------------------------------------------- cenas (pagina 10)
 // Enquanto o Claude usa ferramentas, em vez da cara de trabalhando o Claudinho
 // mostra uma cena: editor de codigo (Edit/Write), terminal (Bash), chuva do
-// Matrix (Read/Grep/Glob) ou organograma (Agent). Tudo de mentira, guardado
+// Matrix (Read/Grep/Glob), organograma (Agent) ou conversa (o Claude pedindo
+// uma segunda opiniao a outra IA, como o Codex). Tudo de mentira, guardado
 // aqui: o que o Claude faz de verdade nunca vem para a placa (o hook manda so
 // a categoria). Cada cena fica pelo menos 8 s; 12 s sem ferramenta, volta ao
 // rosto. Um mini Clawd (com bracinhos e perninhas) fica no canto.
 // Letra mono: fonte 5 (JetBrains Mono, 16 px de altura, 7 px por letra).
 // Nada de aspas nem barra invertida nos textos: vao direto no xstr.
-enum { S_NENHUMA = -1, S_CODANDO, S_TERMINAL, S_LENDO, S_AGENTE };
+enum { S_NENHUMA = -1, S_CODANDO, S_TERMINAL, S_LENDO, S_AGENTE, S_CONVERSA };
 static const int FONTE_MONO = 5, MONO_W = 7, MONO_LH = 17;
 static const unsigned long CENA_MIN_MS = 8000, CENA_FIM_MS = 12000;
 // O organograma (Agent) e raro e importante: entra na hora, por cima de
 // qualquer cena, e os comandos que vem logo depois nao o tiram antes de 6 s.
 static const unsigned long CENA_AGENTE_MIN_MS = 6000;
+// A conversa tambem: e a outra IA costuma levar minutos num comando so, sem
+// evento nenhum no meio, entao a cena fica ate o proximo evento (ate 5 min).
+static const unsigned long CENA_CONVERSA_MS = 300000;
 int cenaAtual = S_NENHUMA; unsigned long cenaDesde = 0, cenaProx = 0;
 char acaoEvento[12] = "";
 
@@ -2020,6 +2024,7 @@ int cenaDe(const char* a) {
   if (!strcmp(a, "terminal")) return S_TERMINAL;
   if (!strcmp(a, "lendo"))    return S_LENDO;
   if (!strcmp(a, "agente"))   return S_AGENTE;
+  if (!strcmp(a, "conversa")) return S_CONVERSA;
   return S_NENHUMA;
 }
 
@@ -2267,6 +2272,111 @@ void agPasso() {
   cenaProx = millis() + 350;
 }
 
+// ---- conversa: o Clawd e uma nuvem de bracinhos trocando baloes de fala
+// Olhos ">_" de terminal na maior parte do tempo; de vez em quando a nuvem muda o olhar.
+static const int CV_Y = 180, CV_BX[2] = {24, 184}, CV_BY = 36, CV_BW = 112, CV_BH = 44;
+static const int CV_AMIGO_X = 195, CV_AMIGO_Y = 111, CV_U = 3;
+// Nuvem 36 x 23 blocos de 3 px, desenhada a partir de cinco circulos sobrepostos:
+// # branco, + sombra clara, - sombra, o contorno.
+static const char* const CV_NUVEM[23] = {
+  "................oooo................", "..............oo####oo..............", "............oo########oo............",
+  "...........o##########++o...........", "...........o##########++o...........", ".......oooo###########+++o..........",
+  ".....oo###############+++ooooo......", "....o######++#########+++#####o.....", "...o########++########++######+o....",
+  "...o########++########+#######++o...", "..o#########+++######+########+++o..", "..o#########+++++++++++++#####+++o..",
+  "..o#######++++++++++++###++###+++o..", "..o+++++++#####+---+######++##+++o..", "...o+++++######++-+#######+++----o..",
+  "...o----+######++-+#######+++---o...", "....o---+######++++#######+++---o...", ".....oo-+######+++########+++-oo....",
+  ".......o++++++---o+++++++----o......", ".......o++++++---oo++++++---o.......", "........o-------o.o--------o........",
+  ".........oo---oo...oo-----o.........", "...........ooo.......ooooo.........."};
+uint16_t cvCor(char c) {
+  switch (c) {
+    case '#': return RGB565(245, 247, 250);
+    case '+': return RGB565(214, 220, 232);
+    case '-': return RGB565(165, 174, 198);
+  }
+  return RGB565(74, 84, 104);
+}
+int cvFala = 0, cvVolta = 0, cvOlhar = -1;
+void cvCel(int bx, int by, int w, int h, uint16_t c) { preenche(CV_AMIGO_X + bx * CV_U, CV_AMIGO_Y + by * CV_U, w * CV_U, h * CV_U, c); }
+void cvRestaura(int c0, int r0, int w, int h) {  // devolve o desenho da nuvem num pedaco (olhos, boca)
+  for (int r = r0; r < r0 + h; r++) for (int c = c0; c < c0 + w; c++) cvCel(c, r, 1, 1, cvCor(CV_NUVEM[r][c]));
+}
+// Olhos: 0 ">_" (quase sempre), 1 normais, 2 felizes "^ ^". Olho esquerdo nas colunas 14-16, direito 18-20, linhas 8-10.
+void cvOlhos(int t) {
+  if (t == cvOlhar) return;
+  cvOlhar = t; cvRestaura(13, 7, 9, 5);
+  if (t == 0) {
+    cvCel(14, 8, 1, 1, COR_OLHO); cvCel(15, 9, 1, 1, COR_OLHO); cvCel(14, 10, 1, 1, COR_OLHO);   // ">" pequeno
+    cvCel(19, 10, 2, 1, COR_OLHO);                                                             // "_" bem separado
+  } else if (t == 1) {
+    cvCel(15, 8, 1, 3, COR_OLHO); cvCel(19, 8, 1, 3, COR_OLHO);
+  } else for (int x : {14, 18}) {
+    cvCel(x, 9, 1, 1, COR_OLHO); cvCel(x + 1, 8, 1, 1, COR_OLHO); cvCel(x + 2, 9, 1, 1, COR_OLHO);
+  }
+}
+void cvNuvem() {                                // por trechos da mesma cor: poucos comandos na tela
+  for (int r = 0; r < 23; r++)
+    for (const char* l = CV_NUVEM[r]; *l; ) {
+      if (*l == '.') { l++; continue; }
+      const char* i = l; while (*l == *i) l++;
+      cvCel(i - CV_NUVEM[r], r, l - i, 1, cvCor(*i));
+    }
+  cvOlhar = -1; cvOlhos(0);
+}
+void cvBraco(int col, int lin, int fora) {      // 2 x 2 com contorno em cima, embaixo e do lado de fora
+  uint16_t o = cvCor('o');
+  cvCel(col, lin - 1, 2, 4, o); cvCel(fora, lin, 1, 2, o); cvCel(col, lin, 2, 2, cvCor('+'));
+}
+// Boca e bracinhos (0 parados, 1 esquerdo, 2 direito, como o miniBracos).
+void cvAmigo(bool boca, int sobe) {
+  if (boca) cvCel(16, 12, 3, 1, COR_OLHO); else cvRestaura(16, 12, 3, 1);
+  cvCel(-1, 8, 3, 6, COR_FUNDO); cvCel(34, 8, 3, 6, COR_FUNDO);
+  cvBraco(0, (sobe & 1) ? 9 : 11, -1); cvBraco(34, (sobe & 2) ? 9 : 11, 36);
+}
+// Balao de quem fala (0 Clawd, 1 nuvem), com o rabinho para baixo; o outro some.
+void cvBalao(int quem) {
+  for (int i = 0; i < 2; i++) preenche(CV_BX[i], CV_BY, CV_BW, CV_BH + 12, COR_FUNDO);
+  int x = CV_BX[quem], cx = x + (quem ? 70 : 42);
+  preenche(x + 4, CV_BY, CV_BW - 8, CV_BH, COR_TEXTO); preenche(x, CV_BY + 4, CV_BW, CV_BH - 8, COR_TEXTO);
+  preenche(cx - 6, CV_BY + CV_BH, 12, 6, COR_TEXTO); preenche(cx - 3, CV_BY + CV_BH + 6, 6, 5, COR_TEXTO);
+}
+// O que eles dizem: zeros e uns, duas linhas digitadas aos pares, uma frase nova a cada vez.
+static const int CV_COLS = 10;
+char cvTxt[2][CV_COLS + 1]; int cvN = 0, cvPausa = 0;
+void cvFrase() {
+  for (int r = 0; r < 2; r++) { for (int c = 0; c < CV_COLS; c++) cvTxt[r][c] = '0' + random(2); cvTxt[r][CV_COLS] = 0; }
+  preenche(CV_BX[cvFala] + 6, CV_BY + 3, CV_BW - 12, CV_BH - 6, COR_TEXTO);
+  cvN = 0; cvPausa = 0;
+  cvOlhos(random(10) < 7 ? 0 : 1 + random(2));     // de vez em quando a nuvem muda o olhar
+}
+void cvEscreve() {                   // a linha que esta sendo digitada, ate a letra cvN
+  int r = (cvN - 1) / CV_COLS, k = cvN - r * CV_COLS; char b[CV_COLS + 1];
+  memcpy(b, cvTxt[r], k); b[k] = 0;
+  escreve(CV_BX[cvFala] + (CV_BW - CV_COLS * MONO_W) / 2, CV_BY + 5 + r * MONO_LH, k * MONO_W, 16, FONTE_MONO, COR_FUNDO, COR_TEXTO, 0, b);
+}
+void cvInicio() {
+  limpaTela(COR_FUNDO);
+  miniP = 6; miniClawd(40, CV_Y - 54, COR_FUNDO); miniOlhos(1);
+  cvNuvem(); cvAmigo(false, 0);
+  escreve(0, 204, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, tx(T_CENA_CONVERSA));
+  cvFala = 0; cvVolta = 0; cvBalao(0); cvFrase();
+}
+void cvPasso() {
+  bool falando = cvN < 2 * CV_COLS;
+  if (falando) { cvN += 2; cvEscreve(); cenaProx = millis() + 90; }
+  else {
+    cenaProx = millis() + 100;
+    if (++cvPausa <= 8) return;                        // respira antes da proxima frase
+    if (++cvVolta >= 2) {                              // duas frases e passa a vez
+      cvFala = !cvFala; cvVolta = 0; cvBalao(cvFala);
+      if (cvFala) miniBracos(0); else cvAmigo(false, 0);
+    }
+    cvFrase(); return;
+  }
+  bool mexe = falando && (cvN / 2) & 1;
+  if (cvFala == 0) miniBracos(mexe ? 1 : 0);           // o Clawd gesticula
+  else cvAmigo(mexe, mexe ? 1 + (cvVolta & 1) : 0);    // a nuvem gesticula e mexe a boca
+}
+
 // ---- o Claudinho dos alertas da impressora: pula nas boas, abana os bracos nas outras
 static const int AL_X = 18, AL_Y = 184;
 int alFase = 0; unsigned long alProx = 0;
@@ -2291,18 +2401,20 @@ void cenaInicio() {
   if (cenaAtual == S_CODANDO) edInicio();
   else if (cenaAtual == S_TERMINAL) teInicio();
   else if (cenaAtual == S_LENDO) mxInicio();
-  else agInicio();
+  else if (cenaAtual == S_AGENTE) agInicio();
+  else cvInicio();
 }
 void abreCena(int s) {
   cenaAtual = s; cenaDesde = millis();
-  mudaPagina(10); paginaDur = CENA_FIM_MS;
+  mudaPagina(10); paginaDur = s == S_CONVERSA ? CENA_CONVERSA_MS : CENA_FIM_MS;
 }
 void cuidaCena() {
   if (pagina != 10 || (long)(millis() - cenaProx) < 0) return;
   if (cenaAtual == S_CODANDO) edPasso();
   else if (cenaAtual == S_TERMINAL) tePasso();
   else if (cenaAtual == S_LENDO) mxPasso();
-  else agPasso();
+  else if (cenaAtual == S_AGENTE) agPasso();
+  else cvPasso();
 }
 // Evento de ferramenta: abre, renova ou troca a cena. Devolve true se a cena
 // cuidou do evento (entao a cara de trabalhando fica para depois).
@@ -2312,9 +2424,10 @@ bool cenaPorFerramenta(bool forca) {   // forca: teste (claudinho.sh cena) troca
     paginaDesde = millis();
     if (forca && s != S_NENHUMA && s != cenaAtual) { abreCena(s); return true; }                            // ainda trabalhando: a cena fica
     poeCara(C_TRABALHANDO, 120000);                    // e a cara de depois continua valendo
-    unsigned long minMs = cenaAtual == S_AGENTE ? CENA_AGENTE_MIN_MS : CENA_MIN_MS;
+    unsigned long minMs = cenaAtual == S_AGENTE || cenaAtual == S_CONVERSA ? CENA_AGENTE_MIN_MS : CENA_MIN_MS;
     if (s == S_AGENTE && cenaAtual == S_AGENTE) novoAgente();
-    else if (s == S_AGENTE) abreCena(s);                                   // agente: na hora
+    else if ((s == S_AGENTE || s == S_CONVERSA) && s != cenaAtual) abreCena(s);   // agente e conversa: na hora
+    else if (s == S_CONVERSA) paginaDur = CENA_CONVERSA_MS;
     else if (s != S_NENHUMA && s != cenaAtual && millis() - cenaDesde >= minMs) abreCena(s);
     return true;
   }
@@ -2404,8 +2517,9 @@ long demoPasso(int n) {
     case 5: abreCena(S_TERMINAL); demoFixa(); return 3500;
     case 6: abreCena(S_LENDO); demoFixa(); return 3000;
     case 7: abreCena(S_AGENTE); demoFixa(); return 4000;
+    case 8: abreCena(S_CONVERSA); demoFixa(); return 4000;
   }
-  k -= 8;
+  k -= 9;
   if (bambuLigado()) {                                                                  // impressora
     switch (k) {
       case 0: demoUso(38, 61); demoImpressora(); abreTela(1); demoFixa(); return 1800;

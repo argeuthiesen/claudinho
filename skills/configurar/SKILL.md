@@ -372,10 +372,11 @@ segredo, mas sem criptografia na rede de casa.
 
 Enquanto o Claude usa ferramentas, a tela mostra uma cena em vez da cara de
 trabalhando: editor de código (editar arquivo), terminal (comandos), chuva do
-Matrix (ler/procurar) e organograma (subagentes), com um mini Claudinho no
+Matrix (ler/procurar), organograma (subagentes) e conversa (o Claude pedindo
+uma segunda opinião a outra IA, como o plugin do Codex), com um mini Claudinho no
 canto. É tudo de mentira: o hook manda só a categoria, nunca arquivo ou
 comando. Se a pessoa perguntar, explique isso; para mostrar uma:
-`claudinho.sh cena codando|terminal|lendo|agente`. As cenas usam a fonte 5
+`claudinho.sh cena codando|terminal|lendo|agente|conversa`. As cenas usam a fonte 5
 (JetBrains Mono) da tela: quem atualizar o firmware para 1.6 ou mais precisa
 também da tela nova (`claudinho.sh tela`, pede um toque).
 

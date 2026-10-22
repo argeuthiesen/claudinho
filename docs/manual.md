@@ -50,14 +50,16 @@ scene, with a mini Claudinho (arms, legs and all) in the corner:
 | running a command | a terminal typing commands, with output scrolling: git, tests that fail and then pass, builds, docker… in a different order each time |
 | reading or searching the code | the Matrix rain |
 | delegating to a subagent | an org chart: Claude on top, agents appearing below |
+| asking another AI for a second opinion: OpenAI's [Codex plugin](https://github.com/openai/codex-plugin-cc) (GPT), `codex exec` or the Gemini CLI (`gemini -p`) | a chat: Claudinho and a little cloud with arms taking turns in speech bubbles full of zeros and ones |
 
 It's all make-believe, stored on the board: the code and commands on screen are
-fake. Only the category (editing, terminal, reading, agent) leaves your
+fake. Only the category (editing, terminal, reading, agent, chat) leaves your
 computer; file names and commands never do. Each scene stays at least 8
 seconds, so the screen doesn't flicker; 12 seconds with no tool, it goes back
-to the face. Any other event (done, needs you, error) goes straight to the
+to the face (the chat waits for the next event, up to 5 minutes, since the
+other AI often takes a while in a single command). Any other event (done, needs you, error) goes straight to the
 face. Tap to see the usage card. To try one: `claudinho.sh cena codando`
-(`terminal`, `lendo`, `agente`).
+(`terminal`, `lendo`, `agente`, `conversa`).
 
 ## Plan usage
 
