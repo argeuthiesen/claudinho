@@ -100,7 +100,7 @@ const T = PT ? {
          empolgado:"Eba!", preocupado:"Xi, um bug?", susto:"Opa!", erro:"Ops, algo falhou", pronto:"Pronto!",
          atencao:"Preciso de você!", compact:"Arrumando a memória...", commit:"Commit feito!", teste_ok:"Testes passaram!",
          teste_falhou:"Testes falharam", janela:"Janela de uso nova!" },
-  agente: "agente %d", delegando: "delegando",
+  agente: "agente %d", delegando: "delegando", conversa: "pedindo uma segunda opinião",
   imp: { tokens:"Tokens", impressora:"Impressora", manter:"Manter", imprimindo:"Imprimindo", ams:"AMS: umidade 27%  · 32°C",
          impresso:"impresso", faltam:"faltam", camada:"camada de 212", bico:"Bico 220/220°", mesa:"Mesa 55/55°", camara:"Câmara 35°",
          titulo:"IMPRESSORA 3D", as:"às 14:32", toque:"toque: li", comecou:"Começou", previsto:"previsto 2h31",
@@ -117,7 +117,7 @@ const T = PT ? {
          empolgado:"Yay!", preocupado:"Uh oh, a bug?", susto:"Whoa!", erro:"Oops, something failed", pronto:"Done!",
          atencao:"I need you!", compact:"Tidying up memory...", commit:"Committed!", teste_ok:"Tests passed!",
          teste_falhou:"Tests failed", janela:"Fresh usage window!" },
-  agente: "agent %d", delegando: "delegating",
+  agente: "agent %d", delegando: "delegating", conversa: "asking for a second opinion",
   imp: { tokens:"Tokens", impressora:"Printer", manter:"Keep", imprimindo:"Printing", ams:"AMS: humidity 27%  · 32°C",
          impresso:"printed", faltam:"left", camada:"layer of 212", bico:"Nozzle 220/220°", mesa:"Bed 55/55°", camara:"Chamber 35°",
          titulo:"3D PRINTER", as:"at 2:32 pm", toque:"tap: got it", comecou:"Started", previsto:"expected 2h31",
@@ -238,8 +238,8 @@ const PISCA = new Set([C.NEUTRO, C.CANSADO, C.ESPERANDO, C.PREOCUPADO, C.DESCONF
 // chuva do Matrix (Read/Grep) ou organograma (Agent). Tudo de mentira: o hook
 // manda so a categoria. Cada cena fica pelo menos 8 s; 12 s sem ferramenta,
 // volta ao rosto. Desenho incremental, como na placa.
-const S = { NENHUMA:-1, CODANDO:0, TERMINAL:1, LENDO:2, AGENTE:3 };
-const MONO_W = 7, MONO_LH = 17, CENA_MIN_MS = 8000, CENA_FIM_MS = 12000, CENA_AGENTE_MIN_MS = 6000;
+const S = { NENHUMA:-1, CODANDO:0, TERMINAL:1, LENDO:2, AGENTE:3, CONVERSA:4 };
+const MONO_W = 7, MONO_LH = 17, CENA_MIN_MS = 8000, CENA_FIM_MS = 12000, CENA_AGENTE_MIN_MS = 6000, CENA_CONVERSA_MS = 300000;
 const FUNDO = "#363435", OURO = "#d0ad6c", TEXTO = "#f2f3f4", APAGADO = "#a5a09d";
 const rgb = (r, gg, b) => `rgb(${r},${gg},${b})`;
 const sorteia = (a, b) => b === undefined ? Math.floor(Math.random() * a) : a + Math.floor(Math.random() * (b - a));
@@ -257,7 +257,7 @@ function escreve(x, y, w, h, mono, cor, fundo, alin, t) {
   g.textAlign = alin == 1 ? "center" : alin == 2 ? "right" : "left";
   g.fillText(t, alin == 1 ? x + w / 2 : alin == 2 ? x + w : x, y + h / 2 + 1);
 }
-function cenaDe(a) { return { codando:S.CODANDO, terminal:S.TERMINAL, lendo:S.LENDO, agente:S.AGENTE }[a] ?? S.NENHUMA; }
+function cenaDe(a) { return { codando:S.CODANDO, terminal:S.TERMINAL, lendo:S.LENDO, agente:S.AGENTE, conversa:S.CONVERSA }[a] ?? S.NENHUMA; }
 
 // ---- mini Clawd (pixel de 4): corpo 10x7, bracinhos, 4 perninhas
 let miniP = 4, miniX = 0, miniY = 0, miniFundo = "#000";
@@ -428,26 +428,103 @@ function agPasso() {
   cenaProx = agoraMs() + 350;
 }
 
+// ---- conversa: o Clawd e uma nuvem de bracinhos trocando baloes de fala (olhos ">_" de terminal)
+const CV_Y = 180, CV_BX = [24, 184], CV_BY = 36, CV_BW = 112, CV_BH = 44, CV_AMIGO_X = 195, CV_AMIGO_Y = 111, CV_U = 3;
+const CV_NUVEM = [
+  "................oooo................", "..............oo####oo..............", "............oo########oo............",
+  "...........o##########++o...........", "...........o##########++o...........", ".......oooo###########+++o..........",
+  ".....oo###############+++ooooo......", "....o######++#########+++#####o.....", "...o########++########++######+o....",
+  "...o########++########+#######++o...", "..o#########+++######+########+++o..", "..o#########+++++++++++++#####+++o..",
+  "..o#######++++++++++++###++###+++o..", "..o+++++++#####+---+######++##+++o..", "...o+++++######++-+#######+++----o..",
+  "...o----+######++-+#######+++---o...", "....o---+######++++#######+++---o...", ".....oo-+######+++########+++-oo....",
+  ".......o++++++---o+++++++----o......", ".......o++++++---oo++++++---o.......", "........o-------o.o--------o........",
+  ".........oo---oo...oo-----o.........", "...........ooo.......ooooo.........."];
+const CV_COR = { "#": rgb(245, 247, 250), "+": rgb(214, 220, 232), "-": rgb(165, 174, 198), "o": rgb(74, 84, 104) };
+let cvFala = 0, cvVolta = 0, cvOlhar = -1;
+function cvCel(bx, by, w, h, c) { preenche(CV_AMIGO_X + bx * CV_U, CV_AMIGO_Y + by * CV_U, w * CV_U, h * CV_U, c); }
+function cvRestaura(c0, r0, w, h) { for (let r = r0; r < r0 + h; r++) for (let c = c0; c < c0 + w; c++) cvCel(c, r, 1, 1, CV_COR[CV_NUVEM[r][c]]); }
+function cvOlhos(t) {
+  if (t == cvOlhar) return;
+  cvOlhar = t; cvRestaura(13, 7, 9, 5);
+  if (t == 0) { cvCel(14, 8, 1, 1, COR.olho); cvCel(15, 9, 1, 1, COR.olho); cvCel(14, 10, 1, 1, COR.olho); cvCel(19, 10, 2, 1, COR.olho); }
+  else if (t == 1) { cvCel(15, 8, 1, 3, COR.olho); cvCel(19, 8, 1, 3, COR.olho); }
+  else for (const x of [14, 18]) { cvCel(x, 9, 1, 1, COR.olho); cvCel(x + 1, 8, 1, 1, COR.olho); cvCel(x + 2, 9, 1, 1, COR.olho); }
+}
+function cvNuvem() {
+  CV_NUVEM.forEach((l, r) => { for (const m of l.matchAll(/([^.])\1*/g)) cvCel(m.index, r, m[0].length, 1, CV_COR[m[1]]); });
+  cvOlhar = -1; cvOlhos(0);
+}
+function cvBraco(col, lin, fora) {
+  cvCel(col, lin - 1, 2, 4, CV_COR.o); cvCel(fora, lin, 1, 2, CV_COR.o); cvCel(col, lin, 2, 2, CV_COR["+"]);
+}
+function cvAmigo(boca, sobe) {
+  if (boca) cvCel(16, 12, 3, 1, COR.olho); else cvRestaura(16, 12, 3, 1);
+  cvCel(-1, 8, 3, 6, FUNDO); cvCel(34, 8, 3, 6, FUNDO);
+  cvBraco(0, (sobe & 1) ? 9 : 11, -1); cvBraco(34, (sobe & 2) ? 9 : 11, 36);
+}
+function cvBalao(quem) {
+  for (const x of CV_BX) preenche(x, CV_BY, CV_BW, CV_BH + 12, FUNDO);
+  const x = CV_BX[quem], cx = x + (quem ? 70 : 42);
+  preenche(x + 4, CV_BY, CV_BW - 8, CV_BH, TEXTO); preenche(x, CV_BY + 4, CV_BW, CV_BH - 8, TEXTO);
+  preenche(cx - 6, CV_BY + CV_BH, 12, 6, TEXTO); preenche(cx - 3, CV_BY + CV_BH + 6, 6, 5, TEXTO);
+}
+const CV_COLS = 10;
+let cvTxt = ["", ""], cvN = 0, cvPausa = 0;
+function cvFrase() {
+  cvTxt = [0, 1].map(() => Array.from({ length: CV_COLS }, () => Math.random() < 0.5 ? "0" : "1").join(""));
+  preenche(CV_BX[cvFala] + 6, CV_BY + 3, CV_BW - 12, CV_BH - 6, TEXTO);
+  cvN = 0; cvPausa = 0;
+  cvOlhos(Math.random() < 0.7 ? 0 : 1 + Math.floor(Math.random() * 2));
+}
+function cvEscreve() {
+  const r = Math.floor((cvN - 1) / CV_COLS), k = cvN - r * CV_COLS;
+  escreve(CV_BX[cvFala] + (CV_BW - CV_COLS * MONO_W) / 2, CV_BY + 5 + r * MONO_LH, k * MONO_W, 16, true, FUNDO, TEXTO, 0, cvTxt[r].slice(0, k));
+}
+function cvInicio() {
+  preenche(0, 0, 320, 240, FUNDO);
+  miniP = 6; miniClawd(40, CV_Y - 54, FUNDO); miniOlhos(1);
+  cvNuvem(); cvAmigo(false, 0);
+  escreve(0, 204, 320, 20, false, OURO, null, 1, T.conversa);
+  cvFala = 0; cvVolta = 0; cvBalao(0); cvFrase();
+}
+function cvPasso() {
+  const falando = cvN < 2 * CV_COLS;
+  if (falando) { cvN += 2; cvEscreve(); cenaProx = agoraMs() + 90; }
+  else {
+    cenaProx = agoraMs() + 100;
+    if (++cvPausa <= 8) return;
+    if (++cvVolta >= 2) {
+      cvFala = 1 - cvFala; cvVolta = 0; cvBalao(cvFala);
+      if (cvFala) miniBracos(0); else cvAmigo(false, 0);
+    }
+    cvFrase(); return;
+  }
+  const mexe = falando && (cvN / 2) & 1;
+  if (cvFala == 0) miniBracos(mexe ? 1 : 0);
+  else cvAmigo(mexe, mexe ? 1 + (cvVolta & 1) : 0);
+}
+
 // ---- controle
 function mudaPagina(p) { pagina = p; paginaDesde = agoraMs(); if (p == 0) caraNaTela = -1; else cenaInicio(); }
 function cenaInicio() {
   cenaProx = agoraMs(); miniP = 4;
-  [edInicio, teInicio, mxInicio, agInicio][cenaAtual]();
+  [edInicio, teInicio, mxInicio, agInicio, cvInicio][cenaAtual]();
 }
-function abreCena(s) { cenaAtual = s; cenaDesde = agoraMs(); mudaPagina(10); }
+function abreCena(s) { cenaAtual = s; cenaDesde = agoraMs(); paginaDur = s == S.CONVERSA ? CENA_CONVERSA_MS : CENA_FIM_MS; mudaPagina(10); }
 function cuidaCena() {
-  if (agoraMs() - paginaDesde > CENA_FIM_MS) { mudaPagina(0); return; }
+  if (agoraMs() - paginaDesde > paginaDur) { mudaPagina(0); return; }
   if (agoraMs() < cenaProx) return;
-  [edPasso, tePasso, mxPasso, agPasso][cenaAtual]();
+  [edPasso, tePasso, mxPasso, agPasso, cvPasso][cenaAtual]();
 }
 function cenaPorFerramenta(acao) {
   const s = cenaDe(acao);
   if (pagina == 10) {
     paginaDesde = agoraMs();
     poeCara(C.TRABALHANDO, 120000);
-    const min = cenaAtual == S.AGENTE ? CENA_AGENTE_MIN_MS : CENA_MIN_MS;
+    const min = cenaAtual == S.AGENTE || cenaAtual == S.CONVERSA ? CENA_AGENTE_MIN_MS : CENA_MIN_MS;
     if (s == S.AGENTE && cenaAtual == S.AGENTE) novoAgente();
-    else if (s == S.AGENTE) abreCena(s);                                  // agente: na hora
+    else if ((s == S.AGENTE || s == S.CONVERSA) && s != cenaAtual) abreCena(s);   // agente e conversa: na hora
+    else if (s == S.CONVERSA) paginaDur = CENA_CONVERSA_MS;
     else if (s != S.NENHUMA && s != cenaAtual && agoraMs() - cenaDesde >= min) abreCena(s);
     return true;
   }
@@ -833,7 +910,7 @@ function demonstracao() {
   // cada cena fica uns 5 s e sai com um evento que nao e ferramenta (como na placa)
   const roteiro = [["inicio",3],["prompt",3],["ferramenta",5,"","codando"],["commit",5],["ferramenta",5,"","terminal"],
                    ["teste_ok",4],["uso",5],["prompt",2],["ferramenta",5,"","lendo"],["atencao",6],["prompt",2,"feliz"],
-                   ["ferramenta",2,"","agente"],["ferramenta",3,"","agente"],["erro",4],["teste_falhou",5],["compact",5],["parou",6],
+                   ["ferramenta",2,"","agente"],["ferramenta",3,"","agente"],["ferramenta",5,"","conversa"],["erro",4],["teste_falhou",5],["compact",5],["parou",6],
                    ["painel",5],["alerta",4,{cor:OK_,titulo:"comecou",l2:"previsto"}],["alerta",4,{cor:OURO,titulo:"faltam5",l2:"quase"}],
                    ["alerta",4,{cor:AZUL_,titulo:"trocou",l2:"slot 2 > slot 4  PLA",amostra:"#3f6fd9"}],
                    ["alerta",4,{cor:CRITICO_,titulo:"pausada",l2:"semFil"}],["alerta",5,{cor:OK_,titulo:"terminou",l2:"levou"}]];
