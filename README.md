@@ -45,6 +45,13 @@ the 5-hour and 7-day windows.
   speech bubbles while Codex works. It also catches `codex exec` and the
   Gemini CLI (`gemini -p`). Same zero tokens: the hook only spots the command
   on your computer.
+- **A ticker under the scenes.** A band at the bottom of the screen says what
+  Claude is doing in plain words ("Compiling the firmware", "Reviewing the
+  code in parallel"): the short description Claude already writes for each
+  command and agent so you can approve it, or the task in progress from its
+  to-do list. Typed letter by letter, scrolling when it doesn't fit. Zero
+  tokens too: it's text that already exists. Never the command or a file
+  name; turn it off with `claudinho.sh letreiro desliga`.
 - **Optional: your Bambu Lab printer.** Claudinho can also connect straight
   to a Bambu 3D printer on your network and show a print panel plus alerts
   (started, paused and why, finished, failed...) that stay until you tap.
@@ -291,7 +298,7 @@ inside the plugin folder. After a marketplace install, the paths are:
 
 - **`<plugin>`** (the plugin itself, with the scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<version>/`, for example
-  `.../claudinho/1.19.0/`. If there's more than one version folder, use the
+  `.../claudinho/1.20.0/`. If there's more than one version folder, use the
   newest. (If you cloned this repository, `<plugin>` is its root.)
 - **`<plugin-data>`** (the board's IP and secret):
   `~/.claude/plugins/data/claudinho-claudinho/`. The scripts find it on their
@@ -340,7 +347,8 @@ claudinho.sh demo [parar]         # demo mode: a ~2 min tour of everything, for 
 claudinho.sh som [mood|liga|desliga|volume N]  # single board: try a voice (feliz, pergunta, sono...), on/off, volume
 claudinho.sh desligar             # single board: deep sleep, to save the battery (BOOT wakes it)
 claudinho.sh alerta [type]        # sample printer alert: bom, ruim, filamento, hms
-claudinho.sh cena <type>          # try a scene: codando (editing), terminal, lendo (reading), agente, conversa (chat)
+claudinho.sh cena <type> [text]   # try a scene: codando (editing), terminal, lendo (reading), agente, conversa (chat); text: the ticker
+claudinho.sh letreiro [liga|desliga]  # the ticker under the scenes: on (default) or off
 claudinho.sh atualizar [file.bin] # update firmware
 claudinho.sh tela [file.tft]      # update the Nextion screen (classic version)
 bash <plugin>/scripts/wifi.sh PORT "NETWORK"   # change Wi-Fi over USB (hidden password)
@@ -645,7 +653,10 @@ your Anthropic account.
 - **What goes over the network:** the event type (tool, done...), the mood
   (happy, worried, startled), the kind of tool (editing, terminal, reading,
   agent, chat: never the file name or the command), a short session code and the
-  plan numbers. Your prompt text never leaves the computer.
+  plan numbers. Your prompt text never leaves the computer. For the ticker,
+  also the short description Claude writes for each command and agent (the one
+  you see when approving) and the task in progress from its to-do list, up to
+  60 letters; `claudinho.sh letreiro desliga` turns that off.
 - **No encryption on the local network.** It's plain HTTP, like most home
   gadgets. Someone able to spy on your network could discover the secret and
   mess with Claudinho (change the face, restart it), but **not swap the

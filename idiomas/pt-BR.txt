@@ -89,6 +89,12 @@ genius.placar = Score: %d
 cena.agente = agente %d
 cena.delegando = delegando
 cena.conversa = pedindo uma segunda opinião
+# letreiro.*: exemplos que aparecem embaixo das cenas na demonstração (os de verdade o Claude escreve)
+letreiro.codando = Ensinando caras novas ao robô
+letreiro.terminal = Compilando o firmware
+letreiro.lendo = Lendo o manual do plugin
+letreiro.agente = Revisando o código em paralelo
+letreiro.conversa = O Codex revisa o último commit
 
 imp.aguardando = Aguardando...
 imp.sem_conexao = Sem conexão

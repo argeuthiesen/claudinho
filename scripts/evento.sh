@@ -14,6 +14,10 @@ tipo="$1"; IP=$(le_config CLAUDINHO_IP); TOKEN=$(le_config CLAUDINHO_TOKEN)
 # PC); no prompt, o texto so serve para escolher o humor e nao e enviado.
 # Na ferramenta vai so a categoria (codando, terminal, lendo, agente, web,
 # conversa), para a cena na tela: nome de arquivo e comando nunca saem do PC.
+# Para o letreiro embaixo da cena vai o resumo que o Claude ja escreve para a
+# pessoa aprovar: a descricao do comando ou do agente, e a tarefa em andamento
+# da lista dele. Sem aspas nem barra invertida, ate 60 letras. Desliga com
+# "claudinho.sh letreiro desliga" (CLAUDINHO_LETREIRO=0 no config).
 # conversa: o Claude chamando outra IA (o plugin do Codex, codex exec, gemini -p),
 # pelo comando ou pelo subagente codex:*.
 # Depois de um comando no terminal, o script olha aqui mesmo se era um
@@ -61,9 +65,23 @@ if tipo == "teste":   # passou? com "| tail" o codigo de saida e do tail: confer
     saida=str(d.get("tool_response") or "")
     ruim=re.search(r"\b[1-9][0-9]* (failed|failing|failures?|errors?)\b|\bFAILED\b|^FAIL\b|test result: FAILED|BUILD FAILURE|Tests:.*\bfailed", saida, re.M)
     tipo="teste_falhou" if ruim else "teste_ok"
-print(tipo)' 2>/dev/null || true)
+print(tipo)
+import unicodedata
+def limpa(t):   # uma linha, so letras que as fontes da tela tem
+    t=unicodedata.normalize("NFKC", str(t or "")).replace(chr(8211), "-").replace(chr(8212), "-")
+    t="".join(c for c in t if c.isprintable() and ord(c) < 256 and c not in (chr(34), chr(92)))
+    t=" ".join(t.split())
+    return t if len(t) <= 60 else t[:60].rsplit(" ", 1)[0]
+print(limpa(ti.get("description")) if f in ("Bash","PowerShell","Agent","Task") else "")
+fazendo=""   # "=" + a tarefa em andamento ("=" sozinho: nenhuma); vazio: este evento nao diz
+if f == "TodoWrite":
+    fazendo="=" + limpa(next((t.get("activeForm") or t.get("content") for t in (ti.get("todos") or []) if isinstance(t, dict) and t.get("status") == "in_progress"), ""))
+elif f == "TaskUpdate" and ti.get("status") == "in_progress" and ti.get("activeForm"):
+    fazendo="=" + limpa(ti.get("activeForm"))
+print(fazendo)' 2>/dev/null || true)
 sessao=$(printf '%s\n' "$leitura" | sed -n 1p); texto=$(printf '%s\n' "$leitura" | sed -n 2p); acao=$(printf '%s\n' "$leitura" | sed -n 3p)
 comando=$(printf '%s\n' "$leitura" | sed -n 4p)
+legenda=$(printf '%s\n' "$leitura" | sed -n 5p); tarefa=$(printf '%s\n' "$leitura" | sed -n 6p)
 # feito: so interessa commit e teste. erro: um teste que falhou vira teste_falhou.
 if [ "$tipo" = feito ]; then
   case "$comando" in commit|teste_ok|teste_falhou) tipo=$comando; acao="" ;; *) exit 0 ;; esac
@@ -78,12 +96,20 @@ if [ "$tipo" = prompt ]; then
   elif printf '%s' "$texto" | grep -qE 'obrigad|valeu|perfeito|funfou|funcionou|excelente|thanks|thank you|perfect|awesome|great job|it works'; then humor=feliz
   fi
 fi
-# tipo, humor, acao e sessao sao palavras fixas ou hexadecimal: nao precisam de escape.
+# tipo, humor, acao e sessao sao palavras fixas ou hexadecimal: nao precisam de escape;
+# o letreiro ja vem sem aspas e sem barra invertida (limpa, acima).
+extra=""
+if [ "$tipo" = ferramenta ]; then
+  case "$(le_config CLAUDINHO_LETREIRO)" in 0|nao|no|off) ;; *)
+    [ -n "$legenda" ] && extra="$extra,\\\"legenda\\\":\\\"$legenda\\\""
+    [ -n "$tarefa" ] && extra="$extra,\\\"tarefa\\\":\\\"${tarefa#=}\\\"" ;;
+  esac
+fi
 # Segredo e corpo vao pela entrada padrao do curl (-K -), fora da linha de comando.
 # Registro curto (eventos.log na pasta de dados, ultimas 200 linhas): hora, tipo
 # e a resposta da placa. Nada do prompt. Serve para o "ele nao reagiu".
-{ r=$(printf 'header = "Authorization: Bearer %s"\nheader = "Content-Type: application/json"\ndata = "{\\"tipo\\":\\"%s\\",\\"humor\\":\\"%s\\",\\"acao\\":\\"%s\\",\\"sessao\\":\\"%s\\"}"\n' \
-    "$TOKEN" "$tipo" "$humor" "$acao" "$sessao" | curl -s -m 2 -o /dev/null -w '%{http_code}' -X POST "http://$IP/evento" -K - )
+{ r=$(printf 'header = "Authorization: Bearer %s"\nheader = "Content-Type: application/json"\ndata = "{\\"tipo\\":\\"%s\\",\\"humor\\":\\"%s\\",\\"acao\\":\\"%s\\",\\"sessao\\":\\"%s\\"%s}"\n' \
+    "$TOKEN" "$tipo" "$humor" "$acao" "$sessao" "$extra" | curl -s -m 2 -o /dev/null -w '%{http_code}' -X POST "http://$IP/evento" -K - )
   L="$DADOS/eventos.log"; printf '%s %s %s\n' "$(date '+%m-%d %H:%M:%S')" "$tipo" "${r:-000}" >> "$L"
   [ "$(wc -l < "$L")" -gt 400 ] && tail -n 200 "$L" > "$L.tmp" && mv "$L.tmp" "$L"; } >/dev/null 2>&1 &
 exit 0

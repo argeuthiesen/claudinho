@@ -117,6 +117,9 @@ class Pedido(BaseHTTPRequestHandler):
         s = str(doc.get("sessao") or "")[:12]
         if caminho == "/evento":
             ev = {k: str(doc.get(k) or "")[:24] for k in ("tipo", "humor", "acao")}
+            ev["legenda"] = str(doc.get("legenda") or "")[:64]     # o letreiro (resumo do Claude)
+            if "tarefa" in doc:                                    # tarefa: so quando o evento diz ("" = nenhuma)
+                ev["tarefa"] = str(doc.get("tarefa") or "")[:64]
             with trava:
                 if ev["tipo"] == "fim":
                     sessoes.pop(s, None)

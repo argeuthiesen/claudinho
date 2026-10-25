@@ -63,6 +63,17 @@ Qualquer outro evento (terminou, precisa de você, erro) volta ao rosto na
 hora. Tocar mostra o cartão de consumo. Para ver uma: `claudinho.sh cena
 codando` (`terminal`, `lendo`, `agente`, `conversa`).
 
+**O letreiro.** Embaixo da cena, uma faixa na cor do rosto mostra o que o
+Claude está fazendo, em palavras: o resumo que o Claude escreve para cada
+comando e agente (o que você vê ao aprovar) ou, sem ele, a tarefa em andamento
+da lista dele. Ele se digita sozinho e, quando não cabe, rola de um lado para
+o outro. O comando e os nomes de arquivo continuam sem sair do computador.
+Desligar: `claudinho.sh letreiro desliga` (`liga` volta). Para ver:
+`claudinho.sh cena terminal "Compilando o firmware"`. O Claude costuma
+escrever esses resumos em inglês; para tê-los em português, peça isso no seu
+`CLAUDE.md`. Na placa única o letreiro usa a DM Sans SemiBold; na versão com
+Nextion, a negrito que a tela já tem.
+
 ## O consumo do plano
 
 - **Tocando na tela** aparece o cartão de consumo: janelas de 5 horas e de 7

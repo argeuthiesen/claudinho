@@ -16,7 +16,8 @@
 #   claudinho.sh idioma [codigo]      idioma da tela (sem codigo: mostra o atual e os disponiveis)
 #   claudinho.sh som [HUMOR|liga|desliga|volume N|lista|padrao|envia EVENTO arq.wav]  alto-falante (so a E32R28T)
 #   claudinho.sh demo [parar]         modo demonstracao: trailer de ~2 min para filmar (um toque interrompe)
-#   claudinho.sh cena <tipo>          testa uma cena: codando, terminal, lendo, agente, conversa
+#   claudinho.sh cena <tipo> [texto]  testa uma cena: codando, terminal, lendo, agente, conversa (texto: o letreiro)
+#   claudinho.sh letreiro [liga|desliga]  o resumo do que o Claude faz, embaixo das cenas (padrao: ligado)
 #   claudinho.sh alerta [bom|ruim|filamento|hms]  alerta de exemplo da impressora
 #   claudinho.sh virtual [parar]      Claudinho virtual: o mascote numa aba do navegador, sem placa
 #   claudinho.sh web                  painel web da placa no navegador (estado, consumo, ultimos eventos)
@@ -113,7 +114,7 @@ fi
 IP=$(le_config CLAUDINHO_IP)
 [ -n "$IP" ] || { echo "Claudinho ainda nao configurado (rode a skill /claudinho:configurar)" >&2; exit 1; }
 J=(-H 'Content-Type: application/json')
-uso() { sed -n '2,20p' "$0"; exit 1; }
+uso() { sed -n '2,24p' "$0"; exit 1; }
 palavra() { case "$1" in *[!a-z_]*) return 1 ;; esac; }    # so letras minusculas e _ (ou vazio)
 cmd() { curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/cmd" -d "$1"; }
 mini() { curl_claudinho -s -m 5 "http://$IP/mini.json"; }
@@ -185,7 +186,15 @@ PY
   alerta) case "${2:-bom}" in bom|ruim|filamento|hms) cmd "{\"alerta\":\"${2:-bom}\"}" ;; *) uso ;; esac ;;
   cena)
     case "${2:-}" in codando|terminal|lendo|agente|conversa) ;; *) uso ;; esac
-    curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/evento" -d "{\"tipo\":\"ferramenta\",\"acao\":\"$2\",\"forca\":true}" ;;   # sem sessao: teste nao conta como terminal aberto
+    D=$(A="$2" L="${3:-}" python3 -c 'import json,os;print(json.dumps({"tipo":"ferramenta","acao":os.environ["A"],"legenda":os.environ["L"],"forca":True}))')
+    curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/evento" -d "$D" ;;   # sem sessao: teste nao conta como terminal aberto
+  letreiro)
+    case "${2:-}" in
+      liga) grava_config CLAUDINHO_LETREIRO 1; echo "letreiro ligado" ;;
+      desliga) grava_config CLAUDINHO_LETREIRO 0; echo "letreiro desligado: so a cena vai para a tela" ;;
+      "") case "$(le_config CLAUDINHO_LETREIRO)" in 0|nao|no|off) echo "letreiro: desligado" ;; *) echo "letreiro: ligado" ;; esac ;;
+      *) uso ;;
+    esac ;;
   bambu)
     case "${2:-}" in
       desligar) cmd '{"bambu":{"desligar":true}}' ;;

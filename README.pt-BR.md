@@ -46,6 +46,13 @@ já foi usado nas janelas de 5 horas e de 7 dias.
   bracinhos conversando em balões de zeros e uns enquanto o Codex trabalha.
   Também reconhece o `codex exec` e o Gemini CLI (`gemini -p`). Os mesmos
   zero tokens: o hook só reconhece o comando no seu computador.
+- **Um letreiro embaixo das cenas.** Uma faixa no pé da tela diz o que o
+  Claude está fazendo, em palavras ("Compilando o firmware", "Revisando o
+  código em paralelo"): o resumo que o Claude já escreve para cada comando e
+  agente para você aprovar, ou a tarefa em andamento da lista dele. Digitado
+  letra por letra, rolando quando não cabe. Também zero tokens: é texto que já
+  existe. Nunca o comando nem nome de arquivo; desliga com
+  `claudinho.sh letreiro desliga`.
 - **Opcional: sua impressora Bambu Lab.** O Claudinho também conecta direto
   numa impressora 3D Bambu da sua rede e mostra um painel da impressão e
   alertas (começou, pausou e por quê, terminou, falhou...) que ficam até você
@@ -294,7 +301,7 @@ pasta do plugin. Depois de instalar pelo marketplace, os caminhos são:
 
 - **`<plugin>`** (o plugin em si, com os scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<versão>/`, por exemplo
-  `.../claudinho/1.19.0/`. Se houver mais de uma pasta de versão, use a mais
+  `.../claudinho/1.20.0/`. Se houver mais de uma pasta de versão, use a mais
   nova. (Se você clonou este repositório, `<plugin>` é a raiz dele.)
 - **`<dados-do-plugin>`** (o IP e o segredo da placa):
   `~/.claude/plugins/data/claudinho-claudinho/`. Os scripts acham essa pasta
@@ -343,7 +350,8 @@ claudinho.sh demo [parar]         # modo demonstração: um passeio de ~2 min po
 claudinho.sh som [humor|liga|desliga|volume N]  # placa única: ouve uma fala (feliz, pergunta, sono...), liga/desliga, volume
 claudinho.sh desligar             # placa única: sono profundo, para poupar a bateria (o BOOT acorda)
 claudinho.sh alerta [tipo]        # alerta de exemplo da impressora: bom, ruim, filamento, hms
-claudinho.sh cena <tipo>          # mostra uma cena: codando, terminal, lendo, agente, conversa
+claudinho.sh cena <tipo> [texto]  # mostra uma cena: codando, terminal, lendo, agente, conversa; texto: o letreiro
+claudinho.sh letreiro [liga|desliga]  # o letreiro embaixo das cenas: ligado (padrão) ou desligado
 claudinho.sh atualizar [arquivo.bin]  # atualiza o firmware
 claudinho.sh tela [arquivo.tft]   # atualiza a tela do Nextion (versão clássica)
 bash <plugin>/scripts/wifi.sh PORTA "REDE"   # troca o Wi-Fi pela USB (senha escondida)
@@ -643,6 +651,9 @@ conta da Anthropic.
   humor (feliz, preocupado, susto), o tipo de ferramenta (editando, terminal,
   lendo, agente, conversa: nunca o nome do arquivo nem o comando), um código curto da
   sessão e os números do plano. O texto dos seus prompts nunca sai do computador.
+  Para o letreiro, vai também o resumo que o Claude escreve para cada comando e
+  agente (o que você vê ao aprovar) e a tarefa em andamento da lista dele, até
+  60 letras; `claudinho.sh letreiro desliga` desliga isso.
 - **Sem criptografia na rede local.** É HTTP simples, como a maioria dos
   gadgets caseiros. Quem conseguir espionar a sua rede pode descobrir o
   segredo e mexer no Claudinho (trocar a cara, reiniciar), mas **não trocar o

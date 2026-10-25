@@ -2019,6 +2019,37 @@ static const unsigned long CENA_CONVERSA_MS = 300000;
 int cenaAtual = S_NENHUMA; unsigned long cenaDesde = 0, cenaProx = 0;
 char acaoEvento[12] = "";
 
+// ---- letreiro: o resumo que o Claude ja escreve para voce aprovar (a descricao
+// do comando ou do agente) ou a tarefa em andamento da lista dele. O comando e o
+// nome de arquivo nunca vem. Fica numa faixa no pe da cena (na cor do rosto, letra
+// grande vazada na cor do fundo), digitado letra por letra; o que nao cabe rola de
+// um lado para o outro. O resumo vale enquanto a cena e do mesmo tipo (e por 1 min);
+// depois fica a tarefa, se houver.
+static const int LT_Y = 204, LT_H = 36, LT_X = 8, LT_W = 304, LT_MAX = 64;
+#ifdef PLACA_E32R28T
+static const int FONTE_LT = 4;        // DM Sans SemiBold 26 px (so a E32R28T tem)
+#else
+static const int FONTE_LT = FONTE_M;  // no Nextion: a negrito de 24 px
+#endif
+static const unsigned long LT_VALE_MS = 60000;
+char ltEvento[LT_MAX] = "", ltTarefa[LT_MAX] = "", ltTela[LT_MAX] = "";   // ltTela: o que esta (ou vai) na tela
+int ltEventoCena = -1, ltN = 0, ltIni = 0, ltDir = 1;
+unsigned long ltEventoEm = 0, ltProx = 0;
+// UTF-8 (o JSON) para ISO-8859-1 (as fontes): o que nao existe na fonte some, e
+// aspas e barra invertida tambem (o Nextion nao as aceita no texto).
+void ltLatin1(const char* u, char* out, size_t n) {
+  size_t k = 0;
+  for (const uint8_t* p = (const uint8_t*)u; *p && k + 1 < n; ) {
+    uint8_t c = *p++;
+    if (c >= 0xC0) {
+      int resto = c >= 0xF0 ? 3 : c >= 0xE0 ? 2 : 1, v = c & (0x3F >> resto);
+      for (int i = 0; i < resto && (*p & 0xC0) == 0x80; i++) v = (v << 6) | (*p++ & 0x3F);
+      if (v >= 0xA0 && v <= 0xFF) out[k++] = (char)v;
+    } else if (c >= 0x20 && c < 0x7F && c != '"' && c != '\\') out[k++] = (char)c;
+  }
+  out[k] = 0;
+}
+
 int cenaDe(const char* a) {
   if (!strcmp(a, "codando"))  return S_CODANDO;
   if (!strcmp(a, "terminal")) return S_TERMINAL;
@@ -2057,7 +2088,7 @@ void miniOlhos(int dx) {             // -1 esquerda, 0 frente, 1 direita (lendo)
 // 3 texto, 4 comentario, 5 numero, 6 resto, 7 tipo.
 #include "cenas.h"   // os roteiros (arquivos do editor e sessoes do terminal), gerados por scripts/gera-cenas.py
 int sorteiaOutro(int n, int antes) { if (antes < 0 || n < 2) return random(n); int k = random(n - 1); return k >= antes ? k + 1 : k; }
-static const int ED_TOPO = 22, ED_X = 30, ED_LINHAS = 12;
+static const int ED_TOPO = 22, ED_X = 30, ED_LINHAS = 10;   // embaixo fica o letreiro
 static const uint16_t ED_FUNDO = RGB565(30, 30, 30);
 int edTopo = 0, edCol = 0, edEspera = 0, edPre = 0;   // edPre: letras ja digitadas do preambulo (-1 = no editor)
 int edArq = -1;                                       // arquivo aberto: cada cena sorteia outro
@@ -2105,10 +2136,11 @@ void edAbre() {
   limpaTela(ED_FUNDO);
   preenche(0, 0, 320, 20, RGB565(45, 45, 45)); preenche(0, 0, 112, 20, ED_FUNDO); preenche(0, 18, 112, 2, corRosto());
   escreve(6, 2, 104, 16, FONTE_MONO, RGB565(220, 220, 220), ED_FUNDO, 0, ARQUIVOS[edArq].nome);
-  miniClawd(320 - MINI_W - 4, 240 - MINI_H - 2, ED_FUNDO);
+  miniClawd(320 - MINI_W - 4, LT_Y - MINI_H - 2, ED_FUNDO);
   edTopo = 0;                            // arquivo aberto do comeco
   for (int r = 0; r < ED_LINHAS - 1; r++) edLinha(r, edTopo + r, -1);
   edCol = 0; edEspera = 0; edCursor();
+  ltTela[0] = 0;                         // limpou a tela: o letreiro volta
 }
 void edPasso() {
   if (edPre >= 0) {
@@ -2137,7 +2169,7 @@ void edPasso() {
 }
 
 // ---- terminal: sessoes (cenas.h) sorteadas uma atras da outra; "$" no comeco e comando digitado
-static const int TE_TOPO = 24, TE_X = 6, TE_LINHAS = 12;
+static const int TE_TOPO = 24, TE_X = 6, TE_LINHAS = 10;
 static const uint16_t TE_FUNDO = RGB565(8, 8, 8), TE_VERDE = RGB565(60, 220, 90), TE_CLARO = RGB565(150, 255, 170);
 int teSes = -1, teLinha = 0, teCol = 0, teN = 0; const char* teVis[TE_LINHAS];
 
@@ -2157,7 +2189,7 @@ void teDesenha(int row, const char* t, int ate) {
     escreve(TE_X, y, strlen(t) * MONO_W, 16, FONTE_MONO, TE_VERDE, TE_FUNDO, 0, t);
   }
 }
-void teLimpa() { preenche(0, 20, 320, 220, TE_FUNDO); teN = 0; miniClawd(320 - MINI_W - 4, 240 - MINI_H - 2, TE_FUNDO); }
+void teLimpa() { preenche(0, 20, 320, 220, TE_FUNDO); teN = 0; miniClawd(320 - MINI_W - 4, LT_Y - MINI_H - 2, TE_FUNDO); }
 void teInicio() {
   limpaTela(TE_FUNDO);
   preenche(0, 0, 320, 20, RGB565(40, 40, 40));
@@ -2202,7 +2234,7 @@ void tePasso() {
 }
 
 // ---- chuva do Matrix: 20 colunas, cabeca clara, rastro verde, a ponta some
-static const int MX_COLS = 20, MX_LIN = 15, MX_DX = 16, MX_POR_VEZ = 6;
+static const int MX_COLS = 20, MX_LIN = 12, MX_DX = 16, MX_POR_VEZ = 6;
 struct { int8_t cab, tam, vel, acc; } mx[MX_COLS];
 static const char MX_CHARS[] = "0123456789ABCDEFZ$#@*+=<>:;!?";
 int mxVez = 0, mxOlhar = 0; unsigned long mxOlharEm = 0;
@@ -2216,7 +2248,7 @@ void mxLetra(int c, int r, uint16_t cor) {
 }
 void mxInicio() {
   limpaTela(0);
-  miniClawd(320 - MINI_W - 4, 240 - MINI_H - 2, 0);
+  miniClawd(320 - MINI_W - 4, LT_Y - MINI_H - 2, 0);
   for (int c = 0; c < MX_COLS; c++) { mxNova(c); mx[c].cab = random(-6, 10); }
   mxVez = 0; mxOlhar = 0; mxOlharEm = millis();
 }
@@ -2261,7 +2293,7 @@ void agInicio() {
   agMini(0);
   escreve(0, 56, 320, 18, FONTE_P, COR_TEXTO, COR_FUNDO, 1, "Claude");
   preenche(159, 76, 3, 20, COR_OURO);
-  escreve(0, 204, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, tx(T_CENA_DELEGANDO));
+  escreve(0, 178, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, tx(T_CENA_DELEGANDO));
   agN = 0; agPuloAte = 0; novoAgente();
 }
 void agPasso() {
@@ -2357,7 +2389,7 @@ void cvInicio() {
   limpaTela(COR_FUNDO);
   miniP = 6; miniClawd(40, CV_Y - 54, COR_FUNDO); miniOlhos(1);
   cvNuvem(); cvAmigo(false, 0);
-  escreve(0, 204, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, tx(T_CENA_CONVERSA));
+  escreve(0, 182, 320, 20, FONTE_P, COR_OURO, COR_FUNDO, 1, tx(T_CENA_CONVERSA));
   cvFala = 0; cvVolta = 0; cvBalao(0); cvFrase();
 }
 void cvPasso() {
@@ -2395,9 +2427,62 @@ void cuidaAlertaAnim() {
   alertaMini(++alFase);
 }
 
+// ---- letreiro (ver ltEvento)
+const char* ltTexto() {
+  if (ltEvento[0] && ltEventoCena == cenaAtual && millis() - ltEventoEm < LT_VALE_MS) return ltEvento;
+  return ltTarefa;
+}
+uint16_t ltFundo() {
+  if (cenaAtual == S_CODANDO) return edPre >= 0 ? 0 : ED_FUNDO;
+  if (cenaAtual == S_TERMINAL) return TE_FUNDO;
+  if (cenaAtual == S_LENDO) return 0;
+  return COR_FUNDO;
+}
+int ltLarg(const char* t) {           // largura do texto na fonte do letreiro
+#ifdef PLACA_E32R28T
+  e32UsaFonte(FONTE_LT); return e32.textWidth(t);
+#else
+  return strlen(t) * 13;              // o Nextion nao mede: media da negrito de 24
+#endif
+}
+void ltDesenha() {                    // ltN letras a partir de ltIni; a caixa corta o que passa
+  char b[LT_MAX]; strlcpy(b, ltTela + ltIni, min(ltN + 1, (int)sizeof b));
+  escreve(LT_X, LT_Y + 2, LT_W, LT_H - 4, FONTE_LT, ltFundo(), corRosto(), 0, b);
+}
+void cuidaLetreiro() {
+  if (pagina != 10 || (long)(millis() - ltProx) < 0) return;
+  const char* t = ltTexto();
+  if (strcmp(t, ltTela)) {                                        // mudou: faixa nova (ou nenhuma)
+    preenche(0, LT_Y, 320, LT_H, t[0] ? corRosto() : ltFundo());
+    strlcpy(ltTela, t, sizeof ltTela); ltN = 0; ltIni = 0; ltDir = 1;
+    ltProx = millis() + 150; return;
+  }
+  if (!ltTela[0]) { ltProx = millis() + 200; return; }
+  int n = strlen(ltTela);
+  if (ltN < n) {                                                  // digitando (o que passa da caixa fica cortado)
+    ltN++; ltDesenha();
+    ltProx = millis() + (ltN == n ? 1800 : 35);
+    return;
+  }
+  if (ltLarg(ltTela) <= LT_W) { ltProx = millis() + 200; return; }  // cabe: fica parado
+  bool fim = ltDir > 0 ? ltLarg(ltTela + ltIni) <= LT_W : ltIni == 0;
+  if (fim) { ltDir = -ltDir; ltProx = millis() + 1800; return; }
+  ltIni += ltDir; ltN = n - ltIni; ltDesenha();                  // rola uma letra
+  ltProx = millis() + 250;
+}
+// Chega com o evento de ferramenta (cena s): o resumo novo entra; sem resumo, o
+// antigo so fica se a cena e do mesmo tipo. tarefa: nullptr = nao veio.
+void ltRecebe(const char* legenda, const char* tarefa, int s) {
+  if (legenda[0]) { ltLatin1(legenda, ltEvento, sizeof ltEvento); ltEventoCena = s; ltEventoEm = millis(); }
+  else if (s != ltEventoCena) ltEvento[0] = 0;
+  if (tarefa) ltLatin1(tarefa, ltTarefa, sizeof ltTarefa);
+}
+void ltLimpa() { ltEvento[0] = ltTarefa[0] = 0; }
+void ltDemo(Txt t, int s) { strlcpy(ltEvento, tx(t), sizeof ltEvento); ltEventoCena = s; ltEventoEm = millis(); }
+
 // ---- controle
 void cenaInicio() {
-  cenaProx = millis(); miniP = 4;
+  cenaProx = millis(); miniP = 4; ltTela[0] = 0; ltProx = millis();
   if (cenaAtual == S_CODANDO) edInicio();
   else if (cenaAtual == S_TERMINAL) teInicio();
   else if (cenaAtual == S_LENDO) mxInicio();
@@ -2482,7 +2567,7 @@ void demoInicia() {
 }
 void demoFim(const char* porque) {
   if (!demo) return;
-  demo = false;
+  demo = false; ltLimpa();
   dados = demoDados; corRostoAtual = demoCor; bConectado = demoBCon; manter = demoManter;
   memcpy(aFila, demoFila, sizeof aFila); aN = demoAN; memcpy(&bi, demoBi, sizeof bi);
   vJogaEm = 0; evento.ate = 0; caraDesenhada = false;
@@ -2513,11 +2598,11 @@ long demoPasso(int n) {
     case 2: demoUso(92, 61); mudaPagina(1); demoFixa();                                 // limite: pisca
             consumo.naTela = true; consumo.telaIntensa = true; return 2500;
     case 3: demoCara(C_SUANDO); fala(H_NERVOSO); return 1000;
-    case 4: abreCena(S_CODANDO); demoFixa(); return 3500;                               // cenas
-    case 5: abreCena(S_TERMINAL); demoFixa(); return 3500;
-    case 6: abreCena(S_LENDO); demoFixa(); return 3000;
-    case 7: abreCena(S_AGENTE); demoFixa(); return 4000;
-    case 8: abreCena(S_CONVERSA); demoFixa(); return 4000;
+    case 4: ltDemo(T_LETREIRO_CODANDO, S_CODANDO); abreCena(S_CODANDO); demoFixa(); return 3500;    // cenas, com o letreiro
+    case 5: ltDemo(T_LETREIRO_TERMINAL, S_TERMINAL); abreCena(S_TERMINAL); demoFixa(); return 3500;
+    case 6: ltDemo(T_LETREIRO_LENDO, S_LENDO); abreCena(S_LENDO); demoFixa(); return 3000;
+    case 7: ltDemo(T_LETREIRO_AGENTE, S_AGENTE); abreCena(S_AGENTE); demoFixa(); return 4000;
+    case 8: ltDemo(T_LETREIRO_CONVERSA, S_CONVERSA); abreCena(S_CONVERSA); demoFixa(); return 4000;
   }
   k -= 9;
   if (bambuLigado()) {                                                                  // impressora
@@ -2791,6 +2876,8 @@ void webEvento() {
   if (deserializeJson(doc, web.arg("plain"))) { web.send(400, "text/plain", "json invalido\n"); return; }
   const char* tipo = doc["tipo"] | ""; const char* humor = doc["humor"] | ""; const char* sessao = doc["sessao"] | "";
   strlcpy(acaoEvento, doc["acao"] | "", sizeof acaoEvento); forcaCena = doc["forca"] | false;
+  if (!strcmp(tipo, "ferramenta")) ltRecebe(doc["legenda"] | "", doc["tarefa"].is<const char*>() ? doc["tarefa"].as<const char*>() : nullptr, cenaDe(acaoEvento));
+  else if (!strcmp(tipo, "parou") || !strcmp(tipo, "fim")) ltLimpa();
   if (!strcmp(tipo, "fim")) tiraSessao(sessao); else marcaSessao(sessao);
   dados.n = contaSessoes();
   if (strcmp(tipo, "fim") != 0) dados.at = time(nullptr);   // atividade = sinal de vida
@@ -3301,6 +3388,7 @@ void loop() {
   cuidaGenius();
   cuidaBambu();
   cuidaCena();
+  cuidaLetreiro();
   cuidaSom();
   cuidaBateria();
   cuidaDemo();

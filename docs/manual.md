@@ -61,6 +61,17 @@ other AI often takes a while in a single command). Any other event (done, needs 
 face. Tap to see the usage card. To try one: `claudinho.sh cena codando`
 (`terminal`, `lendo`, `agente`, `conversa`).
 
+**The ticker.** Under the scene, a band in the face color shows what Claude is
+doing in plain words: the short description Claude writes for each command
+and agent (the one you see when approving it) or, without one, the task in
+progress from its to-do list. It types itself out and, when it doesn't fit,
+scrolls side to side. The command and file names still never leave your
+computer. Off: `claudinho.sh letreiro desliga` (`liga` turns it back on). To
+try it: `claudinho.sh cena terminal "Compiling the firmware"`. Claude tends to
+write these descriptions in English; to get them in another language, ask for
+it in your `CLAUDE.md`. On the single board the ticker uses DM Sans SemiBold;
+on the Nextion version, the bold font the screen already has.
+
 ## Plan usage
 
 - **Tap the screen** to see the usage card: 5-hour and 7-day windows, when

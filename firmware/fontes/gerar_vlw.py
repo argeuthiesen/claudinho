@@ -6,7 +6,8 @@ acentos da Europa ocidental). Os numeros das fontes sao os mesmos do
 Nextion, para o firmware nao precisar saber em que placa esta:
 
   0  DM Sans 16 px        1  DM Sans Bold 48 px     2  DM Sans Bold 24 px
-  3  DM Sans 32 px        5  JetBrains Mono 16 px (7 px por letra, as cenas)
+  3  DM Sans 32 px        4  DM Sans SemiBold 26 px (o letreiro das cenas; o Nextion nao tem)
+  5  JetBrains Mono 16 px (7 px por letra, as cenas)
 
 "16 px" e a altura total da letra (ascendente + descendente), igual ao Nextion.
 Requer o Pillow (pip install pillow). Uso: python3 firmware/fontes/gerar_vlw.py
@@ -23,6 +24,7 @@ FONTES = [  # numero, arquivo, peso (fonte variavel), altura total em px
     (1, "DMSans.ttf", "Bold", 48),
     (2, "DMSans.ttf", "Bold", 24),
     (3, "DMSans.ttf", "Regular", 32),
+    (4, "DMSans.ttf", "SemiBold", 26),
     (5, "JetBrainsMono-Regular.ttf", None, 16),
 ]
 

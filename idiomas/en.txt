@@ -89,6 +89,12 @@ genius.placar = Score: %d
 cena.agente = agent %d
 cena.delegando = delegating
 cena.conversa = asking for a second opinion
+# letreiro.*: samples shown under the scenes in the demo (the real ones are written by Claude)
+letreiro.codando = Teaching the robot new faces
+letreiro.terminal = Compiling the firmware
+letreiro.lendo = Reading the plugin manual
+letreiro.agente = Reviewing the code in parallel
+letreiro.conversa = Codex reviews the last commit
 
 imp.aguardando = Waiting...
 imp.sem_conexao = Disconnected
