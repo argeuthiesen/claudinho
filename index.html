@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Claudinho virtual</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
 <style>
   :root { --fundo:#1d1c1c; --cartao:#2a2828; --texto:#f2f3f4; --apagado:#a5a09d; --ouro:#d0ad6c;
           --ok:#7bbf7b; --alerta:#d9a25a; --critico:#c96f6f; --trilho:#454343; }
@@ -101,6 +101,7 @@ const T = PT ? {
          atencao:"Preciso de você!", compact:"Arrumando a memória...", commit:"Commit feito!", teste_ok:"Testes passaram!",
          teste_falhou:"Testes falharam", janela:"Janela de uso nova!" },
   agente: "agente %d", delegando: "delegando", conversa: "pedindo uma segunda opinião",
+  letreiro: ["Ensinando caras novas ao robô", "Compilando o firmware", "Lendo o manual do plugin", "Revisando o código em paralelo", "O Codex revisa o último commit"],
   imp: { tokens:"Tokens", impressora:"Impressora", manter:"Manter", imprimindo:"Imprimindo", ams:"AMS: umidade 27%  · 32°C",
          impresso:"impresso", faltam:"faltam", camada:"camada de 212", bico:"Bico 220/220°", mesa:"Mesa 55/55°", camara:"Câmara 35°",
          titulo:"IMPRESSORA 3D", as:"às 14:32", toque:"toque: li", comecou:"Começou", previsto:"previsto 2h31",
@@ -118,6 +119,7 @@ const T = PT ? {
          atencao:"I need you!", compact:"Tidying up memory...", commit:"Committed!", teste_ok:"Tests passed!",
          teste_falhou:"Tests failed", janela:"Fresh usage window!" },
   agente: "agent %d", delegando: "delegating", conversa: "asking for a second opinion",
+  letreiro: ["Teaching the robot new faces", "Compiling the firmware", "Reading the plugin manual", "Reviewing the code in parallel", "Codex reviews the last commit"],
   imp: { tokens:"Tokens", impressora:"Printer", manter:"Keep", imprimindo:"Printing", ams:"AMS: humidity 27%  · 32°C",
          impresso:"printed", faltam:"left", camada:"layer of 212", bico:"Nozzle 220/220°", mesa:"Bed 55/55°", camara:"Chamber 35°",
          titulo:"3D PRINTER", as:"at 2:32 pm", toque:"tap: got it", comecou:"Started", previsto:"expected 2h31",
@@ -276,7 +278,7 @@ function miniBracos(sobe) {
   miniCel(0, (sobe & 1) ? 2 : 3, 2, 2, r); miniCel(12, (sobe & 2) ? 2 : 3, 2, 2, r);
 }
 function miniOlhos(dx) { miniCel(3, 2, 8, 3, COR.rosto); miniCel(4 + dx, 2, 1, 3, COR.olho); miniCel(9 + dx, 2, 1, 3, COR.olho); }
-const cantoMini = fundo => miniClawd(320 - MINI_W() - 4, 240 - MINI_H() - 2, fundo);
+const cantoMini = fundo => miniClawd(320 - MINI_W() - 4, LT_Y - MINI_H() - 2, fundo);
 
 // ---- editor: codigo de mentira, com cores de sintaxe, digitado e rolando
 // <cenas> gerado por scripts/gera-cenas.py; nao editar aqui
@@ -284,7 +286,7 @@ const ARQUIVOS = [{"nome": "claudinho.ino", "l": ["\u0004// acorda o Claudinho",
 const SESSOES = [["$git status", "On branch main", "Changes not staged for commit:", "  modified:   src/api.ts", "  modified:   src/api.test.ts", "$git add -A", "$git commit -m \"fix: retry on 429\"", "[main 3f9c2ab] fix: retry on 429", " 2 files changed, 18 insertions(+)", "$git push", "To github.com:you/app.git", "   9be2c10..3f9c2ab  main -> main"], ["$npm test", "> app@2.3.1 test", "> vitest run", "", " PASS  src/cart.test.ts (12)", " PASS  src/auth.test.ts (8)", " FAIL  src/api.test.ts (1/4)", "   expected 200, received 429", "Tests  1 failed | 23 passed", "$npm test -- api", " PASS  src/api.test.ts (4)", "Tests  4 passed (4)"], ["$pytest -q", ".........F......", "FAILED test_auth.py::test_stale", "1 failed, 15 passed in 0.84s", "$pytest -q -k stale", ".", "1 passed in 0.11s"], ["$npm run build", "vite v5.4.8 building for prod...", "transforming...", "412 modules transformed.", "dist/index.html       0.46 kB", "dist/index.js       142.31 kB", "built in 3.21s"], ["$docker compose up -d", " Network app_default  Created", " Container app-db-1   Started", " Container app-api-1  Started", "$curl -s localhost:8000/health", "{\"status\":\"ok\",\"db\":\"up\"}"], ["$cargo build --release", "   Compiling serde v1.0.210", "   Compiling tokio v1.40.0", "   Compiling app v0.4.0", "    Finished release in 23.4s", "$./target/release/app -V", "app 0.4.0"], ["$grep -rn TODO src | wc -l", "17", "$git log --oneline -3", "3f9c2ab fix: retry on 429", "a1d07e4 feat: dark mode", "9be2c10 chore: bump deps"], ["$pio run -t upload", "Building .pio/build/esp32", "RAM:   [==        ]  20.6%", "Flash: [========  ]  82.5%", "Uploading 1622496 bytes", "Writing at 0x0019c000 (100 %)", "Hard resetting via RTS pin..."], ["$python -m venv .venv", "$pip install -r requirements.txt", "Collecting fastapi==0.115.0", "Collecting uvicorn==0.30.6", "Successfully installed 14 packages", "$uvicorn main:app --reload", "INFO:  Uvicorn running on :8000"]];
 // </cenas>
 const sorteiaOutro = (n, antes) => { if (antes < 0 || n < 2) return sorteia(n); const k = sorteia(n - 1); return k >= antes ? k + 1 : k; };
-const ED_TOPO = 22, ED_X = 30, ED_LINHAS = 12, ED_FUNDO = rgb(30, 30, 30);
+const ED_TOPO = 22, ED_X = 30, ED_LINHAS = 10, ED_FUNDO = rgb(30, 30, 30);
 let edTopo = 0, edCol = 0, edEspera = 0, edPre = 0, edArq = -1, ED_PRE = "";
 const edTexto = li => { const a = ARQUIVOS[edArq].l; return a[li % a.length]; };
 function edCor(c) { return [null, rgb(86,156,214), rgb(220,220,170), rgb(206,145,120), rgb(106,153,85), rgb(181,206,168), rgb(212,212,212), rgb(78,201,176)][c] || rgb(212,212,212); }
@@ -314,6 +316,7 @@ function edAbre() {
   edTopo = 0;
   for (let r = 0; r < ED_LINHAS - 1; r++) edLinha(r, edTopo + r, -1);
   edCol = 0; edEspera = 0; edCursor();
+  ltTela = null;                         // limpou a tela: o letreiro volta
 }
 function edPasso() {
   const agora = agoraMs();
@@ -334,7 +337,7 @@ function edPasso() {
 }
 
 // ---- terminal: sessoes sorteadas uma atras da outra; "$" no comeco e comando digitado
-const TE_TOPO = 24, TE_X = 6, TE_LINHAS = 12, TE_FUNDO = rgb(8, 8, 8), TE_VERDE = rgb(60, 220, 90), TE_CLARO = rgb(150, 255, 170);
+const TE_TOPO = 24, TE_X = 6, TE_LINHAS = 10, TE_FUNDO = rgb(8, 8, 8), TE_VERDE = rgb(60, 220, 90), TE_CLARO = rgb(150, 255, 170);
 let teSes = -1, teLinha = 0, teCol = -1, teVis = [];
 const teY = row => TE_TOPO + row * MONO_LH;
 const teLarg = row => teY(row) + 16 > miniY ? miniX - 2 : 320;
@@ -371,7 +374,7 @@ function tePasso() {
 }
 
 // ---- chuva do Matrix: 20 colunas, cabeca clara, rastro verde, a ponta some
-const MX_COLS = 20, MX_LIN = 15, MX_DX = 16, MX_POR_VEZ = 6, MX_CHARS = "0123456789ABCDEFZ$#@*+=<>:;!?";
+const MX_COLS = 20, MX_LIN = 12, MX_DX = 16, MX_POR_VEZ = 6, MX_CHARS = "0123456789ABCDEFZ$#@*+=<>:;!?";
 let mx = [], mxVez = 0, mxOlhar = 0, mxOlharEm = 0;
 const mxNova = c => { mx[c] = { cab:-sorteia(1, 14), tam:sorteia(5, 12), vel:sorteia(1, 4), acc:0 }; };
 const mxLivre = (c, r) => r >= 0 && r < MX_LIN && !(c * MX_DX + MX_DX > miniX && r * 16 + 16 > miniY);
@@ -418,7 +421,7 @@ function agInicio() {
   preenche(0, 0, 320, 240, FUNDO); agMini(0);
   escreve(0, 56, 320, 18, false, TEXTO, null, 1, "Claude");
   preenche(159, 76, 3, 20, OURO);
-  escreve(0, 204, 320, 20, false, OURO, null, 1, T.delegando);
+  escreve(0, 178, 320, 20, false, OURO, null, 1, T.delegando);
   agN = 0; agPuloAte = 0; novoAgente();
 }
 function agPasso() {
@@ -484,7 +487,7 @@ function cvInicio() {
   preenche(0, 0, 320, 240, FUNDO);
   miniP = 6; miniClawd(40, CV_Y - 54, FUNDO); miniOlhos(1);
   cvNuvem(); cvAmigo(false, 0);
-  escreve(0, 204, 320, 20, false, OURO, null, 1, T.conversa);
+  escreve(0, 182, 320, 20, false, OURO, null, 1, T.conversa);
   cvFala = 0; cvVolta = 0; cvBalao(0); cvFrase();
 }
 function cvPasso() {
@@ -504,17 +507,54 @@ function cvPasso() {
   else cvAmigo(mexe, mexe ? 1 + (cvVolta & 1) : 0);
 }
 
+// ---- letreiro: o resumo que o Claude escreve (descricao do comando ou do agente, ou a
+// tarefa em andamento), numa faixa no pe da cena: cor do rosto, letra grande vazada na
+// cor do fundo, digitada e rolando (como na placa)
+const LT_Y = 204, LT_H = 36, LT_X = 8, LT_W = 304, LT_MAX = 63, LT_VALE_MS = 60000, LT_FONTE = "600 21px 'DM Sans', sans-serif";
+let ltEvento = "", ltTarefa = "", ltTela = "", ltEventoCena = -1, ltEventoEm = 0, ltN = 0, ltIni = 0, ltDir = 1, ltProx = 0;
+const ltLimpo = t => [...String(t || "")].filter(c => c.charCodeAt(0) >= 32 && c.charCodeAt(0) < 256 && c != '"' && c != "\\").join("").slice(0, LT_MAX);
+const ltTexto = () => ltEvento && ltEventoCena == cenaAtual && agoraMs() - ltEventoEm < LT_VALE_MS ? ltEvento : ltTarefa;
+const ltFundo = () => cenaAtual == S.CODANDO ? (edPre >= 0 ? "#000" : ED_FUNDO) : cenaAtual == S.TERMINAL ? TE_FUNDO : cenaAtual == S.LENDO ? "#000" : FUNDO;
+const ltLarg = t => { g.font = LT_FONTE; return g.measureText(t).width; };
+function ltDesenha() {
+  preenche(LT_X, LT_Y + 2, LT_W, LT_H - 4, COR.rosto);
+  g.save(); g.beginPath(); g.rect(LT_X, LT_Y, LT_W, LT_H); g.clip();
+  g.font = LT_FONTE; g.fillStyle = ltFundo(); g.textBaseline = "middle"; g.textAlign = "left";
+  g.fillText(ltTela.substr(ltIni, ltN), LT_X, LT_Y + LT_H / 2 + 1);
+  g.restore();
+}
+function cuidaLetreiro() {
+  if (agoraMs() < ltProx) return;
+  const t = ltTexto();
+  if (t !== ltTela) {
+    preenche(0, LT_Y, 320, LT_H, t ? COR.rosto : ltFundo());
+    ltTela = t; ltN = 0; ltIni = 0; ltDir = 1; ltProx = agoraMs() + 150; return;
+  }
+  if (!ltTela) { ltProx = agoraMs() + 200; return; }
+  const n = ltTela.length;
+  if (ltN < n) { ltN++; ltDesenha(); ltProx = agoraMs() + (ltN == n ? 1800 : 35); return; }
+  if (ltLarg(ltTela) <= LT_W) { ltProx = agoraMs() + 200; return; }
+  const fim = ltDir > 0 ? ltLarg(ltTela.slice(ltIni)) <= LT_W : ltIni == 0;
+  if (fim) { ltDir = -ltDir; ltProx = agoraMs() + 1800; return; }
+  ltIni += ltDir; ltN = n - ltIni; ltDesenha(); ltProx = agoraMs() + 250;
+}
+function ltRecebe(legenda, tarefa, s) {
+  if (legenda) { ltEvento = ltLimpo(legenda); ltEventoCena = s; ltEventoEm = agoraMs(); }
+  else if (s != ltEventoCena) ltEvento = "";
+  if (tarefa != null) ltTarefa = ltLimpo(tarefa);
+}
+
 // ---- controle
 function mudaPagina(p) { pagina = p; paginaDesde = agoraMs(); if (p == 0) caraNaTela = -1; else cenaInicio(); }
 function cenaInicio() {
-  cenaProx = agoraMs(); miniP = 4;
+  cenaProx = agoraMs(); miniP = 4; ltTela = null; ltProx = 0;
   [edInicio, teInicio, mxInicio, agInicio, cvInicio][cenaAtual]();
 }
 function abreCena(s) { cenaAtual = s; cenaDesde = agoraMs(); paginaDur = s == S.CONVERSA ? CENA_CONVERSA_MS : CENA_FIM_MS; mudaPagina(10); }
 function cuidaCena() {
   if (agoraMs() - paginaDesde > paginaDur) { mudaPagina(0); return; }
-  if (agoraMs() < cenaProx) return;
-  [edPasso, tePasso, mxPasso, agPasso, cvPasso][cenaAtual]();
+  if (agoraMs() >= cenaProx) [edPasso, tePasso, mxPasso, agPasso, cvPasso][cenaAtual]();
+  cuidaLetreiro();
 }
 function cenaPorFerramenta(acao) {
   const s = cenaDe(acao);
@@ -681,7 +721,9 @@ function poeCara(c, dur) { evento.cara = c; evento.ate = agoraMs() + dur; }
 function poeLegenda(k, dur = 5000) { legenda = T.leg[k]; legendaAte = agoraMs() + dur; }
 const celebrando = () => celebraAte && agoraMs() < celebraAte;
 
-function trataEvento(tipo, humor, acao) {
+function trataEvento(tipo, humor, acao, legenda, tarefa) {
+  if (tipo == "ferramenta") ltRecebe(legenda, tarefa, cenaDe(acao || ""));
+  else if (tipo == "parou" || tipo == "fim") ltEvento = ltTarefa = "";
   if (tipo != "ferramenta" && tipo != "erro") ferramentasSeguidas = 0;
   if ((pagina == 10 && tipo != "ferramenta") || pagina == 1 || pagina == 8 || pagina == 9) mudaPagina(0);   // sai da cena (ou da impressora) e mostra a cara
   if (tipo != "ferramenta" && tipo != "parou") celebraAte = 0;
@@ -714,7 +756,7 @@ function trataEvento(tipo, humor, acao) {
 function recebeEvento(ev) {
   if (typeof ev.n == "number") dados.n = ev.n;
   if (ev.tipo != "fim") { dados.at = Date.now() / 1000; dados.ok = true; }
-  trataEvento(ev.tipo, ev.humor || "", ev.acao || "");
+  trataEvento(ev.tipo, ev.humor || "", ev.acao || "", ev.legenda || "", ev.tarefa);
   painel();
 }
 function mescla(j, k) {
@@ -922,7 +964,7 @@ function demonstracao() {
     else if (tipo == "painel") mostraImpressora({ painel:true, dur:s * 1000 + 600 });
     else if (tipo == "alerta") mostraImpressora({ dur:s * 1000 + 600, alerta:{ cor:humor.cor, titulo:T.imp[humor.titulo],
                                                    l2:T.imp[humor.l2] || humor.l2, amostra:humor.amostra } });
-    else trataEvento(tipo, humor || "", acao || "");
+    else trataEvento(tipo, humor || "", acao || "", T.letreiro[cenaDe(acao || "")] || "");
     if (tipo == "parou") { dados.ctx = Math.min(95, dados.ctx + 7); dados.h5 = Math.min(99, dados.h5 + 3); painel(); }
     setTimeout(proximo, s * 1000);
   })();
