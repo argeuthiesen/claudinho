@@ -324,10 +324,13 @@ servidor, sem token). Ele mostra:
   ligada; o botão vira **Dormir**, que volta ao rosto). Bom para usar o
   Claudinho como monitor portátil da impressora. O nome da impressão não
   aparece: pela rede local só vem "projeto + placa" ou o perfil do MakerWorld;
-- **alertas** que **ficam na tela até um toque** (o toque quer dizer "li"):
+- **alertas**; os importantes **ficam na tela até um toque** (o toque quer dizer "li"):
   começou, pausou (com o motivo: acabou o filamento, bico entupido, erro na
   1ª camada...), retomou, faltam 5 min, trocou o filamento, terminou (com a
   duração), falhou/cancelada, avisos HMS da impressora e AMS úmido (≥ 50 %).
+  Os de andamento (começou, retomou, faltam 5 min, trocou o filamento) saem
+  sozinhos em 20 s, e um alerta novo da impressão tira da fila os de
+  andamento que ficaram velhos (e a pausa que voltou ou acabou).
   Em jogo, paleta ou atualização, os alertas esperam a volta ao rosto.
   Os avisos HMS aparecem em português (categoria + frase curta + código
   pequeno), com a lista oficial da Bambu embutida; os **informativos** (sem

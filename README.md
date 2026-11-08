@@ -54,7 +54,8 @@ the 5-hour and 7-day windows.
   name; turn it off with `claudinho.sh letreiro desliga`.
 - **Optional: your Bambu Lab printer.** Claudinho can also connect straight
   to a Bambu 3D printer on your network and show a print panel plus alerts
-  (started, paused and why, finished, failed...) that stay until you tap.
+  (started, paused and why, finished, failed...); the important ones stay
+  until you tap.
   Tested on the P2S. See the [manual](docs/manual.md#bambu-lab-printer-optional).
 
 **[Try it](#try-it-before-you-build) · [Hardware](#which-version) · [Installation](#installation) · [User manual](docs/manual.md)**
@@ -298,7 +299,7 @@ inside the plugin folder. After a marketplace install, the paths are:
 
 - **`<plugin>`** (the plugin itself, with the scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<version>/`, for example
-  `.../claudinho/1.20.0/`. If there's more than one version folder, use the
+  `.../claudinho/1.21.0/`. If there's more than one version folder, use the
   newest. (If you cloned this repository, `<plugin>` is its root.)
 - **`<plugin-data>`** (the board's IP and secret):
   `~/.claude/plugins/data/claudinho-claudinho/`. The scripts find it on their

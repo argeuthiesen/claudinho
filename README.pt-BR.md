@@ -55,8 +55,8 @@ já foi usado nas janelas de 5 horas e de 7 dias.
   `claudinho.sh letreiro desliga`.
 - **Opcional: sua impressora Bambu Lab.** O Claudinho também conecta direto
   numa impressora 3D Bambu da sua rede e mostra um painel da impressão e
-  alertas (começou, pausou e por quê, terminou, falhou...) que ficam até você
-  tocar. Testado na P2S. Veja o [manual](docs/manual.pt-BR.md#impressora-bambu-lab-opcional).
+  alertas (começou, pausou e por quê, terminou, falhou...); os importantes
+  ficam até você tocar. Testado na P2S. Veja o [manual](docs/manual.pt-BR.md#impressora-bambu-lab-opcional).
 
 **[Experimente](#experimente-antes-de-montar) · [Hardware](#qual-versão) · [Instalação](#instalação) · [Manual de uso](docs/manual.pt-BR.md)**
 
@@ -301,7 +301,7 @@ pasta do plugin. Depois de instalar pelo marketplace, os caminhos são:
 
 - **`<plugin>`** (o plugin em si, com os scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<versão>/`, por exemplo
-  `.../claudinho/1.20.0/`. Se houver mais de uma pasta de versão, use a mais
+  `.../claudinho/1.21.0/`. Se houver mais de uma pasta de versão, use a mais
   nova. (Se você clonou este repositório, `<plugin>` é a raiz dele.)
 - **`<dados-do-plugin>`** (o IP e o segredo da placa):
   `~/.claude/plugins/data/claudinho-claudinho/`. Os scripts acham essa pasta

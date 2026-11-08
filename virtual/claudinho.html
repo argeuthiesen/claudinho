@@ -104,7 +104,7 @@ const T = PT ? {
   letreiro: ["Ensinando caras novas ao robô", "Compilando o firmware", "Lendo o manual do plugin", "Revisando o código em paralelo", "O Codex revisa o último commit"],
   imp: { tokens:"Tokens", impressora:"Impressora", manter:"Manter", imprimindo:"Imprimindo", ams:"AMS: umidade 27%  · 32°C",
          impresso:"impresso", faltam:"faltam", camada:"camada de 212", bico:"Bico 220/220°", mesa:"Mesa 55/55°", camara:"Câmara 35°",
-         titulo:"IMPRESSORA 3D", as:"às 14:32", toque:"toque: li", comecou:"Começou", previsto:"previsto 2h31",
+         titulo:"IMPRESSORA 3D", as:"às 14:32", toque:"toque: li", sozinho:"sai sozinho", comecou:"Começou", previsto:"previsto 2h31",
          faltam5:"Faltam 5 min", quase:"quase pronta", trocou:"Trocou o filamento", pausada:"Pausada", semFil:"acabou o filamento",
          terminou:"Terminou!", levou:"levou 2h31" }
 } : {
@@ -122,7 +122,7 @@ const T = PT ? {
   letreiro: ["Teaching the robot new faces", "Compiling the firmware", "Reading the plugin manual", "Reviewing the code in parallel", "Codex reviews the last commit"],
   imp: { tokens:"Tokens", impressora:"Printer", manter:"Keep", imprimindo:"Printing", ams:"AMS: humidity 27%  · 32°C",
          impresso:"printed", faltam:"left", camada:"layer of 212", bico:"Nozzle 220/220°", mesa:"Bed 55/55°", camara:"Chamber 35°",
-         titulo:"3D PRINTER", as:"at 2:32 pm", toque:"tap: got it", comecou:"Started", previsto:"expected 2h31",
+         titulo:"3D PRINTER", as:"at 2:32 pm", toque:"tap: got it", sozinho:"closes by itself", comecou:"Started", previsto:"expected 2h31",
          faltam5:"5 min left", quase:"almost done", trocou:"Filament changed", pausada:"Paused", semFil:"out of filament",
          terminou:"Finished!", levou:"took 2h31" }
 };
@@ -625,7 +625,7 @@ function desenhaAlerta() {
   if (a.amostra) { preenche(16, 126, 34, 30, BRANCO_); preenche(18, 128, 30, 26, a.amostra); texto(58, 126, 254, 30, fonteP(700, 24), TEXTO, 0, a.l2); }
   else texto(8, 130, 304, 30, fonteP(700, 24), TEXTO, 1, a.l2);
   texto(110, 178, 200, 20, fonteP(400, 16), APAGADO, 1, T.imp.as);
-  texto(110, 200, 200, 20, fonteP(400, 16), OURO, 1, T.imp.toque);
+  texto(110, 200, 200, 20, fonteP(400, 16), OURO, 1, a.sozinho ? T.imp.sozinho : T.imp.toque);   // andamento sai sozinho, como na placa
   alFase = 0; alProx = 0; alertaMini();
 }
 const alertaBom = () => alerta && (alerta.cor == OK_ || alerta.cor == OURO);
@@ -963,7 +963,8 @@ function demonstracao() {
     if (tipo == "uso") mostraUso(s * 1000 + 600);
     else if (tipo == "painel") mostraImpressora({ painel:true, dur:s * 1000 + 600 });
     else if (tipo == "alerta") mostraImpressora({ dur:s * 1000 + 600, alerta:{ cor:humor.cor, titulo:T.imp[humor.titulo],
-                                                   l2:T.imp[humor.l2] || humor.l2, amostra:humor.amostra } });
+                                                   l2:T.imp[humor.l2] || humor.l2, amostra:humor.amostra,
+                                                   sozinho:["comecou", "faltam5", "trocou"].includes(humor.titulo) } });
     else trataEvento(tipo, humor || "", acao || "", T.letreiro[cenaDe(acao || "")] || "");
     if (tipo == "parou") { dados.ctx = Math.min(95, dados.ctx + 7); dados.h5 = Math.min(99, dados.h5 + 3); painel(); }
     setTimeout(proximo, s * 1000);

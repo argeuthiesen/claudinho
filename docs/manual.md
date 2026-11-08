@@ -200,8 +200,12 @@ card, and use **Keep** to keep it on screen.
 **The alerts** show "3D PRINTER" and the model at the top, a
 big title in the alert's color, the part name, the detail, and a little
 Claudinho at the bottom: jumping for good news, waving its arms when something
-needs you. They stay on screen **until you tap** (the tap means "got it"); if
-several pile up, they show one after the other:
+needs you. The ones that only tell you how the print is going (started,
+resumed, 5 minutes left, filament change) close by themselves after 20
+seconds; the others stay on screen **until you tap** (the tap means "got it").
+If several pile up, they show one after the other, and a newer alert from the
+same print drops the ones it made old: "finished" replaces a "started" nobody
+saw, and a pause that was resumed or ended goes away too.
 
 | Alert | When |
 |---|---|

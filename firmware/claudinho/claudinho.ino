@@ -1476,9 +1476,12 @@ void cuidaGenius() {
 // Pagina 9: painel da impressora. Imprimindo, aparece sozinho a cada 5 min por
 // 15 s; tocar fixa (fica ate tocar de novo).
 // Pagina 8: alertas (comecou, pausou e por que, retomou, faltam 5 min, trocou
-// o filamento, terminou, falhou/cancelada, avisos HMS, AMS umido). Ficam na
-// tela ate um toque (o toque = "li"); varios fazem fila. Em jogo, paleta ou
-// atualizacao, esperam a pessoa voltar ao rosto.
+// o filamento, terminou, falhou/cancelada, avisos HMS, AMS umido). Os de
+// andamento (comecou, retomou, faltam 5 min, trocou o filamento) saem sozinhos
+// em 20 s; os outros ficam ate um toque (o toque = "li"). Varios fazem fila, e
+// um aviso novo da impressao tira da fila os de andamento que ficaram velhos
+// (e a pausa, quando ela voltou ou acabou). Em jogo, paleta ou atualizacao,
+// esperam a pessoa voltar ao rosto.
 static const unsigned long B_TENTA_MS = 60000, B_PING_MS = 30000, B_SILENCIO_MS = 100000;
 static const unsigned long B_AUTO_MS = 300000, B_AUTO_DUR_MS = 15000, B_FIXO = 0x7FFFFFFFUL;
 static const uint32_t B_MAX_MSG = 24576;
@@ -1496,7 +1499,7 @@ struct {
 } bi;
 
 // ---- alertas (pagina 8)
-enum { A_GERAL, A_FILAMENTO };
+enum { A_GERAL, A_FILAMENTO, A_ANDAMENTO, A_PAUSA, A_FIM };   // A_ANDAMENTO em diante: o ciclo da impressao
 struct Alerta { uint8_t tipo; uint16_t cor; char titulo[24]; char l1[56]; char l2[60]; char codigo[24]; char hora[6]; uint32_t amostra; bool fixo; };   // fixo: espera o toque
 static const int A_MAX = 6;
 static const unsigned long A_INFO_MS = 20000, A_INFO_REPETE_MS = 1800000;   // informativo: some em 20 s; nao repete em 30 min
@@ -1507,12 +1510,21 @@ uint32_t bHmsVisto[8][2]; int bHmsN = 0; bool bHmsBase = false;
 void abreAlerta() { mudaPagina(8); paginaDur = aFila[0].fixo ? B_FIXO : A_INFO_MS; }
 void novoAlerta(uint8_t tipo, uint16_t cor, const char* titulo, const char* l1, const char* l2, uint32_t amostra) {
   Alerta* a = nullptr; bool cabecaMudou = false;
+  if (tipo >= A_ANDAMENTO) {   // "comecou" com "terminou" logo atras nao faz sentido: o velho sai
+    int j = 0;
+    for (int i = 0; i < aN; i++) {
+      uint8_t v = aFila[i].tipo;
+      if (v == A_ANDAMENTO || v == A_FILAMENTO || (v == A_PAUSA && tipo != A_PAUSA)) { if (i == 0) cabecaMudou = true; registra("bambu: alerta velho tirado (%s)", aFila[i].titulo); }
+      else aFila[j++] = aFila[i];
+    }
+    aN = j;
+  }
   if (tipo == A_FILAMENTO) for (int i = 0; i < aN; i++) if (aFila[i].tipo == A_FILAMENTO) a = &aFila[i];   // troca de cor: um aviso so, atualizado
   if (!a) {
     if (aN == A_MAX) { memmove(aFila, aFila + 1, sizeof(Alerta) * (A_MAX - 1)); aN--; cabecaMudou = true; }   // fila cheia: sai o mais velho
     a = &aFila[aN++];
   }
-  a->tipo = tipo; a->cor = cor; a->amostra = amostra; a->fixo = true;
+  a->tipo = tipo; a->cor = cor; a->amostra = amostra; a->fixo = tipo != A_ANDAMENTO && tipo != A_FILAMENTO;
   strlcpy(a->titulo, titulo, sizeof a->titulo); strlcpy(a->l2, l2, sizeof a->l2); a->codigo[0] = 0;
   strlcpy(a->l1, l1 == bi.nome ? "" : l1, sizeof a->l1);   // o nome da impressao esta errado (projeto + placa): fica de fora
   a->hora[0] = 0; if (relogioValido()) horaStr(time(nullptr), a->hora, sizeof a->hora);
@@ -1596,27 +1608,27 @@ void bDetecta(const char* antes, int restAntes) {
     if (!era && eh) {
       bInicioEm = millis(); b5min = false; bPausaPend = 0;
       t[0] = 0; if (bi.restante > 0) snprintf(t, sizeof t, tx(T_ALERTA_PREVISTO), bi.restante / 60, bi.restante % 60);
-      novoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_COMECOU), bi.nome, t, 0);
+      novoAlerta(A_ANDAMENTO, COR_OK, tx(T_ALERTA_COMECOU), bi.nome, t, 0);
     } else if (!strcmp(e, "PAUSE")) {
       bPausaPend = millis();                                    // o motivo chega junto ou logo depois
     } else if (!strcmp(antes, "PAUSE") && eh) {
       if (bPausaPend) bPausaPend = 0;                           // pausa rapida: nem avisou
-      else novoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_RETOMOU), bi.nome, tx(T_ALERTA_IMPRIMINDO_DE_NOVO), 0);
+      else novoAlerta(A_ANDAMENTO, COR_OK, tx(T_ALERTA_RETOMOU), bi.nome, tx(T_ALERTA_IMPRIMINDO_DE_NOVO), 0);
     } else if (!strcmp(e, "FINISH") && era) {
       bPausaPend = 0; t[0] = 0;
       long agora = time(nullptr);                               // a hora da impressora vale mesmo depois de reiniciar
       if (bi.inicio > 1600000000L && relogioValido() && agora > bi.inicio) duracao((agora - bi.inicio) * 1000UL, t, sizeof t);
       else if (bInicioEm) duracao(millis() - bInicioEm, t, sizeof t);
-      novoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_TERMINOU), bi.nome, t, 0);
+      novoAlerta(A_FIM, COR_OK, tx(T_ALERTA_TERMINOU), bi.nome, t, 0);
     } else if (!strcmp(e, "FAILED") && era) {
       bPausaPend = 0;
-      if (bi.erro == 0x0300400C) novoAlerta(A_GERAL, COR_ALERTA, tx(T_ALERTA_CANCELADA), bi.nome, tx(T_ALERTA_IMPRESSAO_CANCELADA), 0);
-      else { if (bi.erro) codigoErro(bi.erro, t, sizeof t); else strlcpy(t, tx(T_ALERTA_SEM_CODIGO), sizeof t); novoAlerta(A_GERAL, COR_CRITICO, tx(T_ALERTA_FALHOU), bi.nome, t, 0); }
+      if (bi.erro == 0x0300400C) novoAlerta(A_FIM, COR_ALERTA, tx(T_ALERTA_CANCELADA), bi.nome, tx(T_ALERTA_IMPRESSAO_CANCELADA), 0);
+      else { if (bi.erro) codigoErro(bi.erro, t, sizeof t); else strlcpy(t, tx(T_ALERTA_SEM_CODIGO), sizeof t); novoAlerta(A_FIM, COR_CRITICO, tx(T_ALERTA_FALHOU), bi.nome, t, 0); }
     }
   }
   if (!antes[0]) return;
   if (!strcmp(e, "RUNNING") && !b5min && bi.restante > 0 && bi.restante <= 5 && restAntes > 5) {
-    b5min = true; novoAlerta(A_GERAL, COR_OURO, tx(T_ALERTA_FALTAM_5), bi.nome, tx(T_ALERTA_QUASE_PRONTA), 0);
+    b5min = true; novoAlerta(A_ANDAMENTO, COR_OURO, tx(T_ALERTA_FALTAM_5), bi.nome, tx(T_ALERTA_QUASE_PRONTA), 0);
   }
   // troca de filamento (255 = descarregando no meio da troca: ignora)
   if (bi.trayNow != 255) {
@@ -1859,7 +1871,7 @@ void cuidaBambu() {
       const char* m = motivoPausa(bi.stg); char t[40];
       if (!m && bi.erro) { codigoErro(bi.erro, t, sizeof t); m = t; }
       bool voce = bi.stg == 16 || bi.stg == 5 || bi.stg == 30;
-      novoAlerta(A_GERAL, voce ? COR_ALERTA : COR_CRITICO, tx(T_ALERTA_PAUSADA), bi.nome, m ? m : tx(T_ALERTA_MOTIVO_DESCONHECIDO), 0);
+      novoAlerta(A_PAUSA, voce ? COR_ALERTA : COR_CRITICO, tx(T_ALERTA_PAUSADA), bi.nome, m ? m : tx(T_ALERTA_MOTIVO_DESCONHECIDO), 0);
     }
   }
   cuidaAlertas();
@@ -2613,12 +2625,12 @@ long demoPasso(int n) {
       case 2: { int w = botaoLarg(); demoFantasma(6 + 2 * (w + 6) + w / 2, BT_Y + BT_H / 2); delay(250);
                 manter = true; desenhaBotoes(); return 1800; }
       case 3: { manter = false; char t[40]; snprintf(t, sizeof t, tx(T_ALERTA_PREVISTO), 2, 30);
-                demoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_COMECOU), t, 0); return 2200; }
-      case 4: demoAlerta(A_GERAL, COR_OURO, tx(T_ALERTA_FALTAM_5), tx(T_ALERTA_QUASE_PRONTA), 0); return 2000;
+                demoAlerta(A_ANDAMENTO, COR_OK, tx(T_ALERTA_COMECOU), t, 0); return 2200; }
+      case 4: demoAlerta(A_ANDAMENTO, COR_OURO, tx(T_ALERTA_FALTAM_5), tx(T_ALERTA_QUASE_PRONTA), 0); return 2000;
       case 5: demoAlerta(A_FILAMENTO, COR_AZUL, tx(T_ALERTA_TROCOU_FILAMENTO), "slot 2 > slot 4  PLA", 0x3F6FD9FF); return 2200;
-      case 6: demoAlerta(A_GERAL, COR_CRITICO, tx(T_ALERTA_PAUSADA), tx(T_PAUSA_FILAMENTO), 0); return 2200;
+      case 6: demoAlerta(A_PAUSA, COR_CRITICO, tx(T_ALERTA_PAUSADA), tx(T_PAUSA_FILAMENTO), 0); return 2200;
       case 7: { char t[40]; snprintf(t, sizeof t, tx(T_ALERTA_LEVOU_H), 2UL, 31UL);
-                demoAlerta(A_GERAL, COR_OK, tx(T_ALERTA_TERMINOU), t, 0); fala(H_PRONTO); return 1600; }
+                demoAlerta(A_FIM, COR_OK, tx(T_ALERTA_TERMINOU), t, 0); fala(H_PRONTO); return 1600; }
       case 8: { const HmsCodigo* e = hmsBusca(0x03001A00, 0x00020002);                  // bico entupido
                 demoAlerta(A_GERAL, COR_CRITICO, e ? hmsCatTxt(e->cat) : "HMS", e ? hmsMsgTxt(e->msg) : "", 0);
                 strcpy(aFila[0].codigo, "HMS 0300-1A00-0002-0002"); abreAlerta(); demoFixa(); return 2500; }
@@ -3046,11 +3058,11 @@ void executaCmd(JsonDocument& doc) {
   if (doc["alerta"].is<const char*>()) {
     const char* k = doc["alerta"];
     const char* pc = "";
-    if (!strcmp(k, "ruim")) novoAlerta(A_GERAL, COR_CRITICO, tx(T_ALERTA_PAUSADA), pc, tx(T_PAUSA_FILAMENTO), 0);
+    if (!strcmp(k, "ruim")) novoAlerta(A_PAUSA, COR_CRITICO, tx(T_ALERTA_PAUSADA), pc, tx(T_PAUSA_FILAMENTO), 0);
     else if (!strcmp(k, "filamento")) novoAlerta(A_FILAMENTO, COR_AZUL, tx(T_ALERTA_TROCOU_FILAMENTO), pc, "slot 1 > slot 2  PLA", 0x898989FF);
     else if (!strcmp(k, "hms")) { JsonDocument h; JsonArray a = h.to<JsonArray>(); bHmsBase = true; bHmsN = 0;
       JsonObject o = a.add<JsonObject>(); o["attr"] = 0x05000200UL; o["code"] = 0x00020005UL; bConfereHms(a); }
-    else novoAlerta(A_GERAL, COR_OURO, tx(T_ALERTA_FALTAM_5), pc, tx(T_ALERTA_QUASE_PRONTA), 0);
+    else novoAlerta(A_ANDAMENTO, COR_OURO, tx(T_ALERTA_FALTAM_5), pc, tx(T_ALERTA_QUASE_PRONTA), 0);
   }
   // {"manutencao":true}: pede o toque que libera /ota e /tft
   if (doc["manutencao"] | false) {

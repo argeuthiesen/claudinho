@@ -200,8 +200,12 @@ do cartão de consumo, e use **Manter** para deixar na tela.
 **Os alertas** mostram "IMPRESSORA 3D" e o modelo no alto, um título grande na
 cor do alerta, o nome da peça, o detalhe e um Claudinho pequeno embaixo:
 pulando nas notícias boas, abanando os braços quando algo precisa de você.
-Ficam na tela **até você tocar** (o toque quer dizer "li"); se juntarem
-vários, aparecem um depois do outro:
+Os que só contam como a impressão vai (começou, retomou, faltam 5 min, troca
+de filamento) saem sozinhos em 20 segundos; os outros ficam na tela **até
+você tocar** (o toque quer dizer "li"). Se juntarem vários, aparecem um depois
+do outro, e um alerta mais novo da mesma impressão tira os que ficaram velhos:
+o "terminou" substitui um "começou" que ninguém viu, e uma pausa que voltou
+ou acabou também sai.
 
 | Alerta | Quando |
 |---|---|
