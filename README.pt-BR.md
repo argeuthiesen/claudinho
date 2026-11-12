@@ -301,7 +301,7 @@ pasta do plugin. Depois de instalar pelo marketplace, os caminhos são:
 
 - **`<plugin>`** (o plugin em si, com os scripts):
   `~/.claude/plugins/cache/claudinho/claudinho/<versão>/`, por exemplo
-  `.../claudinho/1.21.0/`. Se houver mais de uma pasta de versão, use a mais
+  `.../claudinho/1.21.1/`. Se houver mais de uma pasta de versão, use a mais
   nova. (Se você clonou este repositório, `<plugin>` é a raiz dele.)
 - **`<dados-do-plugin>`** (o IP e o segredo da placa):
   `~/.claude/plugins/data/claudinho-claudinho/`. Os scripts acham essa pasta

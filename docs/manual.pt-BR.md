@@ -205,7 +205,9 @@ de filamento) saem sozinhos em 20 segundos; os outros ficam na tela **até
 você tocar** (o toque quer dizer "li"). Se juntarem vários, aparecem um depois
 do outro, e um alerta mais novo da mesma impressão tira os que ficaram velhos:
 o "terminou" substitui um "começou" que ninguém viu, e uma pausa que voltou
-ou acabou também sai.
+ou acabou também sai. **Quando a impressora volta a imprimir, o Claudinho
+entende que você já resolveu o problema**: a pausa, os avisos da impressora e
+o fim da impressão anterior saem da fila sem esperar o toque.
 
 | Alerta | Quando |
 |---|---|
@@ -230,7 +232,11 @@ grave.
 **Toque ou 20 segundos.** Os avisos informativos (sem internet, acerto do
 relógio, câmera ao vivo, vida do filtro...) **saem sozinhos em 20 segundos** e
 não se repetem por 30 minutos: se a internet cair e voltar, não fica
-pipocando. Todo o resto espera o seu toque.
+pipocando. Um aviso que chega com a impressora imprimindo também sai sozinho
+(ele não parou nada), e o que a impressora tira da lista dela sai da fila
+também. Códigos que a Bambu não descreve, no nível de "aviso" (sem efeito na
+impressão), vão só para o log. Todo o resto espera o seu toque, ou a
+impressora voltar a imprimir.
 
 Num jogo, na paleta de cores ou numa atualização, os alertas esperam você
 voltar ao rosto. Para ver como ficam: `claudinho.sh alerta bom` (notícia

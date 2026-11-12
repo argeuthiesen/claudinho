@@ -331,6 +331,10 @@ servidor, sem token). Ele mostra:
   Os de andamento (começou, retomou, faltam 5 min, trocou o filamento) saem
   sozinhos em 20 s, e um alerta novo da impressão tira da fila os de
   andamento que ficaram velhos (e a pausa que voltou ou acabou).
+  Voltou a imprimir = problema resolvido: pausa, avisos HMS e o fim da
+  impressão anterior saem da fila sem toque. Aviso HMS que chega com a
+  impressora imprimindo sai sozinho, o que a impressora tira da lista sai
+  da fila, e código sem descrição da Bambu no nível "aviso" vai só pro log.
   Em jogo, paleta ou atualização, os alertas esperam a volta ao rosto.
   Os avisos HMS aparecem em português (categoria + frase curta + código
   pequeno), com a lista oficial da Bambu embutida; os **informativos** (sem

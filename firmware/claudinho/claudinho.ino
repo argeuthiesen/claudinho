@@ -1480,8 +1480,11 @@ void cuidaGenius() {
 // andamento (comecou, retomou, faltam 5 min, trocou o filamento) saem sozinhos
 // em 20 s; os outros ficam ate um toque (o toque = "li"). Varios fazem fila, e
 // um aviso novo da impressao tira da fila os de andamento que ficaram velhos
-// (e a pausa, quando ela voltou ou acabou). Em jogo, paleta ou atualizacao,
-// esperam a pessoa voltar ao rosto.
+// (e a pausa, quando ela voltou ou acabou). Voltou a imprimir = resolveram:
+// pausa, HMS e o fim da impressao anterior saem sem toque. HMS que chega
+// imprimindo sai sozinho; o que a impressora tira da lista sai da fila; codigo
+// sem descricao no nivel "aviso" so vai para o log. Em jogo, paleta ou
+// atualizacao, esperam a pessoa voltar ao rosto.
 static const unsigned long B_TENTA_MS = 60000, B_PING_MS = 30000, B_SILENCIO_MS = 100000;
 static const unsigned long B_AUTO_MS = 300000, B_AUTO_DUR_MS = 15000, B_FIXO = 0x7FFFFFFFUL;
 static const uint32_t B_MAX_MSG = 24576;
@@ -1499,7 +1502,8 @@ struct {
 } bi;
 
 // ---- alertas (pagina 8)
-enum { A_GERAL, A_FILAMENTO, A_ANDAMENTO, A_PAUSA, A_FIM };   // A_ANDAMENTO em diante: o ciclo da impressao
+enum { A_GERAL, A_FILAMENTO, A_ANDAMENTO, A_PAUSA, A_FIM, A_HMS };
+#define A_BIT(t) (1u << (t))
 struct Alerta { uint8_t tipo; uint16_t cor; char titulo[24]; char l1[56]; char l2[60]; char codigo[24]; char hora[6]; uint32_t amostra; bool fixo; };   // fixo: espera o toque
 static const int A_MAX = 6;
 static const unsigned long A_INFO_MS = 20000, A_INFO_REPETE_MS = 1800000;   // informativo: some em 20 s; nao repete em 30 min
@@ -1508,17 +1512,33 @@ unsigned long bInicioEm = 0, bPausaPend = 0; bool b5min = false, bUmidAvisada = 
 uint32_t bHmsVisto[8][2]; int bHmsN = 0; bool bHmsBase = false;
 
 void abreAlerta() { mudaPagina(8); paginaDur = aFila[0].fixo ? B_FIXO : A_INFO_MS; }
+// Tira da fila os alertas dos tipos da mascara (e, com codigo, so o HMS com esse codigo).
+// Devolve se o da frente mudou; quem chama decide se redesenha.
+bool tiraAlertas(uint32_t mascara, const char* codigo) {
+  bool cabecaMudou = false; int j = 0;
+  for (int i = 0; i < aN; i++) {
+    bool sai = (mascara & A_BIT(aFila[i].tipo)) && (!codigo || !strcmp(aFila[i].codigo, codigo));
+    if (sai) { if (i == 0) cabecaMudou = true; registra("bambu: alerta velho tirado (%s)", aFila[i].titulo); }
+    else aFila[j++] = aFila[i];
+  }
+  aN = j;
+  return cabecaMudou;
+}
+void redesenhaFila(bool cabecaMudou) {
+  if (pagina != 8 || !cabecaMudou) return;
+  if (aN) abreAlerta(); else voltaRepouso();
+}
+// Imprimindo de novo = o problema foi resolvido: pausa, aviso da impressora e o fim
+// da impressao anterior saem da fila sem esperar o toque.
+const uint32_t A_RESOLVIDOS = A_BIT(A_PAUSA) | A_BIT(A_HMS) | A_BIT(A_FIM);
 void novoAlerta(uint8_t tipo, uint16_t cor, const char* titulo, const char* l1, const char* l2, uint32_t amostra) {
   Alerta* a = nullptr; bool cabecaMudou = false;
-  if (tipo >= A_ANDAMENTO) {   // "comecou" com "terminou" logo atras nao faz sentido: o velho sai
-    int j = 0;
-    for (int i = 0; i < aN; i++) {
-      uint8_t v = aFila[i].tipo;
-      if (v == A_ANDAMENTO || v == A_FILAMENTO || (v == A_PAUSA && tipo != A_PAUSA)) { if (i == 0) cabecaMudou = true; registra("bambu: alerta velho tirado (%s)", aFila[i].titulo); }
-      else aFila[j++] = aFila[i];
-    }
-    aN = j;
-  }
+  // o que este alerta deixa velho
+  uint32_t velhos = 0;
+  if (tipo == A_ANDAMENTO) velhos = A_BIT(A_ANDAMENTO) | A_BIT(A_FILAMENTO) | A_RESOLVIDOS;   // comecou/retomou/faltam 5: esta imprimindo
+  else if (tipo == A_PAUSA) velhos = A_BIT(A_ANDAMENTO) | A_BIT(A_FILAMENTO) | A_BIT(A_PAUSA);
+  else if (tipo == A_FIM) velhos = A_BIT(A_ANDAMENTO) | A_BIT(A_FILAMENTO) | A_BIT(A_PAUSA) | A_BIT(A_FIM);
+  if (velhos) cabecaMudou = tiraAlertas(velhos, nullptr);
   if (tipo == A_FILAMENTO) for (int i = 0; i < aN; i++) if (aFila[i].tipo == A_FILAMENTO) a = &aFila[i];   // troca de cor: um aviso so, atualizado
   if (!a) {
     if (aN == A_MAX) { memmove(aFila, aFila + 1, sizeof(Alerta) * (A_MAX - 1)); aN--; cabecaMudou = true; }   // fila cheia: sai o mais velho
@@ -1605,6 +1625,7 @@ void bDetecta(const char* antes, int restAntes) {
   const char* e = bi.estado; char t[40];
   if (antes[0] && strcmp(e, antes)) {
     bool era = imprimindoEm(antes), eh = imprimindoEm(e);
+    if (!strcmp(e, "RUNNING")) redesenhaFila(tiraAlertas(A_RESOLVIDOS, nullptr));   // voltou a imprimir: ja resolveram
     if (!era && eh) {
       bInicioEm = millis(); b5min = false; bPausaPend = 0;
       t[0] = 0; if (bi.restante > 0) snprintf(t, sizeof t, tx(T_ALERTA_PREVISTO), bi.restante / 60, bi.restante % 60);
@@ -1673,7 +1694,9 @@ void bConfereHms(JsonArray h) {
     uint32_t at = novo[i][0], co = novo[i][1];
     char cod[24]; snprintf(cod, sizeof cod, "HMS %04X-%04X-%04X-%04X", (unsigned)(at >> 16), (unsigned)(at & 0xFFFF), (unsigned)(co >> 16), (unsigned)(co & 0xFFFF));
     const HmsCodigo* e = hmsBusca(at, co);
-    bool info = e ? e->nivel == 0 : (co >> 16) >= 4;
+    // Nivel da Bambu (2o grupo do codigo): 1 fatal, 2 grave, 3 e 4 so avisam, sem efeito na impressao.
+    if (!e && (co >> 16) >= 3) { registra("bambu: %s sem descricao, so aviso: ignorado", cod); continue; }
+    bool info = e ? e->nivel == 0 : false;
     if (info) {                                        // informativo repetido (internet caindo e voltando): fica quieto
       static struct { uint32_t a, c; unsigned long em; } visto[6]; static int prox = 0;
       bool repetido = false;
@@ -1694,10 +1717,21 @@ void bConfereHms(JsonArray h) {
       cat = hmsCatFamilia(at); frase = tx(T_HMS_PROCURE_WIKI);
       cor = sev <= 2 ? COR_CRITICO : sev == 3 ? COR_ALERTA : COR_AZUL;
     }
-    novoAlerta(A_GERAL, cor, cat, onde[0] ? onde : (bImprimindo() ? bi.nome : ""), frase, 0);
-    strlcpy(aFila[aN - 1].codigo, cod, sizeof aFila[aN - 1].codigo); aFila[aN - 1].fixo = !info;
+    novoAlerta(A_HMS, cor, cat, onde[0] ? onde : (bImprimindo() ? bi.nome : ""), frase, 0);
+    // imprimindo, o aviso nao parou nada: sai sozinho; parada, espera o toque (ou a volta a imprimir)
+    strlcpy(aFila[aN - 1].codigo, cod, sizeof aFila[aN - 1].codigo); aFila[aN - 1].fixo = !info && strcmp(bi.estado, "RUNNING");
     if (pagina == 8 && aN == 1) abreAlerta();          // redesenha com o codigo
   }
+  bool cabecaMudou = false;                          // aviso que a impressora tirou da lista: resolvido
+  for (int j = 0; j < bHmsN && bHmsBase; j++) {
+    bool ainda = false;
+    for (int i = 0; i < n; i++) if (bHmsVisto[j][0] == novo[i][0] && bHmsVisto[j][1] == novo[i][1]) ainda = true;
+    if (ainda) continue;
+    uint32_t at = bHmsVisto[j][0], co = bHmsVisto[j][1]; char cod[24];
+    snprintf(cod, sizeof cod, "HMS %04X-%04X-%04X-%04X", (unsigned)(at >> 16), (unsigned)(at & 0xFFFF), (unsigned)(co >> 16), (unsigned)(co & 0xFFFF));
+    cabecaMudou |= tiraAlertas(A_BIT(A_HMS), cod);
+  }
+  redesenhaFila(cabecaMudou);
   memcpy(bHmsVisto, novo, sizeof novo); bHmsN = n; bHmsBase = true;
 }
 
@@ -2632,7 +2666,7 @@ long demoPasso(int n) {
       case 7: { char t[40]; snprintf(t, sizeof t, tx(T_ALERTA_LEVOU_H), 2UL, 31UL);
                 demoAlerta(A_FIM, COR_OK, tx(T_ALERTA_TERMINOU), t, 0); fala(H_PRONTO); return 1600; }
       case 8: { const HmsCodigo* e = hmsBusca(0x03001A00, 0x00020002);                  // bico entupido
-                demoAlerta(A_GERAL, COR_CRITICO, e ? hmsCatTxt(e->cat) : "HMS", e ? hmsMsgTxt(e->msg) : "", 0);
+                demoAlerta(A_HMS, COR_CRITICO, e ? hmsCatTxt(e->cat) : "HMS", e ? hmsMsgTxt(e->msg) : "", 0);
                 strcpy(aFila[0].codigo, "HMS 0300-1A00-0002-0002"); abreAlerta(); demoFixa(); return 2500; }
     }
     k -= 9;

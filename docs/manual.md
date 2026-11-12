@@ -205,7 +205,10 @@ resumed, 5 minutes left, filament change) close by themselves after 20
 seconds; the others stay on screen **until you tap** (the tap means "got it").
 If several pile up, they show one after the other, and a newer alert from the
 same print drops the ones it made old: "finished" replaces a "started" nobody
-saw, and a pause that was resumed or ended goes away too.
+saw, and a pause that was resumed or ended goes away too. **When the printer
+goes back to printing, Claudinho takes it that you already fixed the problem**:
+the pause, the printer warnings and the end of the previous print leave the
+queue without waiting for a tap.
 
 | Alert | When |
 |---|---|
@@ -230,7 +233,11 @@ attention, red is serious.
 **Tap or 20 seconds.** Informative warnings (no internet, clock sync, live
 view, filter life...) **leave on their own after 20 seconds** and don't repeat
 for 30 minutes: when the internet drops and comes back, it won't pop up every
-time. Everything else waits for your tap.
+time. A warning that shows up while the printer keeps printing also closes by
+itself (it didn't stop anything), and one the printer clears from its list
+leaves the queue too. Codes Bambu doesn't describe, at the "notice" level (no
+effect on the print), only go to the log. Everything else waits for your tap,
+or for the printer to start printing again.
 
 During a game, the color palette or an update, the alerts wait until you're
 back on the face. To see what they look like: `claudinho.sh alerta bom` (good
