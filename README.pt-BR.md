@@ -173,8 +173,13 @@ demonstração, idiomas), e a skill de configuração reconhece a placa sozinha.
   aparecer no Windows, instale o driver do CH340.
 - **Abrir a porta USB reinicia a placa.** É assim que ela grava sem apertar
   botão. A tela pode piscar: é normal.
-- **ILI9341 ou ST7789?** A ficha da placa diz ILI9341, mas a tela é uma
-  ST7789. O firmware já sabe disso.
+- **ILI9341 ou ST7789?** A placa sai de fábrica com um ou outro controlador
+  de tela, e por fora não dá para saber qual. O firmware começa como ST7789.
+  Se a tela ficar **branca** depois de gravar (e o resto funcionar), a sua é
+  ILI9341: troque com
+  `bash scripts/serial.sh PORTA 'CFG {"lcd":"ili9341"}' "CFG OK"` pelo USB, ou
+  `claudinho.sh lcd ili9341` depois que ela estiver no Wi-Fi. A escolha fica
+  gravada na placa e não se perde nas atualizações.
 - **Caixa:** no [MakerWorld](https://makerworld.com/models/3365275-claudinho), no mesmo modelo da clássica;
   escolha o perfil de impressão **E32R28T** (camada de 0,2 mm, 3 paredes,
   10% de preenchimento). A bateria fica atrás da placa e o USB-C fêmea encaixa
@@ -346,6 +351,7 @@ claudinho.sh bambu IP_IMPRESSORA  # liga uma impressora Bambu (pede o código de
 claudinho.sh bambu desligar       # desliga e apaga o código da placa
 claudinho.sh painel               # mostra o painel da impressora
 claudinho.sh idioma [código]      # idioma da tela: en, pt-BR... (sem código: o atual e os disponíveis)
+claudinho.sh lcd [st7789|ili9341] # placa única: controlador da tela (tela branca = o errado); grava e reinicia
 claudinho.sh demo [parar]         # modo demonstração: um passeio de ~2 min por tudo, para filmar
 claudinho.sh som [humor|liga|desliga|volume N]  # placa única: ouve uma fala (feliz, pergunta, sono...), liga/desliga, volume
 claudinho.sh desligar             # placa única: sono profundo, para poupar a bateria (o BOOT acorda)

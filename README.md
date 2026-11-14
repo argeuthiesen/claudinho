@@ -171,8 +171,13 @@ languages), and the setup skill recognizes the board on its own.
   doesn't show up on Windows, install the CH340 driver.
 - **Opening the USB port restarts the board.** That's how it gets flashed
   without pressing buttons. The screen may blink: that's normal.
-- **ILI9341 or ST7789?** The board's spec sheet says ILI9341, but the screen
-  is an ST7789. The firmware already knows.
+- **ILI9341 or ST7789?** The board ships with either screen controller, and
+  nothing on the outside tells them apart. The firmware starts as ST7789. If
+  the screen stays **white** after flashing (everything else works), yours is
+  the ILI9341: switch with
+  `bash scripts/serial.sh PORT 'CFG {"lcd":"ili9341"}' "CFG OK"` over USB, or
+  `claudinho.sh lcd ili9341` once it is on Wi-Fi. The choice is stored on the
+  board and survives updates.
 - **Case:** on [MakerWorld](https://makerworld.com/models/3365275-claudinho), same model as the classic one;
   pick the **E32R28T** print profile (0.2 mm layers, 3 walls, 10% infill).
   The battery sits behind the board and the USB-C breakout fits in the back.
@@ -344,6 +349,7 @@ claudinho.sh bambu PRINTER_IP     # connect a Bambu printer (prompts for the acc
 claudinho.sh bambu desligar       # disconnect it and erase the code ("desligar" = turn off)
 claudinho.sh painel               # show the printer panel ("painel" = panel)
 claudinho.sh idioma [code]        # screen language: en, pt-BR... (no code: current and available)
+claudinho.sh lcd [st7789|ili9341] # single board: screen controller (white screen = the wrong one); saves and restarts
 claudinho.sh demo [parar]         # demo mode: a ~2 min tour of everything, for filming ("parar" = stop)
 claudinho.sh som [mood|liga|desliga|volume N]  # single board: try a voice (feliz, pergunta, sono...), on/off, volume
 claudinho.sh desligar             # single board: deep sleep, to save the battery (BOOT wakes it)

@@ -1,42 +1,79 @@
-// Tela da placa E32R28T (ESP32 com tela ST7789 de 2,8" e toque XPT2046).
+// Tela da placa E32R28T (ESP32 com tela de 2,8" e toque XPT2046).
 // O resto do firmware fala "Nextion" (fill, xstr, line, cir, cirs, dim): aqui
 // esses comandos viram desenho direto na tela, com as mesmas fontes (em
 // fontes_e32.h, com bordas suaves) e as mesmas coordenadas. O toque gera os
 // mesmos eventos do Nextion (apertou / soltou, x, y). So entra na compilacao
-// com PLACA_E32R28T. Pinos: ficha da LCDWiki; controlador e calibragem do
-// toque conferidos na placa (a ficha diz ILI9341, mas e ST7789).
+// com PLACA_E32R28T. Pinos: ficha da LCDWiki; calibragem do toque medida na placa.
+//
+// A placa sai de fabrica com DOIS controladores de tela: ST7789 (a minha, apesar
+// de a ficha dizer ILI9341) e ILI9341 (issue #3, markgwharry). Com o driver
+// errado a tela fica branca. Os dois drivers vao no mesmo firmware e a escolha
+// fica gravada na placa (preferencia "lcd"), para uma atualizacao nao desfazer.
+// Deteccao automatica nao da: a leitura do painel devolve zeros na ILI9341.
 #pragma once
 #define LGFX_USE_V1
 #include <LovyanGFX.hpp>
 #include "fontes_e32.h"
 
 class TelaE32 : public lgfx::LGFX_Device {
-  lgfx::Panel_ST7789 painel; lgfx::Bus_SPI bus; lgfx::Light_PWM luz; lgfx::Touch_XPT2046 toque;
+  lgfx::Panel_ST7789 st7789; lgfx::Panel_ILI9341 ili9341;
+  lgfx::Bus_SPI bus; lgfx::Light_PWM luz; lgfx::Touch_XPT2046 toque;
 public:
   TelaE32() {
-    { auto c = bus.config();
-      c.spi_host = HSPI_HOST; c.spi_mode = 0; c.freq_write = 40000000; c.freq_read = 16000000;
-      c.pin_sclk = 14; c.pin_mosi = 13; c.pin_miso = 12; c.pin_dc = 2;
-      bus.config(c); painel.setBus(&bus); }
-    { auto c = painel.config();
-      c.pin_cs = 15; c.pin_rst = -1; c.pin_busy = -1;          // reset ligado ao EN do ESP32
-      c.panel_width = 240; c.panel_height = 320; c.readable = true; c.bus_shared = false;
-      painel.config(c); }
     { auto c = luz.config(); c.pin_bl = 21; c.invert = false; c.freq = 44100; c.pwm_channel = 7;
-      luz.config(c); painel.setLight(&luz); }
+      luz.config(c); }
     { auto c = toque.config();
       c.spi_host = VSPI_HOST; c.freq = 1000000;
       c.pin_sclk = 25; c.pin_mosi = 32; c.pin_miso = 39; c.pin_cs = 33; c.pin_int = 36;
       c.bus_shared = false; c.offset_rotation = 0;
-      toque.config(c); painel.setTouch(&toque); }
-    setPanel(&painel);
+      toque.config(c); }
+  }
+  // Chamar antes do init(). ILI9341 a 27 MHz (a 40 MHz nao mostrou nada na placa
+  // do relato); ST7789 a 40 MHz, como sempre foi.
+  void escolhePainel(bool ili) {
+    lgfx::Panel_Device* p = ili ? static_cast<lgfx::Panel_Device*>(&ili9341) : static_cast<lgfx::Panel_Device*>(&st7789);
+    { auto c = bus.config();
+      c.spi_host = HSPI_HOST; c.spi_mode = 0; c.freq_write = ili ? 27000000 : 40000000; c.freq_read = 16000000;
+      c.pin_sclk = 14; c.pin_mosi = 13; c.pin_miso = 12; c.pin_dc = 2;
+      bus.config(c); p->setBus(&bus); }
+    { auto c = p->config();
+      c.pin_cs = 15; c.pin_rst = -1; c.pin_busy = -1;          // reset ligado ao EN do ESP32
+      c.panel_width = 240; c.panel_height = 320; c.readable = true; c.bus_shared = false;
+      p->config(c); }
+    p->setLight(&luz); p->setTouch(&toque);
+    setPanel(p);
   }
 };
 static TelaE32 e32;
 static int e32Fonte = -1;
 
-inline void e32Inicia() {
+// SWRESET pelo SPI "na mao" (modo 0, MSB primeiro): CS 15, DC 2, SCK 14, MOSI 13.
+inline void e32ResetPainel() {
+  const int CS = 15, DC = 2, SCK = 14, MOSI = 13;
+  pinMode(CS, OUTPUT); pinMode(DC, OUTPUT); pinMode(SCK, OUTPUT); pinMode(MOSI, OUTPUT);
+  digitalWrite(CS, HIGH); digitalWrite(SCK, LOW); delay(1);
+  digitalWrite(DC, LOW); digitalWrite(CS, LOW);            // DC baixo = comando
+  for (int i = 7; i >= 0; i--) {
+    digitalWrite(MOSI, (0x01 >> i) & 1); delayMicroseconds(2);
+    digitalWrite(SCK, HIGH); delayMicroseconds(2);
+    digitalWrite(SCK, LOW);
+  }
+  digitalWrite(CS, HIGH); digitalWrite(DC, HIGH);
+  delay(150);                                              // os dois pedem ate 120 ms depois do SWRESET
+}
+
+inline void e32Inicia(bool ili9341) {
   static uint16_t cal[8] = {3591, 282, 3629, 3507, 424, 367, 396, 3646};   // medida na placa, rotacao 1
+  e32.escolhePainel(ili9341);
+  // O reset da tela esta ligado ao EN do ESP32: reiniciar por software (OTA,
+  // troca de "lcd", claudinho.sh reiniciar) NAO reinicia o painel, e a biblioteca
+  // nao manda reset por comando. Os registros que a lista de init nao reescreve
+  // ficam com o que estava antes - depois de passar pelo driver errado a imagem
+  // volta palida (VCOM e tensoes do outro controlador). Entao, ANTES de a
+  // biblioteca assumir os pinos, manda SWRESET (0x01, igual nos dois
+  // controladores) bit a bit e espera o painel voltar. (Iniciar a biblioteca,
+  // mandar o reset e iniciar de novo deixou a tela preta: nao repetir.)
+  e32ResetPainel();
   e32.init();
   e32.setRotation(1);                      // deitada, 320 x 240, sem espelho
   e32.setTouchCalibrate(cal);

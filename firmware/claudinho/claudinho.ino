@@ -141,6 +141,13 @@ HardwareSerial& nex = Serial1;
 
 // Configuracao gravada na placa (NVS). Vazia de fabrica.
 Preferences prefs;
+#ifdef PLACA_E32R28T
+bool lcdIli9341 = false;               // controlador da tela: false = ST7789, true = ILI9341 (preferencia "lcd")
+#endif
+// Nome do controlador da tela para o INFO e o mini.json ("" nas placas com Nextion).
+// E uma variavel, nao uma funcao: funcao aqui em cima mudaria o ponto onde o
+// Arduino insere os prototipos automaticos (antes das structs) e nada compila.
+const char* lcdNome = "";
 String cfgSsid, cfgSenha, cfgToken;
 String cfgLeitura;           // chave de leitura do painel web (so le; o segredo continua sendo o cfgToken)
 // Abrir a porta serial reinicia a placa. Enquanto ela ainda tenta entrar no
@@ -2944,10 +2951,10 @@ void webMini() {
   if (!autorizado()) { web.send(401, "text/plain", "segredo invalido\n"); return; }
   char buf[600], lista[80] = "";
   for (int i = 0; i < I_N; i++) { if (i) strlcat(lista, ",", sizeof lista); strlcat(lista, IDIOMA_COD[i], sizeof lista); }
-  snprintf(buf, sizeof buf, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,\"ctx\":%d,\"n\":%d,\"mod\":\"%s\",\"at\":%ld,\"now\":%ld,\"local\":%s,\"rssi\":%d,\"manut\":\"%s\",\"bambu\":%s,\"bcon\":%s,\"best\":\"%s\",\"bpct\":%d,\"idioma\":\"%s\",\"idiomas\":\"%s\",\"bat_mv\":%d,\"bat_pct\":%d,\"bat_carga\":%s}\n",
+  snprintf(buf, sizeof buf, "{\"versao\":\"%s\",\"placa\":\"" PLACA_NOME "\",\"h5\":%d,\"h5r\":%ld,\"d7\":%d,\"d7r\":%ld,\"ctx\":%d,\"n\":%d,\"mod\":\"%s\",\"at\":%ld,\"now\":%ld,\"local\":%s,\"rssi\":%d,\"manut\":\"%s\",\"bambu\":%s,\"bcon\":%s,\"best\":\"%s\",\"bpct\":%d,\"idioma\":\"%s\",\"idiomas\":\"%s\",\"bat_mv\":%d,\"bat_pct\":%d,\"bat_carga\":%s,\"lcd\":\"%s\"}\n",
            VERSAO, dados.h5, dados.h5r, dados.d7, dados.d7r, dados.ctx, dados.n, dados.mod, dados.at, (long)time(nullptr), localRecente() ? "true" : "false", (int)WiFi.RSSI(),
            manutPedidaEm ? "pedida" : manutLiberada() ? "liberada" : "",
-           bambuLigado() ? "true" : "false", bConectado ? "true" : "false", bi.estado, bi.pct, IDIOMA_COD[idioma], lista, bateriaMv(), bateriaPct(bateriaMvReal()), batCarregando ? "true" : "false");
+           bambuLigado() ? "true" : "false", bConectado ? "true" : "false", bi.estado, bi.pct, IDIOMA_COD[idioma], lista, bateriaMv(), bateriaPct(bateriaMvReal()), batCarregando ? "true" : "false", lcdNome);
   web.send(200, "application/json", buf);
 }
 
@@ -3109,6 +3116,16 @@ void executaCmd(JsonDocument& doc) {
     mudaPagina(1); paginaDur = constrain(doc["consumo"].as<int>(), 3, 120) * 1000UL; consumo.naTela = true;
   }
   bool reinicia = doc["reiniciar"] | false;
+#ifdef PLACA_E32R28T
+  // {"lcd":"ili9341"|"st7789"}: controlador da tela (gravado na placa); vale ao reiniciar
+  if (doc["lcd"].is<const char*>()) {
+    const char* k = doc["lcd"];
+    if (strcmp(k, "ili9341") && strcmp(k, "st7789")) { web.send(400, "text/plain", "lcd: st7789 ou ili9341\n"); return; }
+    prefs.begin("claudinho", false); prefs.putString("lcd", k); prefs.end();
+    registra("lcd: %s (reiniciando)", k);
+    reinicia = true;
+  }
+#endif
   web.send(200, "text/plain", "ok\n");
   if (reinicia) { delay(300); ESP.restart(); }
 }
@@ -3278,10 +3295,11 @@ void imprimeInfo() {
   d["ip"] = WiFi.status() == WL_CONNECTED ? WiFi.localIP().toString() : String("");
   d["wifi"] = cfgSsid.isEmpty() ? "sem config" : (WiFi.status() == WL_CONNECTED ? "conectado" : "sem conexao");
   d["ssid"] = cfgSsid; d["token"] = cfgToken.length() >= 16;
+  if (*lcdNome) d["lcd"] = lcdNome;
   Serial.print("CLAUDINHO "); serializeJson(d, Serial); Serial.println();
 }
 
-// Linhas pela serial USB: INFO, SCAN, CFG {json}.
+// Linhas pela serial USB: INFO, SCAN, CFG {json} (ssid, senha, token; na E32R28T tambem lcd).
 void leSerialConfig() {
   static String linha;
   while (Serial.available()) {
@@ -3300,11 +3318,18 @@ void leSerialConfig() {
     } else if (linha.startsWith("CFG ")) {
       JsonDocument doc;
       if (deserializeJson(doc, linha.substring(4))) Serial.println("CFG ERRO json");
+#ifdef PLACA_E32R28T
+      // {"lcd":"ili9341"|"st7789"}: tela branca = controlador errado; troca e reinicia
+      else if (!doc["lcd"].isNull() && strcmp(doc["lcd"] | "", "ili9341") && strcmp(doc["lcd"] | "", "st7789")) Serial.println("CFG ERRO lcd");
+#endif
       else {
         prefs.begin("claudinho", false);
         if (doc["ssid"].is<const char*>())  prefs.putString("ssid",  doc["ssid"].as<const char*>());
         if (doc["senha"].is<const char*>()) prefs.putString("senha", doc["senha"].as<const char*>());
         if (doc["token"].is<const char*>()) prefs.putString("token", doc["token"].as<const char*>());
+#ifdef PLACA_E32R28T
+        if (doc["lcd"].is<const char*>())   prefs.putString("lcd",   doc["lcd"].as<const char*>());
+#endif
         prefs.end();
         Serial.println("CFG OK");
         Serial.flush(); delay(300); ESP.restart();
@@ -3362,7 +3387,11 @@ void setup() {
   // juntos (ou depois de gravar um .tft) o Nextion leva ~1,5 s para ouvir:
   // espera, e manda o pedido duas vezes por garantia.
 #ifdef PLACA_E32R28T
-  e32Inicia();
+  // O controlador da tela (ST7789 ou ILI9341) e uma preferencia gravada: precisa
+  // ser lida antes de ligar a tela, por isso nao espera o carregaConfig().
+  prefs.begin("claudinho", true); lcdIli9341 = prefs.getString("lcd", "st7789") == "ili9341"; prefs.end();
+  lcdNome = lcdIli9341 ? "ili9341" : "st7789";
+  e32Inicia(lcdIli9341);
 #else
   nex.begin(NEXTION_BAUD, SERIAL_8N1, NEXTION_RX, NEXTION_TX);
   delay(1800);

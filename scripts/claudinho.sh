@@ -14,6 +14,7 @@
 #   claudinho.sh bambu IP | desligar  liga a impressora Bambu (pede o codigo de acesso escondido; ou pela entrada padrao)
 #   claudinho.sh painel               mostra o painel da impressora
 #   claudinho.sh idioma [codigo]      idioma da tela (sem codigo: mostra o atual e os disponiveis)
+#   claudinho.sh lcd [st7789|ili9341] controlador da tela da E32R28T (a placa sai com um ou outro; tela branca = o errado). Grava e reinicia
 #   claudinho.sh som [HUMOR|liga|desliga|volume N|lista|padrao|envia EVENTO arq.wav]  alto-falante (so a E32R28T)
 #   claudinho.sh demo [parar]         modo demonstracao: trailer de ~2 min para filmar (um toque interrompe)
 #   claudinho.sh cena <tipo> [texto]  testa uma cena: codando, terminal, lendo, agente, conversa (texto: o letreiro)
@@ -114,7 +115,7 @@ fi
 IP=$(le_config CLAUDINHO_IP)
 [ -n "$IP" ] || { echo "Claudinho ainda nao configurado (rode a skill /claudinho:configurar)" >&2; exit 1; }
 J=(-H 'Content-Type: application/json')
-uso() { sed -n '2,24p' "$0"; exit 1; }
+uso() { sed -n '2,25p' "$0"; exit 1; }
 palavra() { case "$1" in *[!a-z_]*) return 1 ;; esac; }    # so letras minusculas e _ (ou vazio)
 cmd() { curl_claudinho -s -m 10 "${J[@]}" -X POST "http://$IP/cmd" -d "$1"; }
 mini() { curl_claudinho -s -m 5 "http://$IP/mini.json"; }
@@ -183,6 +184,12 @@ PY
     if [ -z "${2:-}" ]; then mini | python3 -c 'import json,sys; d=json.load(sys.stdin); print("idioma:", d.get("idioma","?"), "| disponiveis:", d.get("idiomas","?"))'; exit; fi
     case "$2" in *[!A-Za-z-]*) uso ;; esac
     cmd "{\"idioma\":\"$2\"}" ;;
+  lcd)
+    case "${2:-}" in
+      "") mini | python3 -c 'import json,sys; d=json.load(sys.stdin); print("lcd:", d.get("lcd") or "nao se aplica (placa com Nextion ou firmware antigo)")' ;;
+      st7789|ili9341) cmd "{\"lcd\":\"$2\"}" ;;
+      *) uso ;;
+    esac ;;
   alerta) case "${2:-bom}" in bom|ruim|filamento|hms) cmd "{\"alerta\":\"${2:-bom}\"}" ;; *) uso ;; esac ;;
   cena)
     case "${2:-}" in codando|terminal|lendo|agente|conversa) ;; *) uso ;; esac

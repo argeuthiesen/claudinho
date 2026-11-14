@@ -163,6 +163,19 @@ Espere ver `Hash of data verified`. O script reconhece sozinho a placa
 placa. O display vai mostrar "Olá! Sou o Claudinho." (ou lixo, se o Nextion ainda
 tiver a tela de fábrica — normal, o passo 5 resolve).
 
+**E32R28T com a tela toda branca** depois de gravar (luz acesa, nenhum
+desenho): a placa sai de fábrica com dois controladores de tela, ST7789 ou
+ILI9341, e o firmware começa como ST7789. Pergunte se apareceu o rosto; se a
+tela ficou branca, troque o controlador (fica gravado na placa, a placa
+reinicia e as atualizações não desfazem):
+
+```bash
+bash "$R/scripts/serial.sh" PORTA 'CFG {"lcd":"ili9341"}' "CFG OK"
+```
+
+Para voltar: o mesmo comando com `st7789`. Com a placa já na rede:
+`claudinho.sh lcd ili9341` (sem argumento, mostra o atual).
+
 ## 4. Wi-Fi e segredo
 
 Liste as redes que a placa enxerga (só 2,4 GHz):
