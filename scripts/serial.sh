@@ -35,8 +35,9 @@ while ((Get-Date) -lt \$fim -and -not \$ok) {
 if (-not \$ok) { exit 1 }"
     ;;
   linux|mac)
-    if [ "$(ambiente)" = mac ]; then stty -f "$PORTA" 115200 raw -echo clocal; else stty -F "$PORTA" 115200 raw -echo clocal; fi
     exec 3<>"$PORTA"
+    # macOS: stty -f perde a config ao fechar; aplicar no descritor ja aberto
+    if [ "$(ambiente)" = mac ]; then stty 115200 raw -echo clocal <&3; else stty -F "$PORTA" 115200 raw -echo clocal; fi
     [ "$CMD" = "-" ] && IFS= read -r CMD
     fim=$((SECONDS + SEG)); ok=1
     while [ $SECONDS -lt $fim ] && [ $ok -ne 0 ]; do
