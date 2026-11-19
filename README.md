@@ -177,7 +177,7 @@ languages), and the setup skill recognizes the board on its own.
   the ILI9341: switch with
   `bash scripts/serial.sh PORT 'CFG {"lcd":"ili9341"}' "CFG OK"` over USB, or
   `claudinho.sh lcd ili9341` once it is on Wi-Fi. The choice is stored on the
-  board and survives updates.
+  board and survives updates. (Found and diagnosed by [markgwharry](https://github.com/markgwharry) in [#3](https://github.com/argeuthiesen/claudinho/issues/3).)
 - **Case:** on [MakerWorld](https://makerworld.com/models/3365275-claudinho), same model as the classic one;
   pick the **E32R28T** print profile (0.2 mm layers, 3 walls, 10% infill).
   The battery sits behind the board and the USB-C breakout fits in the back.
@@ -470,7 +470,14 @@ screen), with speaker and battery. Classic version: ESP32-C3 Super Mini with
 Nextion NX3224F024_011. Printer module: Bambu Lab P2S with AMS. Virtual
 Claudinho: WSL2 on Windows 11, with the page in the Windows browser.
 
-**Written to work, not yet tested on real hardware:** native Linux, macOS,
+**Tested by the community:** macOS (Apple Silicon) with an E32R28T that has the
+ILI9341 screen, end to end (flash, Wi-Fi, status line, OTA, touch, sound), by
+[markgwharry](https://github.com/markgwharry), who also found and fixed the white screen and the macOS
+serial bug ([#3](https://github.com/argeuthiesen/claudinho/issues/3)). That run used his own patch on
+1.21.1; the built-in `lcd` switch from 1.22.0 is not yet confirmed on an
+ILI9341 board.
+
+**Written to work, not yet tested on real hardware:** native Linux,
 Windows with Git Bash, ESP32-S3 DevKitC-1, other Bambu printers with local
 access (X1, P1, A1).
 

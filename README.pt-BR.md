@@ -179,7 +179,8 @@ demonstração, idiomas), e a skill de configuração reconhece a placa sozinha.
   ILI9341: troque com
   `bash scripts/serial.sh PORTA 'CFG {"lcd":"ili9341"}' "CFG OK"` pelo USB, ou
   `claudinho.sh lcd ili9341` depois que ela estiver no Wi-Fi. A escolha fica
-  gravada na placa e não se perde nas atualizações.
+  gravada na placa e não se perde nas atualizações. (Achado e diagnosticado por
+  [markgwharry](https://github.com/markgwharry) na [#3](https://github.com/argeuthiesen/claudinho/issues/3).)
 - **Caixa:** no [MakerWorld](https://makerworld.com/models/3365275-claudinho), no mesmo modelo da clássica;
   escolha o perfil de impressão **E32R28T** (camada de 0,2 mm, 3 paredes,
   10% de preenchimento). A bateria fica atrás da placa e o USB-C fêmea encaixa
@@ -468,7 +469,14 @@ ST7789), com alto-falante e bateria. Versão clássica: ESP32-C3 Super Mini com
 Nextion NX3224F024_011. Módulo da impressora: Bambu Lab P2S com AMS.
 Claudinho virtual: WSL2 no Windows 11, com a página no navegador do Windows.
 
-**Escrito para funcionar, ainda sem teste real:** Linux nativo, macOS,
+**Testado pela comunidade:** macOS (Apple Silicon) com uma E32R28T de tela
+ILI9341, de ponta a ponta (gravação, Wi-Fi, status line, OTA, toque, som), por
+[markgwharry](https://github.com/markgwharry), que também achou e consertou a tela branca e o defeito da
+serial no macOS ([#3](https://github.com/argeuthiesen/claudinho/issues/3)). Esse teste usou o patch dele
+na 1.21.1; a chave `lcd` embutida na 1.22.0 ainda não foi confirmada numa
+placa ILI9341.
+
+**Escrito para funcionar, ainda sem teste real:** Linux nativo,
 Windows com Git Bash, ESP32-S3 DevKitC-1, outras impressoras Bambu com acesso
 local (X1, P1, A1).
 
