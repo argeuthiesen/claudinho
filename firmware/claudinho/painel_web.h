@@ -23,6 +23,11 @@ button,select{background:#363435;color:var(--t);border:1px solid var(--tr);borde
 button:hover{border-color:var(--o)}button.on{border-color:var(--ok);color:var(--ok)}button.perigo:hover{border-color:var(--cr);color:var(--cr)}
 input[type=range]{flex:1;min-width:120px;accent-color:var(--o)}input[type=color]{width:44px;height:32px;border:0;background:none;padding:0}
 #aviso{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--c);border:1px solid var(--o);padding:8px 14px;border-radius:8px;display:none}#erro{display:none;background:var(--cr);color:#fff;padding:10px;border-radius:8px;margin-bottom:10px}
+#dlg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:9}
+#dlg>div{background:#3f3d3e;border:1px solid var(--o);border-radius:12px;padding:18px;max-width:380px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#dlg p{margin:0 0 16px;line-height:1.4}#dlg .bt{display:flex;justify-content:flex-end;gap:8px}
+#dlg button.sim{background:#5a3232;border-color:var(--cr);color:#f3d6d6}#dlg button.sim:hover{background:#6b3a3a}
+button:focus-visible{outline:2px solid var(--o);outline-offset:2px}
 </style></head><body>
 <h1>Claudinho <b id="t0"></b></h1><div class="sub" id="sub"></div>
 <div id="erro"></div>
@@ -46,6 +51,7 @@ input[type=range]{flex:1;min-width:120px;accent-color:var(--o)}input[type=color]
  <div class="aj"><span id="l5"></span><button id="breini" class="perigo"></button><button id="bdesl" class="perigo"></button></div>
 </div>
 <div id="aviso"></div>
+<div id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgt"><div><p id="dlgt"></p><div class="bt"><button id="dlgn"></button><button id="dlgs" class="sim"></button></div></div></div>
 <script>
 const PT=(navigator.language||"").toLowerCase().startsWith("pt");
 const T=PT?{t0:"Status",t1:"Cara agora",t2:"Ligado há",t3:"Bateria",t4:"Impressora",t5:"Consumo do plano",t6:"Últimos eventos",
@@ -54,7 +60,7 @@ const T=PT?{t0:"Status",t1:"Cara agora",t2:"Ligado há",t3:"Bateria",t4:"Impress
  sem:"Sem resposta do Claudinho.",t7:"Ajustes",l1:"Som",l2:"Cor do rosto",l3:"Idioma da tela",l4:"Mostrar",l5:"Placa",
  ligado:"ligado",mudo:"mudo",testar:"Testar",aplicar:"Aplicar",salvar:"Salvar",paleta:"Paleta na tela",consumo:"Consumo",impressora:"Impressora",
  velha:"Jogo da velha",genius:"Genius",demo:"Demonstração",reiniciar:"Reiniciar",desligar:"Desligar",
- conf:"Desligar o Claudinho? Ele só volta apertando BOOT (ou RESET) na placa.",feito:"Feito!",negado:"Não permitido pelo painel",
+ conf:"Desligar o Claudinho? Ele só volta apertando BOOT (ou RESET) na placa.",cancelar:"Cancelar",feito:"Feito!",negado:"Não permitido pelo painel",
  humores:["feliz","pergunta","sono","bravo","pronto","pensando","empolgado","preocupado","susto","zonzo"],
  caras:["dormindo","neutro","pensando","trabalhando","esperando você","terminou","feliz","empolgado","preocupado","susto","zonzo","cansado","suando","bravo","triste","desconfiado"]}
 :{t0:"Status",t1:"Face now",t2:"Up for",t3:"Battery",t4:"Printer",t5:"Plan usage",t6:"Recent events",
@@ -63,7 +69,7 @@ const T=PT?{t0:"Status",t1:"Cara agora",t2:"Ligado há",t3:"Bateria",t4:"Impress
  sem:"No answer from Claudinho.",t7:"Settings",l1:"Sound",l2:"Face color",l3:"Screen language",l4:"Show",l5:"Board",
  ligado:"on",mudo:"muted",testar:"Test",aplicar:"Apply",salvar:"Save",paleta:"Palette on screen",consumo:"Usage",impressora:"Printer",
  velha:"Tic-tac-toe",genius:"Simon",demo:"Demo",reiniciar:"Restart",desligar:"Turn off",
- conf:"Turn Claudinho off? It only comes back when you press BOOT (or RESET) on the board.",feito:"Done!",negado:"Not allowed from the panel",
+ conf:"Turn Claudinho off? It only comes back when you press BOOT (or RESET) on the board.",cancelar:"Cancel",feito:"Done!",negado:"Not allowed from the panel",
  humores:["happy","question","sleepy","angry","done","thinking","excited","worried","startled","dizzy"],
  caras:["sleeping","neutral","thinking","working","waiting for you","done","happy","excited","worried","startled","dizzy","tired","sweating","angry","sad","suspicious"]};
 for(const k of["t0","t1","t2","t3","t4","t5","t6","t7","l1","l2","l3","l4","l5"])document.getElementById(k).textContent=T[k];
@@ -116,7 +122,14 @@ $("bvelha").onclick=()=>manda({velha:true});
 $("bgen").onclick=()=>manda({genius:true});
 $("bdemo").onclick=()=>manda({demo:true});
 $("breini").onclick=()=>manda({reiniciar:true});
-$("bdesl").onclick=()=>{if(confirm(T.conf))manda({desligar:true})};
+// Confirmacao em caixa propria, no meio da tela (sem o confirm() do navegador):
+// Esc ou clique fora cancela, o foco comeca em Cancelar.
+function confirma(texto,sim){return new Promise(r=>{const d=$("dlg"),n=$("dlgn"),s=$("dlgs"),antes=document.activeElement;
+ $("dlgt").textContent=texto;n.textContent=T.cancelar;s.textContent=sim;d.style.display="flex";n.focus();
+ const fim=v=>{d.style.display="none";document.removeEventListener("keydown",tecla);d.onclick=n.onclick=s.onclick=null;if(antes)antes.focus();r(v)};
+ const tecla=e=>{if(e.key=="Escape")fim(false);else if(e.key=="Tab"){e.preventDefault();(document.activeElement==n?s:n).focus()}};
+ document.addEventListener("keydown",tecla);n.onclick=()=>fim(false);s.onclick=()=>fim(true);d.onclick=e=>{if(e.target==d)fim(false)}})}
+$("bdesl").onclick=async()=>{if(await confirma(T.conf,T.desligar))manda({desligar:true})};
 function ajustes(d){
  est=d;
  $("ajsom").style.display=d.som<0?"none":"";
